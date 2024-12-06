@@ -25,7 +25,7 @@ const camera = new PerspectiveCamera(
 camera.position.set(0, 30, 0)
 camera.lookAt(new Vector3())
 
-window.addEventListener('resize', (ev) => {
+window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight)
   camera.aspect = window.innerWidth / window.innerHeight
   camera.updateProjectionMatrix()
