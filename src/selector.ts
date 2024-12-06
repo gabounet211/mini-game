@@ -27,7 +27,7 @@ export class Selector {
 
     selected: PieceEntity | false = false;
     selectedPos = new Vector2()
-    selectedMov: SmallGrid<boolean> | undefined ;
+    selectedMov: SmallGrid<boolean> | undefined;
 
     constructor(
         private camera: PerspectiveCamera, private grid: Grid
@@ -64,8 +64,8 @@ export class Selector {
                     this.select()
 
             } else if (this.selected) {//We move
-                
-                if (this.selectedMov?.getFromGridPos(this.grid_pos)) {
+
+                if (this.selectedMov?.get(this.grid_pos)) {
                     this.grid.move(this.selectedPos, this.grid_pos)
                     this.unselect()
                 }
@@ -102,21 +102,21 @@ export class Selector {
 
         this.block.visible = true;
         this.block.position.set(this.world_pos.x, .0105, this.world_pos.z);
-        this.block.children.length= 0
+        this.block.children.length = 0
 
         this.selectedMov = this.grid.floodFill(this.selectedPos, this.selected.config.moveRange);
 
         const pos = new Vector2();
         this.selectedMov.forEach((x, y, state) => {
-            if(!state)
+            if (!state)
                 return;
             const block = new Mesh(
                 new PlaneGeometry(1, 1),
-                new MeshBasicMaterial({ color: Color.NAMES.aquamarine })
+                new MeshBasicMaterial({ color: Color.NAMES.aquamarine, opacity: 0.5, transparent: true })
             )
             //block.rotateX(-Math.PI / 2);
-            this.grid.gridToWorldPos(pos.set(x,y));
-            block.position.set(pos.x-this.block.position.x,-pos.y+this.block.position.z,0);
+            this.grid.gridToWorldPos(pos.set(x, y));
+            block.position.set(pos.x - this.block.position.x, -pos.y + this.block.position.z, 0);
             this.block.add(block)
         })
     }

@@ -91,67 +91,63 @@ export class Grid {
     }
 
     floodFill(start: Vector2, moveRange: number) {
-        const resultGrid = new SmallGrid<boolean>(moveRange * 2 + 1, false, start);
-        const visitedGrid = new SmallGrid<number>(moveRange * 2 + 1, Number.MAX_SAFE_INTEGER, start);
+        const resultGrid = new SmallGrid<boolean>(moveRange, false, start);
+        const visitedGrid = new SmallGrid<number>(moveRange, Number.MAX_SAFE_INTEGER, start);
         const cellsToVisit: [Vector2, number][] = [
-            [new Vector2(moveRange + 1, moveRange), 0],
-            [new Vector2(moveRange - 1, moveRange), 0],
-            [new Vector2(moveRange, moveRange + 1), 0],
-            [new Vector2(moveRange, moveRange - 1), 0]
+            [start, 0],
         ];
+        const that = this;
 
         let cnt = 500;
         console.time("flood");
         while (cellsToVisit.length && --cnt > 0) {
             const cur = cellsToVisit.reverse().pop()!
 
-            if (cur[1] >= moveRange)
-                continue
-
-            const gridX = cur[0].x - moveRange + start.x;
-            const gridY = cur[0].y - moveRange + start.y;
-            if (this.cells[gridX + ',' + gridY] !== true)
-                continue;
-
-            if (visitedGrid.get(cur[0]) <= cur[1])
-                continue
-            visitedGrid.set(cur[0], cur[1])
-
-            resultGrid.set(cur[0], true)
-
-            cellsToVisit.push([new Vector2(cur[0].x + 1, cur[0].y), cur[1] + 1]);
-            cellsToVisit.push([new Vector2(cur[0].x - 1, cur[0].y), cur[1] + 1]);
-            cellsToVisit.push([new Vector2(cur[0].x, cur[0].y + 1), cur[1] + 1]);
-            cellsToVisit.push([new Vector2(cur[0].x, cur[0].y - 1), cur[1] + 1]);
+            testValide(new Vector2(cur[0].x + 1, cur[0].y), cur[1] + 1);
+            testValide(new Vector2(cur[0].x - 1, cur[0].y), cur[1] + 1);
+            testValide(new Vector2(cur[0].x, cur[0].y + 1), cur[1] + 1);
+            testValide(new Vector2(cur[0].x, cur[0].y - 1), cur[1] + 1);
         }
-        console.timeEnd("flood")
+        console.timeEnd("flood");
+        console.log(cnt);
+
+        function testValide(pos: Vector2, howManyStep: number) {
+            if (howManyStep > moveRange)
+                return
+            if (that.cells[pos.x + ',' + pos.y] !== true)
+                return;
+            if (visitedGrid.get(pos) <= howManyStep)
+                return
+
+            visitedGrid.set(pos, howManyStep)
+            resultGrid.set(pos, true)
+            cellsToVisit.push([pos, howManyStep])
+        }
+
         return resultGrid
     }
 }
 
 export class SmallGrid<T> {
     private grid: T[][];
+    private half: number;
 
-    constructor(private n: number, d: T, private start: Vector2) {
-        this.grid = Array(n).fill([]).map(() => Array(n).fill(d))
+    constructor(n: number, d: T, private start: Vector2) {
+        this.grid = Array(n * 2 + 1).fill([]).map(() => Array(n * 2 + 1).fill(d));
+        this.half = n;
     }
 
-    /**
-     * local vector
-     */
     set(v: Vector2, t: T) {
-        this.grid[v.x][v.y] = t;
+        const x = v.x - this.start.x + this.half;
+        const y = v.y - this.start.y + this.half;
+        this.grid[x][y] = t;
     }
 
-    /**
-     * local vector
-     */
     get(v: Vector2): T {
-        return this.grid[v.x][v.y];
-    }
-
-    getFromGridPos(v: Vector2): T {
-        return this.grid[v.x - this.start.x + (this.n - 1) / 2][v.y - this.start.y + (this.n - 1) / 2];
+        const x = v.x - this.start.x + this.half;
+        const y = v.y - this.start.y + this.half;
+        console.log(x, y, this)
+        return this.grid[x][y];
     }
 
     /**
@@ -160,7 +156,7 @@ export class SmallGrid<T> {
     forEach(cb: (x: number, y: number, v: T) => void) {
         for (let x = 0; x < this.grid.length; x++) {
             for (let y = 0; y < this.grid[x].length; y++) {
-                cb(x - (this.n - 1) / 2 + this.start.x, y - (this.n - 1) / 2 + this.start.y, this.grid[x][y]);
+                cb(x - this.half + this.start.x, y - this.half + this.start.y, this.grid[x][y]);
             }
         }
     }

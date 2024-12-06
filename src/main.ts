@@ -7,11 +7,12 @@ import { Archer, Cleric, Fighter, gltf, map1, Tank } from './gltf';
 const BOARDSIZE = 30
 
 const renderer = new WebGLRenderer({
-  antialias: true
+  antialias: true,
+  alpha: true
 });
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
-renderer.domElement.onselectstart= () => {
+renderer.domElement.onselectstart = () => {
   return false
 }
 
@@ -31,6 +32,7 @@ scene.add(grid.scene)
 
 const light = new AmbientLight(Color.NAMES.white, 1);
 scene.add(light)
+
 
 
 
