@@ -146,7 +146,6 @@ export class SmallGrid<T> {
     get(v: Vector2): T {
         const x = v.x - this.start.x + this.half;
         const y = v.y - this.start.y + this.half;
-        console.log(x, y, this)
         return this.grid[x][y];
     }
 
