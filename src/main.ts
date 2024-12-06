@@ -25,6 +25,12 @@ const camera = new PerspectiveCamera(
 camera.position.set(0, 30, 0)
 camera.lookAt(new Vector3())
 
+window.addEventListener('resize', (ev) => {
+  renderer.setSize(window.innerWidth, window.innerHeight)
+  camera.aspect = window.innerWidth / window.innerHeight
+  camera.updateProjectionMatrix()
+})
+
 const scene = new Scene();
 
 const grid = new Grid(map1)
@@ -68,7 +74,9 @@ document.addEventListener("keyup", (ev) => {
 })
 document.addEventListener("wheel", (ev) => {
   delta.radius += ev.deltaY / 200;
-  delta.y += ev.deltaY / 200;
+  if (delta.radius < 2.5)
+    delta.radius = 2.5
+  delta.y = delta.radius;
 })
 
 const point = []
