@@ -1,5 +1,5 @@
 import './style.css'
-import { Scene, PerspectiveCamera, Object3D, AmbientLight, WebGLRenderer, Color, Vector3, BufferGeometry, PointsMaterial, Points, BufferAttribute, Raycaster, AudioLoader, FogExp2, AudioListener, Audio, Vector2, Quaternion, Cylindrical } from 'three';
+import { Scene, PerspectiveCamera, AmbientLight, WebGLRenderer, Color, Vector3, BufferGeometry, PointsMaterial, Points, BufferAttribute, Raycaster, AudioLoader, AudioListener, Audio, Vector2, Cylindrical } from 'three';
 import { Selector } from './selector';
 import { Grid } from './grid';
 import { Archer, Cleric, Fighter, gltf, map1, Tank } from './gltf';
