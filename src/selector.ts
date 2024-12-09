@@ -1,6 +1,7 @@
 import { BufferAttribute, BufferGeometry, Color, Line, LineBasicMaterial, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, Vector2, Vector3 } from "three";
 import { Grid, SmallGrid } from "./grid";
 import { Entity, PieceEntity } from "./entity";
+import { CameraControle } from "./cameraControle";
 
 
 
@@ -30,7 +31,7 @@ export class Selector {
     selectedMov: SmallGrid<boolean> | undefined;
 
     constructor(
-        private camera: PerspectiveCamera, private grid: Grid
+        private cameraControle: CameraControle, private grid: Grid
     ) {
         this.obj.rotateX(-Math.PI / 2);
         this.obj.visible = false;
@@ -71,14 +72,12 @@ export class Selector {
                 }
 
             } else
-                this.block.position.set(this.world_pos.x, .0105, this.world_pos.z)
-
-            console.log(this.hoveredCase)
+                this.cameraControle.target.set(this.world_pos.x, .0105, this.world_pos.z)
         })
     }
 
     update() {
-        this.hoveredCase = this.grid.screenTest(this.mousePos, this.camera, this.world_pos, this.grid_pos)
+        this.hoveredCase = this.grid.screenTest(this.mousePos, this.cameraControle.camera, this.world_pos, this.grid_pos)
         if (!this.hoveredCase) {
             this.obj.visible = false
             return;
@@ -103,6 +102,7 @@ export class Selector {
         this.block.visible = true;
         this.block.position.set(this.world_pos.x, .0105, this.world_pos.z);
         this.block.children.length = 0
+        this.cameraControle.target.copy(this.block.position)
 
         this.selectedMov = this.grid.floodFill(this.selectedPos, this.selected.config.moveRange);
 

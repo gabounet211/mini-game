@@ -3,6 +3,7 @@ import { Scene, PerspectiveCamera, AmbientLight, WebGLRenderer, Color, Vector3, 
 import { Selector } from './selector';
 import { Grid } from './grid';
 import { Archer, Cleric, Fighter, gltf, map1, Tank } from './gltf';
+import { CameraControle } from './cameraControle';
 
 const BOARDSIZE = 30
 
@@ -22,8 +23,7 @@ const camera = new PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.set(0, 30, 0)
-camera.lookAt(new Vector3())
+const cameraControle = new CameraControle(camera, new Vector3(), new Vector3())
 
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight)
@@ -35,33 +35,33 @@ const scene = new Scene();
 
 const grid = new Grid(map1)
 scene.add(grid.scene)
+cameraControle.boundMax.setScalar(grid.gridsize / 2)
+cameraControle.boundMin.setScalar(-grid.gridsize / 2)
 
 const light = new AmbientLight(Color.NAMES.white, 1);
 scene.add(light)
 
-
-
-
-let delta = new Cylindrical(20, 0, 20);
-const tmpPos = new Vector3();
-const tmpPos2 = new Vector3();
 const keydown: Record<string, boolean> = {}
 
 function animation() {
   if (keydown["q"])
-    delta.theta += 0.02
+    cameraControle.orbit.theta += 0.02
   if (keydown["e"])
-    delta.theta -= 0.02
+    cameraControle.orbit.theta -= 0.02
 
+  if (keydown["d"])
+    cameraControle.delta.x += cameraControle.orbit.radius / 100
+  if (keydown["a"])
+    cameraControle.delta.x -= cameraControle.orbit.radius / 100
+
+  if (keydown["s"])
+    cameraControle.delta.y += cameraControle.orbit.radius / 100
+  if (keydown["w"])
+    cameraControle.delta.y -= cameraControle.orbit.radius / 100
+
+  cameraControle.update()
   selector.update();
 
-  tmpPos.setFromCylindrical(delta).add(selector.block.position);
-  camera.position.lerp(tmpPos, 0.1);
-
-  tmpPos2.lerp(selector.block.position, 0.1);
-  camera.lookAt(tmpPos2);
-
-  camera.updateMatrix();
   renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animation)
@@ -73,6 +73,7 @@ document.addEventListener("keyup", (ev) => {
   keydown[ev.key] = false;
 })
 document.addEventListener("wheel", (ev) => {
+  const delta = cameraControle.orbit
   delta.radius += ev.deltaY / 200;
   if (delta.radius < 2.5)
     delta.radius = 2.5
@@ -102,7 +103,7 @@ const dotMaterial = new PointsMaterial({ size: 0.25, color: 0xff0000 });
 const dot = new Points(dotGeometry, dotMaterial);
 scene.add(dot);
 
-const selector = new Selector(camera, grid)
+const selector = new Selector(cameraControle, grid)
 scene.add(selector.obj)
 scene.add(selector.block)
 
