@@ -1,10 +1,10 @@
 import { Group, Object3D, PerspectiveCamera, Raycaster, Vector2, Vector3 } from "three";
-import { Entity } from "./entity";
+import {Piece, PieceConfig } from "./piece";
 
 const raycaster = new Raycaster
 export class Grid {
     readonly gridsize: number;
-    private cells: Record<string, true | undefined | Entity> = {};
+    private cells: Record<string, true | undefined | Piece> = {};
     private planes: Object3D[]
     public readonly scene: Group = new Group();
 
@@ -31,19 +31,17 @@ export class Grid {
         console.log(this.cells)
     }
 
-    /**
-     * @param entity Must be a new entity not already in the grid
-     */
-    add(entity: Entity, grid_pos: Vector2) {
+    add(pieceConfig: PieceConfig, grid_pos: Vector2) {
+        const piece = new Piece(pieceConfig);
         const index = grid_pos.x + "," + grid_pos.y;
         const current = this.cells[index];
 
         if (current && current !== true)
             throw new Error("An object was already present at " + index)
 
-        entity.obj.position.set(grid_pos.x - this.gridsize / 2 + .5, entity.offset, grid_pos.y - this.gridsize / 2 + .5);
-        this.scene.add(entity.obj);
-        this.cells[index] = entity;
+        piece.obj.position.set(grid_pos.x - this.gridsize / 2 + .5, piece.offset, grid_pos.y - this.gridsize / 2 + .5);
+        this.scene.add(piece.obj);
+        this.cells[index] = piece;
     }
 
 

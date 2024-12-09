@@ -1,6 +1,6 @@
 import { BufferAttribute, BufferGeometry, Color, Line, LineBasicMaterial, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, Vector2, Vector3 } from "three";
 import { Grid, SmallGrid } from "./grid";
-import { Entity, PieceEntity } from "./entity";
+import { Piece } from "./piece";
 import { CameraControle } from "./cameraControle";
 
 
@@ -24,9 +24,9 @@ export class Selector {
     mousePos = new Vector2(NaN, NaN)
     world_pos = new Vector3(); // create once and reuse
     grid_pos = new Vector2(); // create once and reuse
-    hoveredCase: true | Entity | undefined;
+    hoveredCase: true | Piece | undefined;
 
-    selected: PieceEntity | false = false;
+    selected: Piece | false = false;
     selectedPos = new Vector2()
     selectedMov: SmallGrid<boolean> | undefined;
 
@@ -121,8 +121,8 @@ export class Selector {
         })
     }
 
-    private isPlayerEntity(entity: any): entity is PieceEntity {
-        return entity instanceof PieceEntity
+    private isPlayerEntity(entity: any): entity is Piece {
+        return entity instanceof Piece
     }
 
 }

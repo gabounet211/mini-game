@@ -2,8 +2,9 @@ import './style.css'
 import { Scene, PerspectiveCamera, AmbientLight, WebGLRenderer, Color, Vector3, BufferGeometry, PointsMaterial, Points, BufferAttribute, Raycaster, AudioLoader, AudioListener, Audio, Vector2, Cylindrical } from 'three';
 import { Selector } from './selector';
 import { Grid } from './grid';
-import { Archer, Cleric, Fighter, gltf, map1, Tank } from './gltf';
+import { gltf, levels, } from './gltf';
 import { CameraControle } from './cameraControle';
+import { Levels } from './level';
 
 const BOARDSIZE = 30
 
@@ -33,10 +34,16 @@ window.addEventListener('resize', () => {
 
 const scene = new Scene();
 
-const grid = new Grid(map1)
+const level1 = levels.getNext()
+const desLevel1 = levels.getLevel(level1)
+const grid = new Grid(levels.maps[desLevel1.map])
 scene.add(grid.scene)
 cameraControle.boundMax.setScalar(grid.gridsize / 2)
 cameraControle.boundMin.setScalar(-grid.gridsize / 2)
+
+for (const [x, y, entity] of desLevel1.entities) {
+  grid.add(levels.entities[entity], new Vector2(x, y))
+}
 
 const light = new AmbientLight(Color.NAMES.white, 1);
 scene.add(light)
@@ -136,16 +143,3 @@ bouton.addEventListener('click', (ev) => {
 })
 
 document.body.append(bouton)
-
-const cleric = new Cleric()
-grid.add(cleric, new Vector2(0, 0));
-
-const fighter = new Fighter()
-grid.add(fighter, new Vector2(1, 0));
-
-const tank = new Tank()
-grid.add(tank, new Vector2(2, 0));
-
-const archer = new Archer()
-grid.add(archer, new Vector2(3, 0));
-
