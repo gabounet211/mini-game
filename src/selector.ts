@@ -2,6 +2,8 @@ import { BufferAttribute, BufferGeometry, Color, Line, LineBasicMaterial, Mesh, 
 import { Grid, SmallGrid } from "./grid";
 import { Piece } from "./piece";
 import { CameraControle } from "./cameraControle";
+import { Ui } from "./ui";
+import { GameLogic } from "./gamelogic";
 
 
 
@@ -31,7 +33,7 @@ export class Selector {
     selectedMov: SmallGrid<boolean> | undefined;
 
     constructor(
-        private cameraControle: CameraControle, private grid: Grid
+        private cameraControle: CameraControle, private gameLogic: GameLogic, private ui: Ui
     ) {
         this.obj.rotateX(-Math.PI / 2);
         this.obj.visible = false;
@@ -67,7 +69,7 @@ export class Selector {
             } else if (this.selected) {//We move
 
                 if (this.selectedMov?.get(this.grid_pos)) {
-                    this.grid.move(this.selectedPos, this.grid_pos)
+                    this.gameLogic.grid.move(this.selectedPos, this.grid_pos)
                     this.unselect()
                 }
 
@@ -77,7 +79,7 @@ export class Selector {
     }
 
     update() {
-        this.hoveredCase = this.grid.screenTest(this.mousePos, this.cameraControle.camera, this.world_pos, this.grid_pos)
+        this.hoveredCase = this.gameLogic.grid.screenTest(this.mousePos, this.cameraControle.camera, this.world_pos, this.grid_pos)
         if (!this.hoveredCase) {
             this.obj.visible = false
             return;
@@ -90,6 +92,7 @@ export class Selector {
     private unselect() {
         this.selected = false;
         this.block.visible = false;
+        this.ui.setActionsVisible(false)
     }
 
     private select() {
@@ -99,12 +102,15 @@ export class Selector {
         this.selected = this.hoveredCase;
         this.selectedPos.copy(this.grid_pos);
 
+        this.ui.setActionsVisible(true);
+        this.ui.setActions(this.selected.config.actions??[]);
+
         this.block.visible = true;
         this.block.position.set(this.world_pos.x, .0105, this.world_pos.z);
         this.block.children.length = 0
         this.cameraControle.target.copy(this.block.position)
 
-        this.selectedMov = this.grid.floodFill(this.selectedPos, this.selected.config.moveRange);
+        this.selectedMov = this.gameLogic.grid.floodFill(this.selectedPos, this.selected.config.moveRange);
 
         const pos = new Vector2();
         this.selectedMov.forEach((x, y, state) => {
@@ -115,7 +121,7 @@ export class Selector {
                 new MeshBasicMaterial({ color: Color.NAMES.aquamarine, opacity: 0.5, transparent: true })
             )
             //block.rotateX(-Math.PI / 2);
-            this.grid.gridToWorldPos(pos.set(x, y));
+            this.gameLogic.grid.gridToWorldPos(pos.set(x, y));
             block.position.set(pos.x - this.block.position.x, -pos.y + this.block.position.z, 0);
             this.block.add(block)
         })

@@ -1,4 +1,5 @@
-import { ColorRepresentation, Object3D, Vector3 } from "three";
+import { Object3D, Vector3 } from "three";
+import { Action } from "./action";
 
 export interface PieceConfig {
     obj: Object3D,
@@ -7,6 +8,7 @@ export interface PieceConfig {
     maxHealt: number,
     attackRange: number,
     moveRange: number,
+    actions ?: Action[],
 }
 
 export class Piece {

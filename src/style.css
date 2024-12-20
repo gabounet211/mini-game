@@ -19,14 +19,27 @@ body {
   width: 100vw;
 }
 
+body > * {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
 canvas {
 
 }
 
-button{
-  position: absolute;
+#thoseAreTheAction{
   left: 0;
-  top: 0;
+  bottom: 0;
+  top: unset;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  z-index: 100;
+}
+
+button{
   background-color: blue;
   color: aliceblue;
 }

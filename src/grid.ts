@@ -1,5 +1,5 @@
-import { Group, Object3D, PerspectiveCamera, Raycaster, Vector2, Vector3 } from "three";
-import {Piece, PieceConfig } from "./piece";
+import { BufferAttribute, BufferGeometry, Group, Object3D, PerspectiveCamera, Points, PointsMaterial, Raycaster, Vector2, Vector3 } from "three";
+import { Piece, PieceConfig } from "./piece";
 
 const raycaster = new Raycaster
 export class Grid {
@@ -86,6 +86,31 @@ export class Grid {
 
     static manathanDistance(posA: Vector2, posB: Vector2): number {
         return Math.abs(posA.x - posB.x) + Math.abs(posA.y - posB.y)
+    }
+    
+    debug() {
+        const point = []
+        const raycaster = new Raycaster()
+        const vec1 = new Vector3()
+        const vec2 = new Vector3(0, -1, 0)
+        for (let x = 0; x < this.gridsize; x++) {
+          for (let y = 0; y < this.gridsize; y++) {
+            vec1.set(x - this.gridsize / 2 + .5, 1.1, y - this.gridsize / 2 + .5)
+            raycaster.set(vec1, vec2)
+            const result = raycaster.intersectObjects(this.map.children)
+            const hit = result.some(el => {
+              return !el.object.userData['Plane']
+            })
+            if (!hit)
+              point.push(vec1.x, 0.01, vec1.z)
+          }
+        }
+        
+        const dotGeometry = new BufferGeometry();
+        dotGeometry.setAttribute('position', new BufferAttribute(new Float32Array(point), 3));
+        const dotMaterial = new PointsMaterial({ size: 0.25, color: 0xff0000 });
+        const dot = new Points(dotGeometry, dotMaterial);
+        this.scene.add(dot);
     }
 
     floodFill(start: Vector2, moveRange: number) {
