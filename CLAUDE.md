@@ -10,7 +10,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 
 ## Règles de programmation
 
-- Les variables et les fichiers sont nommés en anglais, en UpperCamelCase.
+- Suivre la règle de nommage déjà utilisée dans le code existant (ne pas renommer les fichiers existants). Dans le code actuel : classes et interfaces en UpperCamelCase (`GameLogic`, `PieceConfig`), variables, fonctions et fichiers en lowerCamelCase (`cameraControle.ts`, `setupCounter`).
 - Ne pas ajouter trop de commentaires dans le code.
 - Travailler par petits changements, un à la fois. Les grosses modifications faites d'un seul coup sont rares.
 
