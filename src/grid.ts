@@ -114,11 +114,20 @@ export class Grid {
     }
 
     floodFill(start: Vector2, moveRange: number) {
-        const resultGrid = new SmallGrid<boolean>(moveRange, false, start);
-        const visitedGrid = new SmallGrid<number>(moveRange, Number.MAX_SAFE_INTEGER, start);
+        return this.fill(start, moveRange, cell => cell === true)
+    }
+
+    attackFill(start: Vector2, attackRange: number) {
+        return this.fill(start, attackRange, cell => cell !== undefined)
+    }
+
+    private fill(start: Vector2, range: number, canPass: (cell: true | undefined | Piece) => boolean) {
+        const resultGrid = new SmallGrid<boolean>(range, false, start);
+        const visitedGrid = new SmallGrid<number>(range, Number.MAX_SAFE_INTEGER, start);
         const cellsToVisit: [Vector2, number][] = [
             [start, 0],
         ];
+        visitedGrid.set(start, 0)
         const that = this;
 
         let cnt = 500;
@@ -135,9 +144,9 @@ export class Grid {
         console.log(cnt);
 
         function testValide(pos: Vector2, howManyStep: number) {
-            if (howManyStep > moveRange)
+            if (howManyStep > range)
                 return
-            if (that.cells[pos.x + ',' + pos.y] !== true)
+            if (!canPass(that.cells[pos.x + ',' + pos.y]))
                 return;
             if (visitedGrid.get(pos) <= howManyStep)
                 return
