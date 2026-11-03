@@ -7,11 +7,13 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 - Jeu au tour par tour sur un échiquier (TypeScript, Three.js, Vite).
 - Portée d'attaque (`attackRange`) : elle n'a jamais été utilisée. Je veux qu'elle tienne compte de certains types d'objets bloquants (on ne peut pas passer par-dessus), sur le même principe que le déplacement des unités.
 - Système de tour : à intégrer dans le jeu.
+- Multijoueur : idée pour plus tard, le jeu pourrait devenir multijoueur à un moment donné. On commence par un jeu PvE.
 
 ## Règles de programmation
 
 - Suivre la règle de nommage déjà utilisée dans le code existant (ne pas renommer les fichiers existants). Dans le code actuel : classes et interfaces en UpperCamelCase (`GameLogic`, `PieceConfig`), variables, fonctions et fichiers en lowerCamelCase (`cameraControle.ts`, `setupCounter`).
 - Ne pas ajouter trop de commentaires dans le code.
+- Programmer le jeu en PvE, mais garder en tête qu'il peut devenir multijoueur plus tard.
 - Travailler par petits changements, un à la fois. Les grosses modifications faites d'un seul coup sont rares.
 
 ## Questions ouvertes
