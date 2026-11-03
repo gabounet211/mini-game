@@ -9,6 +9,11 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 - Système de tour : à intégrer dans le jeu.
 - Multijoueur : idée pour plus tard, le jeu pourrait devenir multijoueur à un moment donné. On commence par un jeu PvE.
 
+### Idées futures
+
+- Remplacer les personnages fixes par un système de personnages de type gacha, avec des statistiques aléatoires : armure, résistance, volonté, savoir, intelligence, dextérité et perception.
+- Système de classes : au niveau X, le héros se voit proposer un choix de trois classes, selon ses statistiques.
+
 L'explication de l'univers du jeu est dans `Univers.md`.
 
 ## Règles de programmation
