@@ -122,7 +122,7 @@ export class Grid {
                 if ((x === 0 && y === 0) || Math.abs(x) + Math.abs(y) > attackRange)
                     continue;
                 target.set(start.x + x, start.y + y);
-                if (this.hasLineOfSight(start, target))
+                if (!this.isViewBlocked(start, target))
                     resultGrid.set(target, true);
             }
         }
@@ -130,29 +130,37 @@ export class Grid {
         return resultGrid
     }
 
-    private hasLineOfSight(from: Vector2, to: Vector2) {
-        const dx = Math.abs(to.x - from.x);
-        const dy = Math.abs(to.y - from.y);
-        const stepX = from.x < to.x ? 1 : -1;
-        const stepY = from.y < to.y ? 1 : -1;
-        let error = dx - dy;
-        let x = from.x;
-        let y = from.y;
-
-        while (x !== to.x || y !== to.y) {
-            const doubleError = 2 * error;
-            if (doubleError > -dy) {
-                error -= dy;
-                x += stepX;
+    private isViewBlocked(from: Vector2, to: Vector2) {
+        for (let x = Math.min(from.x, to.x); x <= Math.max(from.x, to.x); x++) {
+            for (let y = Math.min(from.y, to.y); y <= Math.max(from.y, to.y); y++) {
+                if (this.cells[x + ',' + y] === undefined && this.segmentCrossesCell(from, to, x, y))
+                    return true;
             }
-            if (doubleError < dx) {
-                error += dx;
-                y += stepY;
-            }
-            if (this.cells[x + ',' + y] === undefined)
-                return false;
         }
-        return true
+        return false
+    }
+
+    private segmentCrossesCell(from: Vector2, to: Vector2, cellX: number, cellY: number) {
+        const half = 0.45;
+        let tMin = 0;
+        let tMax = 1;
+        const axes: [number, number, number][] = [
+            [from.x, to.x - from.x, cellX],
+            [from.y, to.y - from.y, cellY],
+        ];
+
+        for (const [start, delta, center] of axes) {
+            if (delta === 0) {
+                if (Math.abs(start - center) > half)
+                    return false;
+                continue;
+            }
+            const t1 = (center - half - start) / delta;
+            const t2 = (center + half - start) / delta;
+            tMin = Math.max(tMin, Math.min(t1, t2));
+            tMax = Math.min(tMax, Math.max(t1, t2));
+        }
+        return tMin <= tMax
     }
 
     floodFill(start: Vector2, moveRange: number) {
