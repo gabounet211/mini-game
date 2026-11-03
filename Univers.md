@@ -11,8 +11,8 @@ Un continent avec cinq territoires, un par grande puissance :
 - **Bleu clair** : petite péninsule au nord, reliée au continent par un passage étroit. Symbole : un bouclier, qui représente ses chevaliers.
 - **Vert** : l'ouest du continent. Symbole : une canne, qui représente leur rapprochement au système de magie de l'univers.
 - **Orange** : le plus grand territoire, à l'est. Symbole : une épée, qui représente l'importance de la force pour la nation.
-- **Bleu** : le centre, entre le vert et l'orange (symbole `$` sur la carte).
-- **Or** : le sud, au bord du continent (symbole `M` sur la carte).
+- **Bleu** : le centre, entre le vert et l'orange Symbole : `$`, qui représente leur culture de marchands.
+- **Or** : le sud, au bord du continent Symbole : `M`, qui représente le territoire occupé principalement par les monstres.
 
 ## Les cinq grandes puissances
 
@@ -100,7 +100,6 @@ Basically, des objets dans lesquels on a pu obtenir une volonté ou une intellig
 
 ## Questions ouvertes
 
-- Le texte original a un espace vide entre le territoire or et les dieux : des idées perdues à compléter ?
-- Quel est le sens des symboles `$` (trader bleu) et `M` (territoire or) sur la carte ?
+- Autres continents : l'espace vide dans le texte original était prévu pour d'autres continents. Pas sûr qu'il y en ait pour le moment.
 - Influence des dieux : à redéfinir plus tard.
 - Nom du Gabounathium : à trouver.
