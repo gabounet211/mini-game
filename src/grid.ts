@@ -113,21 +113,54 @@ export class Grid {
         this.scene.add(dot);
     }
 
-    floodFill(start: Vector2, moveRange: number) {
-        return this.fill(start, moveRange, cell => cell === true)
-    }
-
     attackFill(start: Vector2, attackRange: number) {
-        return this.fill(start, attackRange, cell => cell !== undefined)
+        const resultGrid = new SmallGrid<boolean>(attackRange, false, start);
+        const target = new Vector2();
+
+        for (let x = -attackRange; x <= attackRange; x++) {
+            for (let y = -attackRange; y <= attackRange; y++) {
+                if ((x === 0 && y === 0) || Math.abs(x) + Math.abs(y) > attackRange)
+                    continue;
+                target.set(start.x + x, start.y + y);
+                if (this.hasLineOfSight(start, target))
+                    resultGrid.set(target, true);
+            }
+        }
+
+        return resultGrid
     }
 
-    private fill(start: Vector2, range: number, canPass: (cell: true | undefined | Piece) => boolean) {
-        const resultGrid = new SmallGrid<boolean>(range, false, start);
-        const visitedGrid = new SmallGrid<number>(range, Number.MAX_SAFE_INTEGER, start);
+    private hasLineOfSight(from: Vector2, to: Vector2) {
+        const dx = Math.abs(to.x - from.x);
+        const dy = Math.abs(to.y - from.y);
+        const stepX = from.x < to.x ? 1 : -1;
+        const stepY = from.y < to.y ? 1 : -1;
+        let error = dx - dy;
+        let x = from.x;
+        let y = from.y;
+
+        while (x !== to.x || y !== to.y) {
+            const doubleError = 2 * error;
+            if (doubleError > -dy) {
+                error -= dy;
+                x += stepX;
+            }
+            if (doubleError < dx) {
+                error += dx;
+                y += stepY;
+            }
+            if (this.cells[x + ',' + y] === undefined)
+                return false;
+        }
+        return true
+    }
+
+    floodFill(start: Vector2, moveRange: number) {
+        const resultGrid = new SmallGrid<boolean>(moveRange, false, start);
+        const visitedGrid = new SmallGrid<number>(moveRange, Number.MAX_SAFE_INTEGER, start);
         const cellsToVisit: [Vector2, number][] = [
             [start, 0],
         ];
-        visitedGrid.set(start, 0)
         const that = this;
 
         let cnt = 500;
@@ -144,9 +177,9 @@ export class Grid {
         console.log(cnt);
 
         function testValide(pos: Vector2, howManyStep: number) {
-            if (howManyStep > range)
+            if (howManyStep > moveRange)
                 return
-            if (!canPass(that.cells[pos.x + ',' + pos.y]))
+            if (that.cells[pos.x + ',' + pos.y] !== true)
                 return;
             if (visitedGrid.get(pos) <= howManyStep)
                 return
