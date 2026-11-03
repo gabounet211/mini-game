@@ -9,6 +9,8 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 - Système de tour : à intégrer dans le jeu.
 - Multijoueur : idée pour plus tard, le jeu pourrait devenir multijoueur à un moment donné. On commence par un jeu PvE.
 
+L'explication de l'univers du jeu est dans `Univers.md`.
+
 ## Règles de programmation
 
 - Suivre la règle de nommage déjà utilisée dans le code existant (ne pas renommer les fichiers existants). Dans le code actuel : classes et interfaces en UpperCamelCase (`GameLogic`, `PieceConfig`), variables, fonctions et fichiers en lowerCamelCase (`cameraControle.ts`, `setupCounter`).
