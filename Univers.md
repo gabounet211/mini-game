@@ -2,13 +2,15 @@
 
 Ce fichier sert à noter l'explication de l'univers dans lequel le jeu se déroule. Il vient d'un texte de l'utilisateur (`POINT_IMPORTANT.txt`) et d'une carte dessinée à la main, mis en forme sans ajouter d'idées.
 
+L'univers est prévu pour plusieurs projets : le jeu, des short stories (qui seront ajoutées plus tard pour aider à bâtir l'univers) et peut-être des webtoons courts ou longs.
+
 ## Carte
 
 Un continent avec cinq territoires, un par grande puissance :
 
-- **Bleu clair** : petite péninsule au nord, reliée au continent par un passage étroit.
-- **Vert** : l'ouest du continent.
-- **Orange** : le plus grand territoire, à l'est.
+- **Bleu clair** : petite péninsule au nord, reliée au continent par un passage étroit. Symbole : un bouclier, qui représente ses chevaliers.
+- **Vert** : l'ouest du continent. Symbole : une canne, qui représente leur rapprochement au système de magie de l'univers.
+- **Orange** : le plus grand territoire, à l'est. Symbole : une épée, qui représente l'importance de la force pour la nation.
 - **Bleu** : le centre, entre le vert et l'orange (symbole `$` sur la carte).
 - **Or** : le sud, au bord du continent (symbole `M` sur la carte).
 
@@ -49,7 +51,7 @@ Un continent avec cinq territoires, un par grande puissance :
 ## Les dieux
 
 - 30 sous-dieux.
-- Influence négligeable sur l'univers.
+- Influence négligeable sur l'univers (susceptible de changer : l'auteur y réfléchit encore).
 - Ils ont perdu la possibilité de se matérialiser, que ce soit par un avatar ou par eux-mêmes.
 - Ancêtres des races et des peuples du continent.
 
@@ -89,7 +91,7 @@ Basically, des objets dans lesquels on a pu obtenir une volonté ou une intellig
 ## Matériaux spéciaux
 
 - **Mythril** : aide à catalyser sa volonté et sa compréhension.
-- **Gabounathium** (*nom a changé*) : métal très rare qui a une meilleure capacité à avoir une forte volonté.
+- **Gabounathium** (nom provisoire, aucun autre nom trouvé pour le moment) : métal très rare qui a une meilleure capacité à avoir une forte volonté.
 
 ## Drogues
 
@@ -99,6 +101,6 @@ Basically, des objets dans lesquels on a pu obtenir une volonté ou une intellig
 ## Questions ouvertes
 
 - Le texte original a un espace vide entre le territoire or et les dieux : des idées perdues à compléter ?
-- « Nagie » dans le texte original : « magie » ?
-- Gabounathium : le nom doit-il être changé, ou a-t-il déjà été changé ?
-- La carte a des symboles dans chaque territoire. Seuls `$` et `M` sont clairs : que représentent les trois autres ?
+- Quel est le sens des symboles `$` (trader bleu) et `M` (territoire or) sur la carte ?
+- Influence des dieux : à redéfinir plus tard.
+- Nom du Gabounathium : à trouver.
