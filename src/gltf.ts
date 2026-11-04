@@ -1,6 +1,7 @@
 import { GLTFLoader } from "three/addons";
 import asset from '../public/assets/assets.gltf?url';
 import { Levels } from "./level";
+import { basicAttack } from "./action";
 
 
 const loader = new GLTFLoader();
@@ -18,7 +19,7 @@ export const levels = new Levels({
         attackRange: 3,
         moveRange: 5,
         obj: gltf.scenes.find(d => d.name == 'cleric')!,
-        actions: [{
+        actions: [basicAttack, {
             action(game) {
                 const piece = game.selector.selected
                 if (!piece)
@@ -41,6 +42,7 @@ export const levels = new Levels({
         offset: 0.1,
         maxHealt: 15,
         maxActionPoints: 3,
+        actions: [basicAttack],
         attackRange: 1,
         moveRange: 7,
         obj: gltf.scenes.find(d => d.name == 'fighter')!
@@ -49,6 +51,7 @@ export const levels = new Levels({
         offset: 0.1,
         maxHealt: 20,
         maxActionPoints: 3,
+        actions: [basicAttack],
         attackRange: 1,
         moveRange: 3,
         obj: gltf.scenes.find(d => d.name == 'tank')!
@@ -57,6 +60,7 @@ export const levels = new Levels({
         offset: 0.1,
         maxHealt: 10,
         maxActionPoints: 3,
+        actions: [basicAttack],
         attackRange: 4,
         moveRange: 5,
         obj: gltf.scenes.find(d => d.name == 'archer')!
@@ -65,6 +69,7 @@ export const levels = new Levels({
         offset: 0.1,
         maxHealt: 12,
         maxActionPoints: 3,
+        actions: [basicAttack],
         attackRange: 1,
         moveRange: 5,
         obj: gltf.scenes.find(d => d.name == 'goblinCleric')!
@@ -73,6 +78,7 @@ export const levels = new Levels({
         offset: 0.1,
         maxHealt: 15,
         maxActionPoints: 3,
+        actions: [basicAttack],
         attackRange: 1,
         moveRange: 7,
         obj: gltf.scenes.find(d => d.name == 'goblinFighter')!
@@ -81,6 +87,7 @@ export const levels = new Levels({
         offset: 0.1,
         maxHealt: 20,
         maxActionPoints: 3,
+        actions: [basicAttack],
         attackRange: 1,
         moveRange: 3,
         obj: gltf.scenes.find(d => d.name == 'goblinTank')!
@@ -89,6 +96,7 @@ export const levels = new Levels({
         offset: 0.1,
         maxHealt: 10,
         maxActionPoints: 3,
+        actions: [basicAttack],
         attackRange: 4,
         moveRange: 5,
         obj: gltf.scenes.find(d => d.name == 'goblinArcher')!

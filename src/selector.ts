@@ -1,6 +1,7 @@
 import { BufferAttribute, BufferGeometry, Color, Line, LineBasicMaterial, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, Vector2, Vector3 } from "three";
 import { Grid, SmallGrid } from "./grid";
 import { Piece } from "./piece";
+import { Action } from "./action";
 import { CameraControle } from "./cameraControle";
 import { Ui } from "./ui";
 import { GameLogic } from "./gamelogic";
@@ -31,6 +32,8 @@ export class Selector {
     selected: Piece | false = false;
     selectedPos = new Vector2()
     selectedMov: SmallGrid<boolean> | undefined;
+    selectedAttack: SmallGrid<boolean> | undefined;
+    targetingAction: Action | undefined;
 
     constructor(
         private cameraControle: CameraControle, private gameLogic: GameLogic, private ui: Ui
@@ -68,7 +71,9 @@ export class Selector {
 
             } else if (this.selected) {//We move
 
-                if (this.selectedMov?.get(this.grid_pos)) {
+                if (this.targetingAction)
+                    this.target()
+                else if (this.selectedMov?.get(this.grid_pos)) {
                     this.gameLogic.grid.move(this.selectedPos, this.grid_pos)
                     this.selected.hasMoved = true
                     this.unselect()
@@ -92,6 +97,7 @@ export class Selector {
 
     unselect() {
         this.selected = false;
+        this.targetingAction = undefined;
         this.block.visible = false;
         this.ui.setActionsVisible(false)
     }
@@ -101,6 +107,7 @@ export class Selector {
             throw new Error();
 
         this.selected = this.hoveredCase;
+        this.targetingAction = undefined;
         this.selectedPos.copy(this.grid_pos);
 
         this.ui.setActionsVisible(true);
@@ -115,8 +122,27 @@ export class Selector {
         if (this.selectedMov)
             this.showRange(this.selectedMov, Color.NAMES.aquamarine, 0)
 
-        const selectedAttack = this.gameLogic.grid.attackFill(this.selectedPos, this.selected.config.attackRange);
-        this.showRange(selectedAttack, Color.NAMES.red, 0.001)
+        this.selectedAttack = this.gameLogic.grid.attackFill(this.selectedPos, this.selected.config.attackRange);
+        this.showRange(this.selectedAttack, Color.NAMES.red, 0.001)
+    }
+
+    startTargeting(action: Action) {
+        this.targetingAction = action
+    }
+
+    private target() {
+        const piece = this.selected
+        const action = this.targetingAction
+        const target = this.hoveredCase
+        this.targetingAction = undefined
+        if (!piece || !action || !(target instanceof Piece) || target.player === piece.player)
+            return
+        if (Grid.manathanDistance(this.selectedPos, this.grid_pos) > piece.config.attackRange || !this.selectedAttack?.get(this.grid_pos))
+            return
+
+        action.action(this.ui.game, target)
+        piece.actionPoints -= action.cost
+        this.ui.setActions(piece.config.actions ?? [])
     }
 
     private showRange(range: SmallGrid<boolean>, color: number, height: number) {

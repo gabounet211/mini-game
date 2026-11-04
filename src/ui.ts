@@ -46,6 +46,10 @@ export class Ui {
             attackBouton.addEventListener('click', () =>{
                 if (piece.actionPoints < element.cost)
                     return
+                if (element.needsTarget) {
+                    this.game.selector.startTargeting(element)
+                    return
+                }
                 element.action(this.game)
                 piece.actionPoints -= element.cost
                 this.setActions(actions)
