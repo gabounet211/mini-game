@@ -70,6 +70,7 @@ export class Selector {
 
                 if (this.selectedMov?.get(this.grid_pos)) {
                     this.gameLogic.grid.move(this.selectedPos, this.grid_pos)
+                    this.selected.hasMoved = true
                     this.unselect()
                 }
 
@@ -110,8 +111,9 @@ export class Selector {
         this.block.children.length = 0
         this.cameraControle.target.copy(this.block.position)
 
-        this.selectedMov = this.gameLogic.grid.floodFill(this.selectedPos, this.selected.config.moveRange);
-        this.showRange(this.selectedMov, Color.NAMES.aquamarine, 0)
+        this.selectedMov = this.selected.hasMoved ? undefined : this.gameLogic.grid.floodFill(this.selectedPos, this.selected.config.moveRange);
+        if (this.selectedMov)
+            this.showRange(this.selectedMov, Color.NAMES.aquamarine, 0)
 
         const selectedAttack = this.gameLogic.grid.attackFill(this.selectedPos, this.selected.config.attackRange);
         this.showRange(selectedAttack, Color.NAMES.red, 0.001)

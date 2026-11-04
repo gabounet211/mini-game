@@ -18,6 +18,8 @@ export class Piece {
     to = new Vector3()
     
     healt: number
+    hasMoved = false
+    hasActed = false
 
     constructor(public config: PieceConfig, public player = false) {
         this.obj = config.obj.clone();

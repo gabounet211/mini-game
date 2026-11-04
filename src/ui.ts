@@ -30,7 +30,11 @@ export class Ui {
             attackBouton.textContent = element.name;
             this.actionButtons.append(attackBouton);
             attackBouton.addEventListener('click', () =>{
+                const piece = this.game.selector.selected
+                if (!piece || piece.hasActed)
+                    return
                 element.action(this.game)
+                piece.hasActed = true
             }
             )
         }
