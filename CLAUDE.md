@@ -12,6 +12,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 ### Idées futures
 
 - Remplacer les personnages fixes par un système de personnages de type gacha, avec des statistiques aléatoires : armure, résistance, volonté, savoir, intelligence, dextérité et perception.
+- Fiche du personnage : remplacer la barre de vie par une fiche qui affiche les informations du personnage (HP restant / HP max, PA, Ms, etc.).
 - Système de classes : au niveau X, le héros se voit proposer un choix de trois classes, selon ses statistiques.
 
 L'explication de l'univers du jeu est dans `Univers.md`.
