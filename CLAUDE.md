@@ -6,7 +6,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 
 - Jeu au tour par tour sur un échiquier (TypeScript, Three.js, Vite).
 - Portée d'attaque (`attackRange`) : elle n'a jamais été utilisée. Je veux qu'elle tienne compte de certains types d'objets bloquants (on ne peut pas passer par-dessus), sur le même principe que le déplacement des unités.
-- Système de tour : à intégrer dans le jeu.
+- Système de tour : à intégrer dans le jeu. Tour camp par camp : tous les personnages d'un camp jouent dans l'ordre voulu, puis le tour passe à l'autre camp. Pendant son tour, un personnage a un déplacement et une action.
 - Multijoueur : idée pour plus tard, le jeu pourrait devenir multijoueur à un moment donné. On commence par un jeu PvE.
 
 ### Idées futures

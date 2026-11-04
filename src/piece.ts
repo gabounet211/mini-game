@@ -19,7 +19,7 @@ export class Piece {
     
     healt: number
 
-    constructor(public config: PieceConfig) {
+    constructor(public config: PieceConfig, public player = false) {
         this.obj = config.obj.clone();
         this.healt = config.maxHealt
         this.offset = config.offset;

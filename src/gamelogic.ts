@@ -14,6 +14,7 @@ const STATE = {
 
 export class GameLogic {
     grid: Grid
+    state: keyof typeof STATE = "PlayerTurn"
 
 
     constructor(
@@ -26,8 +27,8 @@ export class GameLogic {
         scene.add(this.grid.scene)
         cameraControle.boundMax.setScalar(this.grid.gridsize / 2)
         cameraControle.boundMin.setScalar(-this.grid.gridsize / 2)
-        for (const [x, y, entity] of desLevel1.entities) {
-            this.grid.add(levels.entities[entity], new Vector2(x, y))
+        for (const [x, y, entity, player] of desLevel1.entities) {
+            this.grid.add(levels.entities[entity], new Vector2(x, y), player)
         }
 
 

@@ -31,8 +31,8 @@ export class Grid {
         console.log(this.cells)
     }
 
-    add(pieceConfig: PieceConfig, grid_pos: Vector2) {
-        const piece = new Piece(pieceConfig);
+    add(pieceConfig: PieceConfig, grid_pos: Vector2, player = false) {
+        const piece = new Piece(pieceConfig, player);
         const index = grid_pos.x + "," + grid_pos.y;
         const current = this.cells[index];
 
