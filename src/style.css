@@ -39,6 +39,12 @@ canvas {
   z-index: 100;
 }
 
+#endTurn{
+  left: unset;
+  right: 0;
+  z-index: 100;
+}
+
 button{
   background-color: blue;
   color: aliceblue;

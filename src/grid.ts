@@ -45,6 +45,10 @@ export class Grid {
     }
 
 
+    getPieces(player: boolean) {
+        return Object.values(this.cells).filter((cell): cell is Piece => cell instanceof Piece && cell.player === player)
+    }
+
     move(from: Vector2, to: Vector2) {
         const iFrom = from.x + "," + from.y;
         const iTo = to.x + "," + to.y;

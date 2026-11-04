@@ -7,9 +7,15 @@ export class Ui {
 
     private musicButton = document.createElement('button')
     private actionButtons = document.createElement('div')
+    private endTurnButton = document.createElement('button')
 
     constructor(public game: Game) {
         document.body.append(this.musicButton)
+
+        this.endTurnButton.id = 'endTurn'
+        this.endTurnButton.textContent = 'end turn'
+        this.endTurnButton.addEventListener('click', () => this.game.endTurn())
+        document.body.append(this.endTurnButton)
 
         this.actionButtons.id = 'thoseAreTheAction'
         document.body.append(this.actionButtons)

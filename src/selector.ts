@@ -90,7 +90,7 @@ export class Selector {
         this.obj.position.set(this.world_pos.x, 0.01, this.world_pos.z)
     }
 
-    private unselect() {
+    unselect() {
         this.selected = false;
         this.block.visible = false;
         this.ui.setActionsVisible(false)

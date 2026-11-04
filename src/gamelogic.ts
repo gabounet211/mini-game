@@ -33,4 +33,12 @@ export class GameLogic {
 
 
     }
+
+    endTurn() {
+        this.state = this.state === "PlayerTurn" ? "AiTurn" : "PlayerTurn"
+        for (const piece of this.grid.getPieces(this.state === "PlayerTurn")) {
+            piece.hasMoved = false
+            piece.hasActed = false
+        }
+    }
 }

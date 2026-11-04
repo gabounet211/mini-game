@@ -43,5 +43,10 @@ export class Game {
         this.scene.add(this.selector.obj)
         this.scene.add(this.selector.block)
     }
+
+    endTurn() {
+        this.selector.unselect()
+        this.gameLogic.endTurn()
+    }
 }
 
