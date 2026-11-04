@@ -40,5 +40,11 @@ export class GameLogic {
             piece.hasMoved = false
             piece.hasActed = false
         }
+        if (this.state === "AiTurn")
+            this.playAiTurn()
+    }
+
+    private playAiTurn() {
+        this.endTurn()
     }
 }
