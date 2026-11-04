@@ -52,7 +52,11 @@ export class Ui {
                 }
                 element.action(this.game)
                 piece.actionPoints -= element.cost
-                this.setActions(actions)
+                this.game.gameLogic.grid.removeDead()
+                if (piece.healt <= 0)
+                    this.game.selector.unselect()
+                else
+                    this.setActions(actions)
             }
             )
         }

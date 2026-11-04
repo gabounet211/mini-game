@@ -49,6 +49,15 @@ export class Grid {
         return Object.values(this.cells).filter((cell): cell is Piece => cell instanceof Piece && cell.player === player)
     }
 
+    removeDead() {
+        for (const [index, cell] of Object.entries(this.cells)) {
+            if (cell instanceof Piece && cell.healt <= 0) {
+                this.scene.remove(cell.obj)
+                this.cells[index] = true
+            }
+        }
+    }
+
     move(from: Vector2, to: Vector2) {
         const iFrom = from.x + "," + from.y;
         const iTo = to.x + "," + to.y;

@@ -142,6 +142,7 @@ export class Selector {
 
         action.action(this.ui.game, target)
         piece.actionPoints -= action.cost
+        this.gameLogic.grid.removeDead()
         this.ui.setActions(piece.config.actions ?? [])
     }
 
