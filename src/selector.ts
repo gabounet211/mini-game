@@ -111,18 +111,24 @@ export class Selector {
         this.cameraControle.target.copy(this.block.position)
 
         this.selectedMov = this.gameLogic.grid.floodFill(this.selectedPos, this.selected.config.moveRange);
+        this.showRange(this.selectedMov, Color.NAMES.aquamarine, 0)
 
+        const selectedAttack = this.gameLogic.grid.attackFill(this.selectedPos, this.selected.config.attackRange);
+        this.showRange(selectedAttack, Color.NAMES.red, 0.001)
+    }
+
+    private showRange(range: SmallGrid<boolean>, color: number, height: number) {
         const pos = new Vector2();
-        this.selectedMov.forEach((x, y, state) => {
+        range.forEach((x, y, state) => {
             if (!state)
                 return;
             const block = new Mesh(
                 new PlaneGeometry(1, 1),
-                new MeshBasicMaterial({ color: Color.NAMES.aquamarine, opacity: 0.5, transparent: true })
+                new MeshBasicMaterial({ color: color, opacity: 0.5, transparent: true })
             )
             //block.rotateX(-Math.PI / 2);
             this.gameLogic.grid.gridToWorldPos(pos.set(x, y));
-            block.position.set(pos.x - this.block.position.x, -pos.y + this.block.position.z, 0);
+            block.position.set(pos.x - this.block.position.x, -pos.y + this.block.position.z, height);
             this.block.add(block)
         })
     }

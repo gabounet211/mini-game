@@ -14,7 +14,7 @@ export const levels = new Levels({
     cleric: {
         offset: 0.1,
         maxHealt: 12,
-        attackRange: 1,
+        attackRange: 3,
         moveRange: 5,
         obj: gltf.scenes.find(d => d.name == 'cleric')!,
         actions: [{

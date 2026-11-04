@@ -113,6 +113,56 @@ export class Grid {
         this.scene.add(dot);
     }
 
+    attackFill(start: Vector2, attackRange: number) {
+        const resultGrid = new SmallGrid<boolean>(attackRange, false, start);
+        const target = new Vector2();
+
+        for (let x = -attackRange; x <= attackRange; x++) {
+            for (let y = -attackRange; y <= attackRange; y++) {
+                if ((x === 0 && y === 0) || Math.abs(x) + Math.abs(y) > attackRange)
+                    continue;
+                target.set(start.x + x, start.y + y);
+                if (!this.isViewBlocked(start, target))
+                    resultGrid.set(target, true);
+            }
+        }
+
+        return resultGrid
+    }
+
+    private isViewBlocked(from: Vector2, to: Vector2) {
+        for (let x = Math.min(from.x, to.x); x <= Math.max(from.x, to.x); x++) {
+            for (let y = Math.min(from.y, to.y); y <= Math.max(from.y, to.y); y++) {
+                if (this.cells[x + ',' + y] === undefined && this.segmentCrossesCell(from, to, x, y))
+                    return true;
+            }
+        }
+        return false
+    }
+
+    private segmentCrossesCell(from: Vector2, to: Vector2, cellX: number, cellY: number) {
+        const half = 0.45;
+        let tMin = 0;
+        let tMax = 1;
+        const axes: [number, number, number][] = [
+            [from.x, to.x - from.x, cellX],
+            [from.y, to.y - from.y, cellY],
+        ];
+
+        for (const [start, delta, center] of axes) {
+            if (delta === 0) {
+                if (Math.abs(start - center) > half)
+                    return false;
+                continue;
+            }
+            const t1 = (center - half - start) / delta;
+            const t2 = (center + half - start) / delta;
+            tMin = Math.max(tMin, Math.min(t1, t2));
+            tMax = Math.min(tMax, Math.max(t1, t2));
+        }
+        return tMin <= tMax
+    }
+
     floodFill(start: Vector2, moveRange: number) {
         const resultGrid = new SmallGrid<boolean>(moveRange, false, start);
         const visitedGrid = new SmallGrid<number>(moveRange, Number.MAX_SAFE_INTEGER, start);
