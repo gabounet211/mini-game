@@ -31,8 +31,8 @@ export class Grid {
         console.log(this.cells)
     }
 
-    add(pieceConfig: PieceConfig, grid_pos: Vector2) {
-        const piece = new Piece(pieceConfig);
+    add(pieceConfig: PieceConfig, grid_pos: Vector2, player = false) {
+        const piece = new Piece(pieceConfig, player);
         const index = grid_pos.x + "," + grid_pos.y;
         const current = this.cells[index];
 
@@ -44,6 +44,19 @@ export class Grid {
         this.cells[index] = piece;
     }
 
+
+    getPieces(player: boolean) {
+        return Object.values(this.cells).filter((cell): cell is Piece => cell instanceof Piece && cell.player === player)
+    }
+
+    removeDead() {
+        for (const [index, cell] of Object.entries(this.cells)) {
+            if (cell instanceof Piece && cell.healt <= 0) {
+                this.scene.remove(cell.obj)
+                this.cells[index] = true
+            }
+        }
+    }
 
     move(from: Vector2, to: Vector2) {
         const iFrom = from.x + "," + from.y;

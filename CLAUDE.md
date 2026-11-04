@@ -6,12 +6,13 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 
 - Jeu au tour par tour sur un échiquier (TypeScript, Three.js, Vite).
 - Portée d'attaque (`attackRange`) : elle n'a jamais été utilisée. Je veux qu'elle tienne compte de certains types d'objets bloquants (on ne peut pas passer par-dessus), sur le même principe que le déplacement des unités.
-- Système de tour : à intégrer dans le jeu.
+- Système de tour : à intégrer dans le jeu. Tour camp par camp : tous les personnages d'un camp jouent dans l'ordre voulu, puis le tour passe à l'autre camp. Pendant son tour, un personnage a un déplacement gratuit (un seul par tour) et des actions qui coûtent des points d'action (PA). Les PA sont une valeur unique à chaque personnage (les personnages vont devenir des personnages à statistiques et classe aléatoires) et reviennent au maximum à chaque tour.
 - Multijoueur : idée pour plus tard, le jeu pourrait devenir multijoueur à un moment donné. On commence par un jeu PvE.
 
 ### Idées futures
 
 - Remplacer les personnages fixes par un système de personnages de type gacha, avec des statistiques aléatoires : armure, résistance, volonté, savoir, intelligence, dextérité et perception.
+- Fiche du personnage : remplacer la barre de vie par une fiche qui affiche les informations du personnage (HP restant / HP max, PA, Ms, etc.).
 - Système de classes : au niveau X, le héros se voit proposer un choix de trois classes, selon ses statistiques.
 
 L'explication de l'univers du jeu est dans `Univers.md`.
