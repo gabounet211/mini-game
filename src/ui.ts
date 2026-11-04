@@ -28,19 +28,27 @@ export class Ui {
 
     setActions(actions: Action[]) {
         this.actionButtons.innerHTML = ''
+        const piece = this.game.selector.selected
+        if (!piece)
+            return
+
+        const points = document.createElement('span')
+        points.textContent = 'AP ' + piece.actionPoints + '/' + piece.config.maxActionPoints
+        this.actionButtons.append(points)
 
         for (let index = 0; index < actions.length; index++) {
             const element = actions[index];
 
             const attackBouton = document.createElement('button');
-            attackBouton.textContent = element.name;
+            attackBouton.textContent = element.name + ' (' + element.cost + ')';
+            attackBouton.disabled = piece.actionPoints < element.cost
             this.actionButtons.append(attackBouton);
             attackBouton.addEventListener('click', () =>{
-                const piece = this.game.selector.selected
-                if (!piece || piece.hasActed)
+                if (piece.actionPoints < element.cost)
                     return
                 element.action(this.game)
-                piece.hasActed = true
+                piece.actionPoints -= element.cost
+                this.setActions(actions)
             }
             )
         }

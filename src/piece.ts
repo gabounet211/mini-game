@@ -6,6 +6,7 @@ export interface PieceConfig {
     offset: number,
 
     maxHealt: number,
+    maxActionPoints: number,
     attackRange: number,
     moveRange: number,
     actions ?: Action[],
@@ -19,11 +20,12 @@ export class Piece {
     
     healt: number
     hasMoved = false
-    hasActed = false
+    actionPoints: number
 
     constructor(public config: PieceConfig, public player = false) {
         this.obj = config.obj.clone();
         this.healt = config.maxHealt
+        this.actionPoints = config.maxActionPoints
         this.offset = config.offset;
     }
 }

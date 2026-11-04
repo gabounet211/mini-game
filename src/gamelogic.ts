@@ -38,7 +38,7 @@ export class GameLogic {
         this.state = this.state === "PlayerTurn" ? "AiTurn" : "PlayerTurn"
         for (const piece of this.grid.getPieces(this.state === "PlayerTurn")) {
             piece.hasMoved = false
-            piece.hasActed = false
+            piece.actionPoints = piece.config.maxActionPoints
         }
         if (this.state === "AiTurn")
             this.playAiTurn()
