@@ -3,6 +3,7 @@ import { Ui } from "./ui";
 import { CameraControle } from "./cameraControle";
 import { Selector } from "./selector";
 import { GameLogic } from "./gamelogic";
+import { AudioManager } from "./audioManager";
 
 
 
@@ -15,6 +16,7 @@ export class Game {
     light: AmbientLight;
     gameLogic: GameLogic
     selector: Selector;
+    audio: AudioManager;
 
     constructor() {
         this.renderer = new WebGLRenderer({
@@ -34,6 +36,7 @@ export class Game {
             1000
         );
         this.cameraControle = new CameraControle(this.camera, new Vector3(), new Vector3())
+        this.audio = new AudioManager(this.camera)
 
         this.light = new AmbientLight(Color.NAMES.white, 1);
         this.scene.add(this.light)

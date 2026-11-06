@@ -5,13 +5,10 @@ import { Game } from "./game"
 
 export class Ui {
 
-    private musicButton = document.createElement('button')
     private actionButtons = document.createElement('div')
     private endTurnButton = document.createElement('button')
 
     constructor(public game: Game) {
-        document.body.append(this.musicButton)
-
         this.endTurnButton.id = 'endTurn'
         this.endTurnButton.textContent = 'End turn'
         this.endTurnButton.addEventListener('click', () => this.game.endTurn())
