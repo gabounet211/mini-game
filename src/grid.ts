@@ -152,6 +152,28 @@ export class Grid {
         return resultGrid
     }
 
+    distanceMap(start: Vector2) {
+        const distances = new Map<string, number>([[start.x + ',' + start.y, 0]])
+        const queue = [start]
+        for (let index = 0; index < queue.length; index++) {
+            const current = queue[index]
+            const distance = distances.get(current.x + ',' + current.y)! + 1
+            for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+                const next = new Vector2(current.x + dx, current.y + dy)
+                const key = next.x + ',' + next.y
+                if (distances.has(key) || this.cells[key] === undefined)
+                    continue
+                distances.set(key, distance)
+                queue.push(next)
+            }
+        }
+        return { get: (pos: Vector2) => distances.get(pos.x + ',' + pos.y) }
+    }
+
+    canSee(from: Vector2, to: Vector2) {
+        return !this.isViewBlocked(from, to)
+    }
+
     private isViewBlocked(from: Vector2, to: Vector2) {
         for (let x = Math.min(from.x, to.x); x <= Math.max(from.x, to.x); x++) {
             for (let y = Math.min(from.y, to.y); y <= Math.max(from.y, to.y); y++) {

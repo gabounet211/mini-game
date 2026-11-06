@@ -2,6 +2,9 @@ import { GLTFLoader } from "three/addons";
 import asset from '../public/assets/assets.gltf?url';
 import { Levels } from "./level";
 import { basicAttack } from "./action";
+import { aggressiveBehavior } from "./aiBehavior";
+
+const goblinBehavior = aggressiveBehavior
 
 
 const loader = new GLTFLoader();
@@ -72,6 +75,7 @@ export const levels = new Levels({
     goblinCleric: {
         offset: 0.1,
         name: "Goblin Cleric",
+        behavior: goblinBehavior,
         maxHealt: 12,
         maxActionPoints: 3,
         actions: [basicAttack],
@@ -82,6 +86,7 @@ export const levels = new Levels({
     goblinFigther: {
         offset: 0.1,
         name: "Goblin Fighter",
+        behavior: goblinBehavior,
         maxHealt: 15,
         maxActionPoints: 3,
         actions: [basicAttack],
@@ -92,6 +97,7 @@ export const levels = new Levels({
     goblinTank: {
         offset: 0.1,
         name: "Goblin Tank",
+        behavior: goblinBehavior,
         maxHealt: 20,
         maxActionPoints: 3,
         actions: [basicAttack],
@@ -102,6 +108,7 @@ export const levels = new Levels({
     goblinArcher: {
         offset: 0.1,
         name: "Goblin Archer",
+        behavior: goblinBehavior,
         maxHealt: 10,
         maxActionPoints: 3,
         actions: [basicAttack],

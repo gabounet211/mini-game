@@ -1,5 +1,6 @@
 import { Box3, Object3D, Sprite, SpriteMaterial, Vector3 } from "three";
 import { Action } from "./action";
+import { AiBehavior } from "./aiBehavior";
 
 const barWidth = 0.8
 const barHeight = 0.1
@@ -14,6 +15,7 @@ export interface PieceConfig {
     attackRange: number,
     moveRange: number,
     actions ?: Action[],
+    behavior ?: AiBehavior,
 }
 
 export class Piece {

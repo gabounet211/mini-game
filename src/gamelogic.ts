@@ -40,11 +40,5 @@ export class GameLogic {
             piece.hasMoved = false
             piece.actionPoints = piece.config.maxActionPoints
         }
-        if (this.state === "AiTurn")
-            this.playAiTurn()
-    }
-
-    private playAiTurn() {
-        this.endTurn()
     }
 }

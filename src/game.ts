@@ -48,8 +48,23 @@ export class Game {
     }
 
     endTurn() {
+        if (this.gameLogic.state !== "PlayerTurn")
+            return
         this.selector.unselect()
         this.gameLogic.endTurn()
+        this.playAiTurn()
+    }
+
+    private async playAiTurn() {
+        try {
+            for (const piece of this.gameLogic.grid.getPieces(false)) {
+                await new Promise(resolve => setTimeout(resolve, 500))
+                piece.config.behavior?.takeTurn(piece, this)
+                this.gameLogic.grid.removeDead()
+            }
+        } finally {
+            this.gameLogic.endTurn()
+        }
     }
 }
 
