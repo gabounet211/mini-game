@@ -57,6 +57,8 @@ export class Selector {
         })
 
         document.addEventListener('click', (ev) => {
+            if (!(ev.target instanceof HTMLCanvasElement))
+                return
             ev.preventDefault()
             if (this.hoveredCase === undefined) {
                 return;

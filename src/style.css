@@ -43,6 +43,33 @@ canvas {
   z-index: 100;
 }
 
+#setting{
+  left: unset;
+  right: 16px;
+  top: 16px;
+  z-index: 100;
+}
+
+#settingMenu{
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 280px;
+  padding: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.87);
+  background-color: rgba(20, 20, 20, 0.95);
+  z-index: 200;
+}
+
+#settingMenu label{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 #endTurn{
   left: unset;
   right: 16px;

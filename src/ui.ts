@@ -1,5 +1,6 @@
 import { Action } from "./action"
 import { Game } from "./game"
+import { VolumeKind } from "./audioManager"
 
 
 
@@ -7,8 +8,17 @@ export class Ui {
 
     private actionButtons = document.createElement('div')
     private endTurnButton = document.createElement('button')
+    private settingButton = document.createElement('button')
+    private settingMenu = document.createElement('div')
+    private volumeSliders = new Map<VolumeKind, HTMLInputElement>()
 
     constructor(public game: Game) {
+        this.settingButton.id = 'setting'
+        this.settingButton.textContent = 'Setting'
+        this.settingButton.addEventListener('click', () => this.setSettingMenuVisible(this.settingMenu.style.display !== 'flex'))
+        document.body.append(this.settingButton)
+        this.buildSettingMenu()
+
         this.endTurnButton.id = 'endTurn'
         this.endTurnButton.textContent = 'End turn'
         this.endTurnButton.addEventListener('click', () => this.game.endTurn())
@@ -17,6 +27,45 @@ export class Ui {
         this.actionButtons.id = 'thoseAreTheAction'
         document.body.append(this.actionButtons)
 
+    }
+
+    private buildSettingMenu() {
+        this.settingMenu.id = 'settingMenu'
+
+        const resumeButton = document.createElement('button')
+        resumeButton.textContent = 'Resume'
+        resumeButton.addEventListener('click', () => this.setSettingMenuVisible(false))
+        this.settingMenu.append(resumeButton)
+
+        const volumes: [VolumeKind, string][] = [['main', 'Main volume'], ['sfx', 'SFX volume'], ['music', 'Music volume']]
+        for (const [kind, name] of volumes) {
+            const row = document.createElement('label')
+            row.textContent = name
+            const slider = document.createElement('input')
+            slider.type = 'range'
+            slider.min = '0'
+            slider.max = '1'
+            slider.step = '0.01'
+            slider.addEventListener('input', () => this.game.audio.setVolume(kind, Number(slider.value)))
+            this.volumeSliders.set(kind, slider)
+            row.append(slider)
+            this.settingMenu.append(row)
+        }
+
+        const quitButton = document.createElement('button')
+        quitButton.textContent = 'Quit Game'
+        quitButton.disabled = true
+        this.settingMenu.append(quitButton)
+
+        document.body.append(this.settingMenu)
+    }
+
+    private setSettingMenuVisible(visible: boolean) {
+        this.settingMenu.style.display = visible ? 'flex' : 'none'
+        if (!visible)
+            return
+        for (const [kind, slider] of this.volumeSliders)
+            slider.value = String(this.game.audio.volumes[kind])
     }
 
     private formatName(name: string) {
