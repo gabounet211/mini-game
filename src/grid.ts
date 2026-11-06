@@ -42,6 +42,7 @@ export class Grid {
         piece.obj.position.set(grid_pos.x - this.gridsize / 2 + .5, piece.offset, grid_pos.y - this.gridsize / 2 + .5);
         this.scene.add(piece.obj);
         this.cells[index] = piece;
+        console.log(piece.config.name, piece.stats)
     }
 
 

@@ -18,10 +18,8 @@ export const levels = new Levels({
     cleric: {
         offset: 0.1,
         name: "Cleric",
-        maxHealt: 12,
-        maxActionPoints: 3,
+        rarity: "rare",
         attackRange: 3,
-        moveRange: 5,
         obj: gltf.scenes.find(d => d.name == 'cleric')!,
         actions: [basicAttack, {
             action(game) {
@@ -45,75 +43,61 @@ export const levels = new Levels({
     figther: {
         offset: 0.1,
         name: "Fighter",
-        maxHealt: 15,
-        maxActionPoints: 3,
+        rarity: "rare",
         actions: [basicAttack],
         attackRange: 1,
-        moveRange: 7,
         obj: gltf.scenes.find(d => d.name == 'fighter')!
     },
     tank: {
         offset: 0.1,
         name: "Tank",
-        maxHealt: 20,
-        maxActionPoints: 3,
+        rarity: "rare",
         actions: [basicAttack],
         attackRange: 1,
-        moveRange: 3,
         obj: gltf.scenes.find(d => d.name == 'tank')!
     },
     archer: {
         offset: 0.1,
         name: "Archer",
-        maxHealt: 10,
-        maxActionPoints: 3,
+        rarity: "rare",
         actions: [basicAttack],
         attackRange: 4,
-        moveRange: 5,
         obj: gltf.scenes.find(d => d.name == 'archer')!
     },
     goblinCleric: {
         offset: 0.1,
         name: "Goblin Cleric",
+        rarity: "common",
         behavior: goblinBehavior,
-        maxHealt: 12,
-        maxActionPoints: 3,
         actions: [basicAttack],
         attackRange: 1,
-        moveRange: 5,
         obj: gltf.scenes.find(d => d.name == 'goblinCleric')!
     },
     goblinFigther: {
         offset: 0.1,
         name: "Goblin Fighter",
+        rarity: "common",
         behavior: goblinBehavior,
-        maxHealt: 15,
-        maxActionPoints: 3,
         actions: [basicAttack],
         attackRange: 1,
-        moveRange: 7,
         obj: gltf.scenes.find(d => d.name == 'goblinFighter')!
     },
     goblinTank: {
         offset: 0.1,
         name: "Goblin Tank",
+        rarity: "common",
         behavior: goblinBehavior,
-        maxHealt: 20,
-        maxActionPoints: 3,
         actions: [basicAttack],
         attackRange: 1,
-        moveRange: 3,
         obj: gltf.scenes.find(d => d.name == 'goblinTank')!
     },
     goblinArcher: {
         offset: 0.1,
         name: "Goblin Archer",
+        rarity: "common",
         behavior: goblinBehavior,
-        maxHealt: 10,
-        maxActionPoints: 3,
         actions: [basicAttack],
         attackRange: 4,
-        moveRange: 5,
         obj: gltf.scenes.find(d => d.name == 'goblinArcher')!
     },
 })

@@ -51,7 +51,7 @@ export function approachTarget(piece: Piece, target: Piece, game: Game) {
     const distances = grid.distanceMap(targetPos)
     let best: Vector2 | undefined
     let bestScore = Infinity
-    grid.floodFill(from, piece.config.moveRange).forEach((x, y, reachable) => {
+    grid.floodFill(from, piece.moveRange).forEach((x, y, reachable) => {
         if (!reachable)
             return
         const cell = new Vector2(x, y)
@@ -73,7 +73,7 @@ function attackWhilePossible(piece: Piece, steps: AiSteps, game: Game) {
     if (!action || !from)
         return
 
-    for (let attacks = 0; attacks < piece.config.maxActionPoints && piece.actionPoints >= action.cost; attacks++) {
+    for (let attacks = 0; attacks < piece.maxActionPoints && piece.actionPoints >= action.cost; attacks++) {
         const reachable = grid.getPieces(!piece.player).filter(candidate => canAttackFrom(piece, from, candidate, game))
         const target = steps.chooseTarget(piece, reachable, game)
         if (!target)
