@@ -64,7 +64,7 @@ export class Selector {
                 return;
             }
 
-            this.ui.showEnemy(this.hoveredCase instanceof Piece && !this.hoveredCase.player ? this.hoveredCase : undefined)
+            this.ui.showSheet(this.hoveredCase instanceof Piece ? this.hoveredCase : undefined)
 
             if (this.isPlayerEntity(this.hoveredCase)) {
 
@@ -125,6 +125,7 @@ export class Selector {
 
         this.ui.setActionsVisible(true);
         this.ui.setActions(piece.config.actions??[]);
+        this.ui.showSheet(piece)
 
         const worldPos = this.gameLogic.grid.gridToWorldPos(gridPos.clone())
         this.block.visible = true;

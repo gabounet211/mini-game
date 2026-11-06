@@ -1,10 +1,7 @@
-import { Box3, Object3D, Sprite, SpriteMaterial, Vector3 } from "three";
+import { Object3D, Vector3 } from "three";
 import { Action } from "./action";
 import { AiBehavior } from "./aiBehavior";
 import { deriveAttributes, Rarity, rarityBudget, rollStats, Stats } from "./stats";
-
-const barWidth = 0.8
-const barHeight = 0.1
 
 export interface PieceConfig {
     obj: Object3D,
@@ -32,7 +29,6 @@ export class Piece {
     moveRange: number
 
     private currentHealt: number
-    private healthFill: Sprite
 
     constructor(public config: PieceConfig, public player = false) {
         this.obj = config.obj.clone();
@@ -45,9 +41,6 @@ export class Piece {
         this.actionPoints = this.maxActionPoints
         this.offset = config.offset;
 
-        const barTop = new Box3().setFromObject(this.obj).max.y + 0.2
-        this.addBarSprite(0x222222, 1, barTop)
-        this.healthFill = this.addBarSprite(player ? 0x33cc55 : 0xcc3333, 2, barTop)
     }
 
     get healt() {
@@ -56,18 +49,5 @@ export class Piece {
 
     set healt(value: number) {
         this.currentHealt = value
-        const ratio = Math.max(0, value) / this.maxHealt
-        this.healthFill.visible = ratio > 0
-        this.healthFill.scale.x = barWidth * ratio
-        this.healthFill.center.x = 0.5 / Math.max(ratio, 0.0001)
-    }
-
-    private addBarSprite(color: number, renderOrder: number, height: number) {
-        const sprite = new Sprite(new SpriteMaterial({ color: color, depthTest: false, depthWrite: false }))
-        sprite.scale.set(barWidth, barHeight, 1)
-        sprite.position.set(0, height, 0)
-        sprite.renderOrder = renderOrder
-        this.obj.add(sprite)
-        return sprite
     }
 }

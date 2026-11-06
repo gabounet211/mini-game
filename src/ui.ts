@@ -14,21 +14,21 @@ export class Ui {
     private volumeSliders = new Map<VolumeKind, HTMLInputElement>()
     private partyCards = document.createElement('div')
     private cards = new Map<Piece, { element: HTMLDivElement, health: HTMLDivElement }>()
-    private enemyPanel = document.createElement('div')
-    private enemyName = document.createElement('div')
-    private enemyHealth = document.createElement('div')
-    private enemyPoints = document.createElement('div')
-    private enemyActions = document.createElement('div')
-    private inspectedEnemy: Piece | undefined
+    private sheet = document.createElement('div')
+    private sheetName = document.createElement('div')
+    private sheetHealth = document.createElement('div')
+    private sheetPoints = document.createElement('div')
+    private sheetDetails = document.createElement('div')
+    private inspected: Piece | undefined
 
     constructor(public game: Game) {
         this.partyCards.id = 'partyCards'
         document.body.append(this.partyCards)
 
-        this.enemyPanel.id = 'enemyPanel'
-        this.enemyActions.className = 'enemyActions'
-        this.enemyPanel.append(this.enemyName, this.enemyHealth, this.enemyPoints, this.enemyActions)
-        document.body.append(this.enemyPanel)
+        this.sheet.id = 'characterSheet'
+        this.sheetDetails.className = 'sheetDetails'
+        this.sheet.append(this.sheetName, this.sheetHealth, this.sheetPoints, this.sheetDetails)
+        document.body.append(this.sheet)
 
         this.settingButton.id = 'setting'
         this.settingButton.textContent = 'Setting'
@@ -48,32 +48,53 @@ export class Ui {
 
     update() {
         this.updateCards()
-        this.updateEnemyPanel()
+        this.updateSheet()
     }
 
-    showEnemy(piece: Piece | undefined) {
-        this.inspectedEnemy = piece
-        this.enemyPanel.style.display = piece ? 'flex' : 'none'
+    showSheet(piece: Piece | undefined) {
+        this.inspected = piece
+        this.sheet.style.display = piece ? 'flex' : 'none'
         if (!piece)
             return
-        this.enemyName.textContent = piece.config.name
-        this.enemyActions.replaceChildren(...(piece.config.actions ?? []).map(action => {
-            const row = document.createElement('div')
-            row.textContent = this.formatName(action.name) + ' (' + action.cost + ')'
-            return row
-        }))
+        this.sheetName.textContent = piece.config.name + ' (' + piece.config.rarity + ')'
+        this.sheetDetails.replaceChildren(
+            this.createSection('Attributes', [['Ms', piece.moveRange], ['Range', piece.config.attackRange]]),
+            this.createSection('Stats', Object.entries(piece.stats).map(([name, value]) => [this.formatName(name), value])),
+            this.createSection('Equipment', [['Weapon', '-'], ['Armor', '-'], ['Jewelry', '-']]),
+            this.createSection('Actions', (piece.config.actions ?? []).map(action => [this.formatName(action.name), action.cost + ' AP'])),
+        )
     }
 
-    private updateEnemyPanel() {
-        const piece = this.inspectedEnemy
+    private createSection(title: string, rows: [string, string | number][]) {
+        const section = document.createElement('div')
+        section.className = 'sheetSection'
+        const heading = document.createElement('div')
+        heading.className = 'sheetTitle'
+        heading.textContent = title
+        section.append(heading)
+        for (const [label, value] of rows) {
+            const row = document.createElement('div')
+            row.className = 'sheetRow'
+            const name = document.createElement('span')
+            name.textContent = label
+            const content = document.createElement('span')
+            content.textContent = String(value)
+            row.append(name, content)
+            section.append(row)
+        }
+        return section
+    }
+
+    private updateSheet() {
+        const piece = this.inspected
         if (!piece)
             return
         if (piece.healt <= 0) {
-            this.showEnemy(undefined)
+            this.showSheet(undefined)
             return
         }
-        this.setText(this.enemyHealth, 'HP: ' + piece.healt + '/' + piece.maxHealt)
-        this.setText(this.enemyPoints, 'AP: ' + piece.actionPoints + '/' + piece.maxActionPoints)
+        this.setText(this.sheetHealth, 'HP: ' + piece.healt + '/' + piece.maxHealt)
+        this.setText(this.sheetPoints, 'AP: ' + piece.actionPoints + '/' + piece.maxActionPoints)
     }
 
     private setText(element: HTMLElement, text: string) {
