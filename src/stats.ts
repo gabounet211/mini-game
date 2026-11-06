@@ -12,9 +12,9 @@ export interface Stats {
 export type Rarity = "common" | "rare" | "legendary"
 
 export const rarityBudget: Record<Rarity, number> = {
-    common: 21,
-    rare: 28,
-    legendary: 35,
+    common: 24,
+    rare: 32,
+    legendary: 40,
 }
 
 const statNames: (keyof Stats)[] = ["strength", "resistance", "constitution", "willpower", "knowledge", "intelligence", "dexterity", "perception"]
