@@ -152,6 +152,10 @@ export class Grid {
         return resultGrid
     }
 
+    canSee(from: Vector2, to: Vector2) {
+        return !this.isViewBlocked(from, to)
+    }
+
     private isViewBlocked(from: Vector2, to: Vector2) {
         for (let x = Math.min(from.x, to.x); x <= Math.max(from.x, to.x); x++) {
             for (let y = Math.min(from.y, to.y); y <= Math.max(from.y, to.y); y++) {
