@@ -68,6 +68,7 @@ canvas {
 }
 
 #enemyPanel{
+  left: unset;
   right: 16px;
   top: 50%;
   transform: translateY(-50%);
