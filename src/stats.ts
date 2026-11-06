@@ -1,6 +1,6 @@
 export interface Stats {
-    armor: number,
     resistance: number,
+    constitution: number,
     willpower: number,
     knowledge: number,
     intelligence: number,
@@ -16,7 +16,7 @@ export const rarityBudget: Record<Rarity, number> = {
     legendary: 35,
 }
 
-const statNames: (keyof Stats)[] = ["armor", "resistance", "willpower", "knowledge", "intelligence", "dexterity", "perception"]
+const statNames: (keyof Stats)[] = ["resistance", "constitution", "willpower", "knowledge", "intelligence", "dexterity", "perception"]
 
 export function rollStats(budget: number, random = Math.random): Stats {
     const stats = Object.fromEntries(statNames.map(name => [name, 1])) as unknown as Stats
@@ -27,7 +27,7 @@ export function rollStats(budget: number, random = Math.random): Stats {
 
 export function deriveAttributes(stats: Stats) {
     return {
-        maxHealt: 6 + stats.resistance * 2,
+        maxHealt: 6 + stats.constitution * 2,
         maxActionPoints: 2 + Math.floor(stats.willpower / 3),
         moveRange: 3 + Math.floor(stats.dexterity / 2),
     }
