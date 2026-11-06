@@ -30,24 +30,28 @@ canvas {
 }
 
 #thoseAreTheAction{
-  left: 0;
-  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 16px;
   top: unset;
-  width: 100vw;
-  display: flex;
-  justify-content: center;
+  display: none;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border: 2px solid rgba(255, 255, 255, 0.87);
+  background-color: rgba(20, 20, 20, 0.85);
   z-index: 100;
 }
 
 #endTurn{
   left: unset;
-  right: 0;
+  right: 16px;
+  bottom: 16px;
+  top: unset;
+  padding: 8px 20px;
+  font-size: 1.25rem;
+  background-color: #d11;
   z-index: 100;
-}
-
-#thoseAreTheAction span{
-  align-self: center;
-  margin-right: 8px;
 }
 
 button:disabled{
