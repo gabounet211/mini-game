@@ -25,13 +25,14 @@ export function nearestTarget(piece: Piece, candidates: Piece[], game: Game) {
     const from = grid.getPosition(piece)
     if (!from)
         return
+    const distances = grid.distanceMap(from)
     let best: Piece | undefined
     let bestDistance = Infinity
     for (const candidate of candidates) {
         const pos = grid.getPosition(candidate)
         if (!pos)
             continue
-        const distance = Grid.manathanDistance(from, pos)
+        const distance = (distances.get(pos) ?? 500) + Grid.manathanDistance(from, pos) / 100
         if (distance < bestDistance) {
             best = candidate
             bestDistance = distance
@@ -47,6 +48,7 @@ export function approachTarget(piece: Piece, target: Piece, game: Game) {
     if (!from || !targetPos || canAttackFrom(piece, from, target, game))
         return
 
+    const distances = grid.distanceMap(targetPos)
     let best: Vector2 | undefined
     let bestScore = Infinity
     grid.floodFill(from, piece.config.moveRange).forEach((x, y, reachable) => {
@@ -55,7 +57,7 @@ export function approachTarget(piece: Piece, target: Piece, game: Game) {
         const cell = new Vector2(x, y)
         const score = canAttackFrom(piece, cell, target, game)
             ? Grid.manathanDistance(from, cell)
-            : 1000 + Grid.manathanDistance(cell, targetPos)
+            : 1000 + (distances.get(cell) ?? 500) + Grid.manathanDistance(cell, targetPos) / 100
         if (score < bestScore) {
             best = cell
             bestScore = score
