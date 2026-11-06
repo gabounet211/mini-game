@@ -6,6 +6,7 @@ const barHeight = 0.1
 
 export interface PieceConfig {
     obj: Object3D,
+    name: string,
     offset: number,
 
     maxHealt: number,

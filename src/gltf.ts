@@ -14,6 +14,7 @@ export const levels = new Levels({
 }, {
     cleric: {
         offset: 0.1,
+        name: "Cleric",
         maxHealt: 12,
         maxActionPoints: 3,
         attackRange: 3,
@@ -40,6 +41,7 @@ export const levels = new Levels({
     },
     figther: {
         offset: 0.1,
+        name: "Fighter",
         maxHealt: 15,
         maxActionPoints: 3,
         actions: [basicAttack],
@@ -49,6 +51,7 @@ export const levels = new Levels({
     },
     tank: {
         offset: 0.1,
+        name: "Tank",
         maxHealt: 20,
         maxActionPoints: 3,
         actions: [basicAttack],
@@ -58,6 +61,7 @@ export const levels = new Levels({
     },
     archer: {
         offset: 0.1,
+        name: "Archer",
         maxHealt: 10,
         maxActionPoints: 3,
         actions: [basicAttack],
@@ -67,6 +71,7 @@ export const levels = new Levels({
     },
     goblinCleric: {
         offset: 0.1,
+        name: "Goblin Cleric",
         maxHealt: 12,
         maxActionPoints: 3,
         actions: [basicAttack],
@@ -76,6 +81,7 @@ export const levels = new Levels({
     },
     goblinFigther: {
         offset: 0.1,
+        name: "Goblin Fighter",
         maxHealt: 15,
         maxActionPoints: 3,
         actions: [basicAttack],
@@ -85,6 +91,7 @@ export const levels = new Levels({
     },
     goblinTank: {
         offset: 0.1,
+        name: "Goblin Tank",
         maxHealt: 20,
         maxActionPoints: 3,
         actions: [basicAttack],
@@ -94,6 +101,7 @@ export const levels = new Levels({
     },
     goblinArcher: {
         offset: 0.1,
+        name: "Goblin Archer",
         maxHealt: 10,
         maxActionPoints: 3,
         actions: [basicAttack],
