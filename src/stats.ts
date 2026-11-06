@@ -1,4 +1,5 @@
 export interface Stats {
+    strength: number,
     resistance: number,
     constitution: number,
     willpower: number,
@@ -16,7 +17,7 @@ export const rarityBudget: Record<Rarity, number> = {
     legendary: 35,
 }
 
-const statNames: (keyof Stats)[] = ["resistance", "constitution", "willpower", "knowledge", "intelligence", "dexterity", "perception"]
+const statNames: (keyof Stats)[] = ["strength", "resistance", "constitution", "willpower", "knowledge", "intelligence", "dexterity", "perception"]
 
 export function rollStats(budget: number, random = Math.random): Stats {
     const stats = Object.fromEntries(statNames.map(name => [name, 1])) as unknown as Stats
