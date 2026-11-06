@@ -1,5 +1,4 @@
 import './style.css'
-import { AudioLoader, AudioListener, Audio,} from 'three';
 import { Game } from './game';
 
 const game = new Game
@@ -30,6 +29,7 @@ function animation() {
 
   game.cameraControle.update()
   game.selector.update();
+  game.ui.update()
 
   game.renderer.render(game.scene, game.camera);
 }
@@ -48,36 +48,4 @@ document.addEventListener("wheel", (ev) => {
     delta.radius = 2.5
   delta.y = delta.radius;
 })
-
-// create an AudioListener and add it to the camera
-const listener = new AudioListener();
-game.camera.add(listener);
-
-// create a global audio source
-const sound = new Audio(listener);
-
-// load a sound and set it as the Audio object's buffer
-const audioLoader = new AudioLoader();
-audioLoader.load('music_test.mp3', function (buffer) {
-  sound.setBuffer(buffer);
-  sound.setLoop(true);
-  sound.setVolume(0.05);
-});
-
-const bouton = document.createElement('button')
-let toggle_music = false
-
-bouton.textContent = 'play music'
-bouton.addEventListener('click', (ev) => {
-  ev.preventDefault()
-  toggle_music = !toggle_music
-  if (toggle_music)
-    sound.play()
-  else
-    sound.stop()
-})
-
-document.body.append(bouton)
-
-
 
