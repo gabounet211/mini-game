@@ -1,6 +1,7 @@
 import { Box3, Object3D, Sprite, SpriteMaterial, Vector3 } from "three";
 import { Action } from "./action";
 import { AiBehavior } from "./aiBehavior";
+import { deriveAttributes, Rarity, rarityBudget, rollStats, Stats } from "./stats";
 
 const barWidth = 0.8
 const barHeight = 0.1
@@ -10,10 +11,8 @@ export interface PieceConfig {
     name: string,
     offset: number,
 
-    maxHealt: number,
-    maxActionPoints: number,
+    rarity: Rarity,
     attackRange: number,
-    moveRange: number,
     actions ?: Action[],
     behavior ?: AiBehavior,
 }
@@ -27,13 +26,23 @@ export class Piece {
     hasMoved = false
     actionPoints: number
 
+    stats: Stats
+    maxHealt: number
+    maxActionPoints: number
+    moveRange: number
+
     private currentHealt: number
     private healthFill: Sprite
 
     constructor(public config: PieceConfig, public player = false) {
         this.obj = config.obj.clone();
-        this.currentHealt = config.maxHealt
-        this.actionPoints = config.maxActionPoints
+        this.stats = rollStats(rarityBudget[config.rarity])
+        const attributes = deriveAttributes(this.stats)
+        this.maxHealt = attributes.maxHealt
+        this.maxActionPoints = attributes.maxActionPoints
+        this.moveRange = attributes.moveRange
+        this.currentHealt = this.maxHealt
+        this.actionPoints = this.maxActionPoints
         this.offset = config.offset;
 
         const barTop = new Box3().setFromObject(this.obj).max.y + 0.2
@@ -47,7 +56,7 @@ export class Piece {
 
     set healt(value: number) {
         this.currentHealt = value
-        const ratio = Math.max(0, value) / this.config.maxHealt
+        const ratio = Math.max(0, value) / this.maxHealt
         this.healthFill.visible = ratio > 0
         this.healthFill.scale.x = barWidth * ratio
         this.healthFill.center.x = 0.5 / Math.max(ratio, 0.0001)

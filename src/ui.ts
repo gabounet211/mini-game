@@ -72,8 +72,8 @@ export class Ui {
             this.showEnemy(undefined)
             return
         }
-        this.setText(this.enemyHealth, 'HP: ' + piece.healt + '/' + piece.config.maxHealt)
-        this.setText(this.enemyPoints, 'AP: ' + piece.actionPoints + '/' + piece.config.maxActionPoints)
+        this.setText(this.enemyHealth, 'HP: ' + piece.healt + '/' + piece.maxHealt)
+        this.setText(this.enemyPoints, 'AP: ' + piece.actionPoints + '/' + piece.maxActionPoints)
     }
 
     private setText(element: HTMLElement, text: string) {
@@ -95,7 +95,7 @@ export class Ui {
         }
         for (const [piece, card] of this.cards) {
             card.element.classList.toggle('selected', piece === this.game.selector.selected)
-            this.setText(card.health, 'HP: ' + piece.healt + '/' + piece.config.maxHealt)
+            this.setText(card.health, 'HP: ' + piece.healt + '/' + piece.maxHealt)
         }
     }
 
@@ -166,9 +166,9 @@ export class Ui {
             return
 
         const health = document.createElement('span')
-        health.textContent = 'HP: ' + piece.healt + '/' + piece.config.maxHealt
+        health.textContent = 'HP: ' + piece.healt + '/' + piece.maxHealt
         const points = document.createElement('span')
-        points.textContent = 'AP: ' + piece.actionPoints + '/' + piece.config.maxActionPoints
+        points.textContent = 'AP: ' + piece.actionPoints + '/' + piece.maxActionPoints
         this.actionButtons.append(health, points)
 
         for (let index = 0; index < actions.length; index++) {

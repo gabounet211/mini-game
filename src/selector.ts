@@ -132,7 +132,7 @@ export class Selector {
         this.block.children.length = 0
         this.cameraControle.target.copy(this.block.position)
 
-        this.selectedMov = piece.hasMoved ? undefined : this.gameLogic.grid.floodFill(this.selectedPos, piece.config.moveRange);
+        this.selectedMov = piece.hasMoved ? undefined : this.gameLogic.grid.floodFill(this.selectedPos, piece.moveRange);
         if (this.selectedMov)
             this.showRange(this.selectedMov, Color.NAMES.aquamarine, 0)
 
