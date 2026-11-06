@@ -1,6 +1,7 @@
 import { Action } from "./action"
 import { Game } from "./game"
 import { VolumeKind } from "./audioManager"
+import { Piece } from "./piece"
 
 
 
@@ -11,8 +12,13 @@ export class Ui {
     private settingButton = document.createElement('button')
     private settingMenu = document.createElement('div')
     private volumeSliders = new Map<VolumeKind, HTMLInputElement>()
+    private partyCards = document.createElement('div')
+    private cards = new Map<Piece, { element: HTMLDivElement, health: HTMLDivElement }>()
 
     constructor(public game: Game) {
+        this.partyCards.id = 'partyCards'
+        document.body.append(this.partyCards)
+
         this.settingButton.id = 'setting'
         this.settingButton.textContent = 'Setting'
         this.settingButton.addEventListener('click', () => this.setSettingMenuVisible(this.settingMenu.style.display !== 'flex'))
@@ -27,6 +33,37 @@ export class Ui {
         this.actionButtons.id = 'thoseAreTheAction'
         document.body.append(this.actionButtons)
 
+    }
+
+    updateCards() {
+        const pieces = this.game.gameLogic.grid.getPieces(true)
+        for (const [piece, card] of this.cards) {
+            if (!pieces.includes(piece)) {
+                card.element.remove()
+                this.cards.delete(piece)
+            }
+        }
+        for (const piece of pieces) {
+            if (!this.cards.has(piece))
+                this.cards.set(piece, this.createCard(piece))
+        }
+        for (const [piece, card] of this.cards) {
+            card.element.classList.toggle('selected', piece === this.game.selector.selected)
+            const health = 'HP: ' + piece.healt + '/' + piece.config.maxHealt
+            if (card.health.textContent !== health)
+                card.health.textContent = health
+        }
+    }
+
+    private createCard(piece: Piece) {
+        const element = document.createElement('div')
+        element.className = 'partyCard'
+        const name = document.createElement('div')
+        name.textContent = piece.config.name
+        const health = document.createElement('div')
+        element.append(name, health)
+        this.partyCards.append(element)
+        return { element, health }
     }
 
     private buildSettingMenu() {

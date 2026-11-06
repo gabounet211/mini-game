@@ -43,6 +43,26 @@ canvas {
   z-index: 100;
 }
 
+#partyCards{
+  left: 16px;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+
+.partyCard{
+  min-width: 96px;
+  padding: 6px 10px;
+  border: 2px solid rgba(255, 255, 255, 0.87);
+  background-color: rgba(20, 20, 20, 0.85);
+}
+
+.partyCard.selected{
+  border-color: #2c4;
+}
+
 #setting{
   left: unset;
   right: 16px;
