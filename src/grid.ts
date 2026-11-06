@@ -49,6 +49,15 @@ export class Grid {
         return Object.values(this.cells).filter((cell): cell is Piece => cell instanceof Piece && cell.player === player)
     }
 
+    getPosition(piece: Piece) {
+        for (const [index, cell] of Object.entries(this.cells)) {
+            if (cell === piece) {
+                const [x, y] = index.split(',').map(Number)
+                return new Vector2(x, y)
+            }
+        }
+    }
+
     removeDead() {
         for (const [index, cell] of Object.entries(this.cells)) {
             if (cell instanceof Piece && cell.healt <= 0) {

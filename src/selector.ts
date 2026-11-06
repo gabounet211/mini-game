@@ -64,12 +64,14 @@ export class Selector {
                 return;
             }
 
+            this.ui.showEnemy(this.hoveredCase instanceof Piece && !this.hoveredCase.player ? this.hoveredCase : undefined)
+
             if (this.isPlayerEntity(this.hoveredCase)) {
 
                 if (this.selected === this.hoveredCase)
                     this.unselect()
                 else
-                    this.select()
+                    this.select(this.hoveredCase, this.grid_pos)
 
             } else if (this.selected) {//We move
 
@@ -104,27 +106,37 @@ export class Selector {
         this.ui.setActionsVisible(false)
     }
 
-    private select() {
-        if (!(this.isPlayerEntity(this.hoveredCase)))
-            throw new Error();
+    selectPiece(piece: Piece) {
+        if (!this.isPlayerEntity(piece))
+            return
+        if (this.selected === piece) {
+            this.unselect()
+            return
+        }
+        const gridPos = this.gameLogic.grid.getPosition(piece)
+        if (gridPos)
+            this.select(piece, gridPos)
+    }
 
-        this.selected = this.hoveredCase;
+    private select(piece: Piece, gridPos: Vector2) {
+        this.selected = piece;
         this.targetingAction = undefined;
-        this.selectedPos.copy(this.grid_pos);
+        this.selectedPos.copy(gridPos);
 
         this.ui.setActionsVisible(true);
-        this.ui.setActions(this.selected.config.actions??[]);
+        this.ui.setActions(piece.config.actions??[]);
 
+        const worldPos = this.gameLogic.grid.gridToWorldPos(gridPos.clone())
         this.block.visible = true;
-        this.block.position.set(this.world_pos.x, .0105, this.world_pos.z);
+        this.block.position.set(worldPos.x, .0105, worldPos.y);
         this.block.children.length = 0
         this.cameraControle.target.copy(this.block.position)
 
-        this.selectedMov = this.selected.hasMoved ? undefined : this.gameLogic.grid.floodFill(this.selectedPos, this.selected.config.moveRange);
+        this.selectedMov = piece.hasMoved ? undefined : this.gameLogic.grid.floodFill(this.selectedPos, piece.config.moveRange);
         if (this.selectedMov)
             this.showRange(this.selectedMov, Color.NAMES.aquamarine, 0)
 
-        this.selectedAttack = this.gameLogic.grid.attackFill(this.selectedPos, this.selected.config.attackRange);
+        this.selectedAttack = this.gameLogic.grid.attackFill(this.selectedPos, piece.config.attackRange);
         this.showRange(this.selectedAttack, Color.NAMES.red, 0.001)
     }
 

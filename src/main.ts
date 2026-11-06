@@ -29,7 +29,7 @@ function animation() {
 
   game.cameraControle.update()
   game.selector.update();
-  game.ui.updateCards()
+  game.ui.update()
 
   game.renderer.render(game.scene, game.camera);
 }

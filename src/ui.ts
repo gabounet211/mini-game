@@ -14,10 +14,21 @@ export class Ui {
     private volumeSliders = new Map<VolumeKind, HTMLInputElement>()
     private partyCards = document.createElement('div')
     private cards = new Map<Piece, { element: HTMLDivElement, health: HTMLDivElement }>()
+    private enemyPanel = document.createElement('div')
+    private enemyName = document.createElement('div')
+    private enemyHealth = document.createElement('div')
+    private enemyPoints = document.createElement('div')
+    private enemyActions = document.createElement('div')
+    private inspectedEnemy: Piece | undefined
 
     constructor(public game: Game) {
         this.partyCards.id = 'partyCards'
         document.body.append(this.partyCards)
+
+        this.enemyPanel.id = 'enemyPanel'
+        this.enemyActions.className = 'enemyActions'
+        this.enemyPanel.append(this.enemyName, this.enemyHealth, this.enemyPoints, this.enemyActions)
+        document.body.append(this.enemyPanel)
 
         this.settingButton.id = 'setting'
         this.settingButton.textContent = 'Setting'
@@ -35,7 +46,42 @@ export class Ui {
 
     }
 
-    updateCards() {
+    update() {
+        this.updateCards()
+        this.updateEnemyPanel()
+    }
+
+    showEnemy(piece: Piece | undefined) {
+        this.inspectedEnemy = piece
+        this.enemyPanel.style.display = piece ? 'flex' : 'none'
+        if (!piece)
+            return
+        this.enemyName.textContent = piece.config.name
+        this.enemyActions.replaceChildren(...(piece.config.actions ?? []).map(action => {
+            const row = document.createElement('div')
+            row.textContent = this.formatName(action.name) + ' (' + action.cost + ')'
+            return row
+        }))
+    }
+
+    private updateEnemyPanel() {
+        const piece = this.inspectedEnemy
+        if (!piece)
+            return
+        if (piece.healt <= 0) {
+            this.showEnemy(undefined)
+            return
+        }
+        this.setText(this.enemyHealth, 'HP: ' + piece.healt + '/' + piece.config.maxHealt)
+        this.setText(this.enemyPoints, 'AP: ' + piece.actionPoints + '/' + piece.config.maxActionPoints)
+    }
+
+    private setText(element: HTMLElement, text: string) {
+        if (element.textContent !== text)
+            element.textContent = text
+    }
+
+    private updateCards() {
         const pieces = this.game.gameLogic.grid.getPieces(true)
         for (const [piece, card] of this.cards) {
             if (!pieces.includes(piece)) {
@@ -49,15 +95,14 @@ export class Ui {
         }
         for (const [piece, card] of this.cards) {
             card.element.classList.toggle('selected', piece === this.game.selector.selected)
-            const health = 'HP: ' + piece.healt + '/' + piece.config.maxHealt
-            if (card.health.textContent !== health)
-                card.health.textContent = health
+            this.setText(card.health, 'HP: ' + piece.healt + '/' + piece.config.maxHealt)
         }
     }
 
     private createCard(piece: Piece) {
         const element = document.createElement('div')
         element.className = 'partyCard'
+        element.addEventListener('click', () => this.game.selector.selectPiece(piece))
         const name = document.createElement('div')
         name.textContent = piece.config.name
         const health = document.createElement('div')
