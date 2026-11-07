@@ -2,9 +2,11 @@ import { Action } from "./action"
 import { Game } from "./game"
 import { VolumeKind } from "./audioManager"
 import { Piece } from "./piece"
-import { clearSave } from "./save"
+import { clearSave, loadSave, writeSave } from "./save"
 
 
+
+const summonRewardChance = 0.25
 
 export class Ui {
 
@@ -66,10 +68,17 @@ export class Ui {
         const title = document.createElement('div')
         title.className = 'endTitle'
         title.textContent = state
-        const replayButton = document.createElement('button')
-        replayButton.textContent = 'Replay'
-        replayButton.addEventListener('click', () => location.reload())
-        this.endScreen.append(title, replayButton)
+        const reward = document.createElement('div')
+        if (state === "Victory" && Math.random() < summonRewardChance) {
+            const save = loadSave()
+            save.summons++
+            writeSave(save)
+            reward.textContent = 'You found a summon token!'
+        }
+        const lobbyButton = document.createElement('button')
+        lobbyButton.textContent = 'Back to lobby'
+        lobbyButton.addEventListener('click', () => location.reload())
+        this.endScreen.append(title, reward, lobbyButton)
         setTimeout(() => this.endScreen.style.display = 'flex', 2500)
     }
 

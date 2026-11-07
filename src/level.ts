@@ -6,6 +6,7 @@ import { EndCondition } from "./endCondition";
 export interface Level<M extends Record<string, Group>, E extends Record<string, PieceConfig>> {
     title: string,
     map: keyof M,
+    startCells: [x: number, y: number][]
     entities: [x: number, y: number, entity: keyof E, player?: boolean][]
     victory?: EndCondition
     defeat?: EndCondition
@@ -34,6 +35,10 @@ export class Levels<M extends Record<string, Group>, E extends Record<string, Pi
         if (!key)
             return this.orders[0];
         return this.next[key] ?? this.orders[0]
+    }
+
+    keys() {
+        return [...this.orders]
     }
 
     getLevel(key: string): Level<M,E> {

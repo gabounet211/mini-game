@@ -1,28 +1,37 @@
-import { Character } from "./character"
+import { Character, createHero } from "./character"
 
 const saveKey = "miniGameSave"
 const saveVersion = 1
+const startingHeroes = 5
 
-interface SaveData {
-    version: number,
+export interface SaveData {
     roster: Character[],
+    summons: number,
 }
 
-export function loadRoster(): Character[] {
+export function loadSave(): SaveData {
     try {
-        const data: SaveData = JSON.parse(localStorage.getItem(saveKey) ?? "null")
+        const data = JSON.parse(localStorage.getItem(saveKey) ?? "null")
         if (data?.version === saveVersion && Array.isArray(data.roster))
-            return data.roster
+            return { roster: data.roster, summons: data.summons ?? 0 }
     } catch (error) {
         console.warn("Save could not be loaded", error)
     }
-    return []
+    return { roster: [], summons: 0 }
 }
 
-export function saveRoster(roster: Character[]) {
+export function loadOrCreateSave(): SaveData {
+    const save = loadSave()
+    if (!save.roster.length) {
+        save.roster = Array.from({ length: startingHeroes }, () => createHero("hero"))
+        writeSave(save)
+    }
+    return save
+}
+
+export function writeSave(save: SaveData) {
     try {
-        const data: SaveData = { version: saveVersion, roster }
-        localStorage.setItem(saveKey, JSON.stringify(data))
+        localStorage.setItem(saveKey, JSON.stringify({ version: saveVersion, ...save }))
     } catch (error) {
         console.warn("Save could not be written", error)
     }

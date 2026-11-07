@@ -5,7 +5,6 @@ import { Selector } from "./selector";
 import { GameLogic } from "./gamelogic";
 import { AudioManager } from "./audioManager";
 import { Character } from "./character";
-import { loadRoster, saveRoster } from "./save";
 
 
 
@@ -20,9 +19,8 @@ export class Game {
     gameLogic: GameLogic
     selector: Selector;
     audio: AudioManager;
-    roster: Character[] = loadRoster();
 
-    constructor() {
+    constructor(team: Character[], levelKey: string) {
         this.renderer = new WebGLRenderer({
             antialias: true,
             alpha: true
@@ -48,8 +46,7 @@ export class Game {
         this.sun.position.set(5, 10, 3)
         this.scene.add(this.sun)
 
-        this.gameLogic = new GameLogic(this.scene, this.cameraControle, this.roster);
-        saveRoster(this.roster)
+        this.gameLogic = new GameLogic(this.scene, this.cameraControle, team, levelKey);
         this.selector = new Selector(this.cameraControle, this.gameLogic, this.ui)
         this.scene.add(this.selector.obj)
         this.scene.add(this.selector.block)
