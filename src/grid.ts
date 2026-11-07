@@ -45,6 +45,13 @@ export class Grid {
     }
 
 
+    update(delta: number) {
+        for (const cell of Object.values(this.cells)) {
+            if (cell instanceof Piece)
+                cell.update(delta)
+        }
+    }
+
     getPieces(player: boolean) {
         return Object.values(this.cells).filter((cell): cell is Piece => cell instanceof Piece && cell.player === player)
     }

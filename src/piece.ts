@@ -1,4 +1,4 @@
-import { Object3D, Vector3 } from "three";
+import { AnimationClip, AnimationMixer, Mesh, MeshStandardMaterial, Object3D, Vector3 } from "three";
 import { Action } from "./action";
 import { AiBehavior } from "./aiBehavior";
 import { DamageKind, damageReduction, deriveAttributes, Rarity, rarityBudget, rollStats, Stats } from "./stats";
@@ -12,6 +12,8 @@ export interface PieceConfig {
     attackRange: number,
     actions ?: Action[],
     behavior ?: AiBehavior,
+    animations ?: AnimationClip[],
+    color ?: number,
 }
 
 export class Piece {
@@ -30,6 +32,7 @@ export class Piece {
     attackRange: number
 
     private currentHealt: number
+    private mixer: AnimationMixer
 
     constructor(public config: PieceConfig, public player = false) {
         this.obj = config.obj.clone();
@@ -42,6 +45,16 @@ export class Piece {
         this.currentHealt = this.maxHealt
         this.actionPoints = this.maxActionPoints
         this.offset = config.offset;
+        if (!player)
+            this.obj.rotation.y = Math.PI
+
+        this.obj.traverse(child => {
+            if (config.color !== undefined && child instanceof Mesh) {
+                child.material = new MeshStandardMaterial({ color: config.color })
+            }
+        })
+        this.mixer = new AnimationMixer(this.obj)
+        this.play('idle')
 
     }
 
@@ -51,6 +64,16 @@ export class Piece {
 
     set healt(value: number) {
         this.currentHealt = value
+    }
+
+    play(name: string) {
+        const clip = this.config.animations?.find(animation => animation.name.toLowerCase() === name)
+        if (clip)
+            this.mixer.clipAction(clip).play()
+    }
+
+    update(delta: number) {
+        this.mixer.update(delta)
     }
 
     takeDamage(amount: number, kind: DamageKind) {

@@ -1,5 +1,6 @@
 import './style.css'
 import { Game } from './game';
+import { Clock } from 'three';
 
 const game = new Game
 
@@ -10,6 +11,7 @@ window.addEventListener('resize', () => {
 })
 
 const keydown: Record<string, boolean> = {}
+const clock = new Clock()
 
 function animation() {
   if (keydown["q"])
@@ -30,6 +32,7 @@ function animation() {
   game.cameraControle.update()
   game.selector.update();
   game.ui.update()
+  game.gameLogic.grid.update(clock.getDelta())
 
   game.renderer.render(game.scene, game.camera);
 }

@@ -1,5 +1,7 @@
 import { GLTFLoader } from "three/addons";
 import asset from '../public/assets/assets.gltf?url';
+import characterAsset from '../public/assets/roughCharacter.glb?url';
+import { Group } from "three";
 import { Levels } from "./level";
 import { basicAttack, magicAttack } from "./action";
 import { aggressiveBehavior } from "./aiBehavior";
@@ -12,6 +14,15 @@ const loader = new GLTFLoader();
 export const gltf = await loader.loadAsync(asset)
 console.log(gltf.scenes)
 
+const characterGltf = await loader.loadAsync(characterAsset)
+const characterModel = new Group()
+characterGltf.scene.scale.setScalar(0.4)
+characterGltf.scene.position.x = -0.12 * 0.4
+characterModel.add(characterGltf.scene)
+
+const heroModel = { obj: characterModel, animations: characterGltf.animations, color: 0x4f7fe0 }
+const goblinModel = { obj: characterModel, animations: characterGltf.animations, color: 0x5fa040 }
+
 export const levels = new Levels({
     map1: gltf.scenes.find(d => d.name == '1Map')!
 }, {
@@ -20,7 +31,7 @@ export const levels = new Levels({
         name: "Cleric",
         rarity: "rare",
         attackRange: 3,
-        obj: gltf.scenes.find(d => d.name == 'cleric')!,
+        ...heroModel,
         actions: [basicAttack, magicAttack, {
             action(game) {
                 const piece = game.selector.selected
@@ -46,7 +57,7 @@ export const levels = new Levels({
         rarity: "rare",
         actions: [basicAttack],
         attackRange: 1,
-        obj: gltf.scenes.find(d => d.name == 'fighter')!
+        ...heroModel,
     },
     tank: {
         offset: 0.1,
@@ -54,7 +65,7 @@ export const levels = new Levels({
         rarity: "rare",
         actions: [basicAttack],
         attackRange: 1,
-        obj: gltf.scenes.find(d => d.name == 'tank')!
+        ...heroModel,
     },
     archer: {
         offset: 0.1,
@@ -62,7 +73,7 @@ export const levels = new Levels({
         rarity: "rare",
         actions: [basicAttack],
         attackRange: 4,
-        obj: gltf.scenes.find(d => d.name == 'archer')!
+        ...heroModel,
     },
     goblinCleric: {
         offset: 0.1,
@@ -71,7 +82,7 @@ export const levels = new Levels({
         behavior: goblinBehavior,
         actions: [basicAttack],
         attackRange: 1,
-        obj: gltf.scenes.find(d => d.name == 'goblinCleric')!
+        ...goblinModel,
     },
     goblinFigther: {
         offset: 0.1,
@@ -80,7 +91,7 @@ export const levels = new Levels({
         behavior: goblinBehavior,
         actions: [basicAttack],
         attackRange: 1,
-        obj: gltf.scenes.find(d => d.name == 'goblinFighter')!
+        ...goblinModel,
     },
     goblinTank: {
         offset: 0.1,
@@ -89,7 +100,7 @@ export const levels = new Levels({
         behavior: goblinBehavior,
         actions: [basicAttack],
         attackRange: 1,
-        obj: gltf.scenes.find(d => d.name == 'goblinTank')!
+        ...goblinModel,
     },
     goblinArcher: {
         offset: 0.1,
@@ -98,7 +109,7 @@ export const levels = new Levels({
         behavior: goblinBehavior,
         actions: [basicAttack],
         attackRange: 4,
-        obj: gltf.scenes.find(d => d.name == 'goblinArcher')!
+        ...goblinModel,
     },
 })
 
