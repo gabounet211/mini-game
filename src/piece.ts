@@ -38,7 +38,7 @@ export class Piece {
         this.maxHealt = attributes.maxHealt
         this.maxActionPoints = attributes.maxActionPoints
         this.moveRange = attributes.moveRange
-        this.attackRange = config.attackRange + attributes.attackRangeBonus
+        this.attackRange = config.attackRange
         this.currentHealt = this.maxHealt
         this.actionPoints = this.maxActionPoints
         this.offset = config.offset;
