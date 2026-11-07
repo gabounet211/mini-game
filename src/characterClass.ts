@@ -10,7 +10,7 @@ export interface CharacterClass {
 }
 
 export const characterClasses: Record<string, CharacterClass> = {
-    farmer: { name: "Farmer", tier: 1, attackRange: 1, actions: [physicalAttack("pitchforkStrike", 1)], statWeights: { constitution: 3, strength: 2 } },
+    farmer: { name: "Farmer", tier: 1, attackRange: 1, actions: [physicalAttack("pitchforkStrike", 1)], statWeights: { constitution: 3, resistance: 2 } },
     lumberjack: { name: "Lumberjack", tier: 1, attackRange: 1, actions: [physicalAttack("axeChop", 1)], statWeights: { strength: 3, constitution: 2 } },
     hunter: { name: "Hunter", tier: 1, attackRange: 3, actions: [physicalAttack("slingShot", 1)], statWeights: { dexterity: 3, perception: 2 } },
     soldier: { name: "Soldier", tier: 2, attackRange: 1, actions: [physicalAttack("swordStrike", 1)], statWeights: { strength: 3, resistance: 3 } },
