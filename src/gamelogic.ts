@@ -4,7 +4,7 @@ import { levels } from './gltf';
 import { Scene, Vector2 } from "three";
 import { Selector } from "./selector";
 import { CameraControle } from "./cameraControle";
-import { Character, createCharacter, createHero } from "./character";
+import { Character, createCharacter } from "./character";
 import { allEnemiesDefeated, allHeroesDefeated, EndCondition } from "./endCondition";
 
 const STATE = {
@@ -26,27 +26,23 @@ export class GameLogic {
     constructor(
         scene: Scene,
         cameraControle: CameraControle,
-        roster: Character[],
+        team: Character[],
+        levelKey: string,
     ) {
-        const level1 = levels.getNext()
-        const desLevel1 = levels.getLevel(level1)
+        const desLevel1 = levels.getLevel(levelKey)
         this.grid = new Grid(levels.maps[desLevel1.map])
         this.victory = desLevel1.victory ?? allEnemiesDefeated
         this.defeat = desLevel1.defeat ?? allHeroesDefeated
         scene.add(this.grid.scene)
         cameraControle.boundMax.setScalar(this.grid.gridsize / 2)
         cameraControle.boundMin.setScalar(-this.grid.gridsize / 2)
-        const used = new Set<Character>()
+        team.slice(0, desLevel1.startCells.length).forEach((character, index) => {
+            const [x, y] = desLevel1.startCells[index]
+            this.grid.add(levels.entities[character.entity as keyof typeof levels.entities], character, new Vector2(x, y), true)
+        })
         for (const [x, y, entity, player] of desLevel1.entities) {
             const config = levels.entities[entity]
-            let character = player ? roster.find(candidate => candidate.entity === entity && !used.has(candidate)) : undefined
-            if (!character) {
-                character = player ? createHero(entity) : createCharacter(entity, config.rarity)
-                if (player)
-                    roster.push(character)
-            }
-            used.add(character)
-            this.grid.add(config, character, new Vector2(x, y), player)
+            this.grid.add(config, createCharacter(entity, config.rarity), new Vector2(x, y), player)
         }
 
 
