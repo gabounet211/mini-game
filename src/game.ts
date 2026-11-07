@@ -61,7 +61,12 @@ export class Game {
 
     private async playAiTurn() {
         try {
-            for (const piece of this.gameLogic.grid.getPieces(false)) {
+            const order = this.gameLogic.grid.getPieces(false)
+                .map(piece => ({ piece, initiative: piece.config.behavior?.initiative(piece, this) ?? 0 }))
+                .sort((a, b) => a.initiative - b.initiative)
+            for (const { piece } of order) {
+                if (piece.healt <= 0)
+                    continue
                 await new Promise(resolve => setTimeout(resolve, 500))
                 await piece.config.behavior?.takeTurn(piece, this)
                 this.gameLogic.grid.removeDead()

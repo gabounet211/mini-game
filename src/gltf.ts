@@ -4,9 +4,13 @@ import characterAsset from '../public/assets/roughCharacter.glb?url';
 import { Group } from "three";
 import { Levels } from "./level";
 import { basicAttack, magicAttack } from "./action";
-import { aggressiveBehavior } from "./aiBehavior";
+import { approachTarget, createBehavior, nearestTarget, randomInitiative } from "./aiBehavior";
 
-const goblinBehavior = aggressiveBehavior
+const goblinBehavior = createBehavior({
+    chooseTarget: nearestTarget,
+    chooseDestination: approachTarget,
+    initiative: randomInitiative,
+})
 
 
 const loader = new GLTFLoader();

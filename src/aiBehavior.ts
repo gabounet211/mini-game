@@ -5,11 +5,29 @@ import { Piece } from "./piece";
 
 export interface AiBehavior {
     takeTurn(piece: Piece, game: Game): Promise<void>
+    initiative(piece: Piece, game: Game): number
 }
 
 export interface AiSteps {
     chooseTarget(piece: Piece, candidates: Piece[], game: Game): Piece | undefined
     chooseDestination(piece: Piece, target: Piece, game: Game): Vector2 | undefined
+    initiative?(piece: Piece, game: Game): number
+}
+
+export function randomInitiative() {
+    return Math.random()
+}
+
+export function nearestFirstInitiative(piece: Piece, game: Game) {
+    const grid = game.gameLogic.grid
+    const from = grid.getPosition(piece)
+    if (!from)
+        return Infinity
+    const distances = grid.distanceMap(from)
+    return Math.min(...grid.getPieces(!piece.player).map(enemy => {
+        const pos = grid.getPosition(enemy)
+        return pos ? distances.get(pos) ?? 500 : 500
+    }))
 }
 
 export function canAttackFrom(piece: Piece, from: Vector2, target: Piece, game: Game) {
@@ -88,6 +106,7 @@ async function attackWhilePossible(piece: Piece, steps: AiSteps, game: Game) {
 
 export function createBehavior(steps: AiSteps): AiBehavior {
     return {
+        initiative: steps.initiative ?? (() => 0),
         async takeTurn(piece, game) {
             const grid = game.gameLogic.grid
             const target = steps.chooseTarget(piece, grid.getPieces(!piece.player), game)
