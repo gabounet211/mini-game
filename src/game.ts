@@ -1,4 +1,4 @@
-import { AmbientLight, Color, PerspectiveCamera, Scene, Vector3, WebGLRenderer } from "three";
+import { AmbientLight, Color, DirectionalLight, PerspectiveCamera, Scene, Vector3, WebGLRenderer } from "three";
 import { Ui } from "./ui";
 import { CameraControle } from "./cameraControle";
 import { Selector } from "./selector";
@@ -14,6 +14,7 @@ export class Game {
     cameraControle: CameraControle;
     scene = new Scene();
     light: AmbientLight;
+    sun: DirectionalLight;
     gameLogic: GameLogic
     selector: Selector;
     audio: AudioManager;
@@ -40,6 +41,9 @@ export class Game {
 
         this.light = new AmbientLight(Color.NAMES.white, 1);
         this.scene.add(this.light)
+        this.sun = new DirectionalLight(Color.NAMES.white, 1.5)
+        this.sun.position.set(5, 10, 3)
+        this.scene.add(this.sun)
 
         this.gameLogic = new GameLogic(this.scene,this.cameraControle);
         this.selector = new Selector(this.cameraControle, this.gameLogic, this.ui)
@@ -59,7 +63,7 @@ export class Game {
         try {
             for (const piece of this.gameLogic.grid.getPieces(false)) {
                 await new Promise(resolve => setTimeout(resolve, 500))
-                piece.config.behavior?.takeTurn(piece, this)
+                await piece.config.behavior?.takeTurn(piece, this)
                 this.gameLogic.grid.removeDead()
             }
         } finally {

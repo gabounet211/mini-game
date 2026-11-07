@@ -6,6 +6,7 @@ export class Grid {
     readonly gridsize: number;
     private cells: Record<string, true | undefined | Piece> = {};
     private planes: Object3D[]
+    private dying: Piece[] = []
     public readonly scene: Group = new Group();
 
     constructor(public readonly map: Group) {
@@ -45,6 +46,15 @@ export class Grid {
     }
 
 
+    update(delta: number) {
+        for (const cell of Object.values(this.cells)) {
+            if (cell instanceof Piece)
+                cell.update(delta)
+        }
+        for (const piece of this.dying)
+            piece.update(delta)
+    }
+
     getPieces(player: boolean) {
         return Object.values(this.cells).filter((cell): cell is Piece => cell instanceof Piece && cell.player === player)
     }
@@ -61,8 +71,12 @@ export class Grid {
     removeDead() {
         for (const [index, cell] of Object.entries(this.cells)) {
             if (cell instanceof Piece && cell.healt <= 0) {
-                this.scene.remove(cell.obj)
                 this.cells[index] = true
+                this.dying.push(cell)
+                cell.die().then(() => {
+                    this.scene.remove(cell.obj)
+                    this.dying.splice(this.dying.indexOf(cell), 1)
+                })
             }
         }
     }
@@ -78,9 +92,32 @@ export class Grid {
         if (currentFrom === true || !currentFrom)
             throw new Error("no object at " + iFrom)
 
-        currentFrom.obj.position.set(to.x - this.gridsize / 2 + .5, currentFrom.offset, to.y - this.gridsize / 2 + .5);
+        const path = this.findPath(from, to) ?? [to]
+        currentFrom.walk(path.map(cell => new Vector3(cell.x - this.gridsize / 2 + .5, currentFrom.offset, cell.y - this.gridsize / 2 + .5)))
         this.cells[iFrom] = true;
         this.cells[iTo] = currentFrom;
+    }
+
+    findPath(from: Vector2, to: Vector2) {
+        const previous = new Map<string, Vector2 | undefined>([[from.x + ',' + from.y, undefined]])
+        const queue = [from]
+        for (let index = 0; index < queue.length; index++) {
+            const current = queue[index]
+            if (current.equals(to)) {
+                const path: Vector2[] = []
+                for (let step: Vector2 | undefined = current; step && !step.equals(from); step = previous.get(step.x + ',' + step.y))
+                    path.unshift(step)
+                return path
+            }
+            for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+                const next = new Vector2(current.x + dx, current.y + dy)
+                const key = next.x + ',' + next.y
+                if (previous.has(key) || this.cells[key] !== true)
+                    continue
+                previous.set(key, current)
+                queue.push(next)
+            }
+        }
     }
 
     screenTest(mousePosition: Vector2, camera: PerspectiveCamera, worldPos?: Vector3, gridPos?: Vector2) {
