@@ -1,11 +1,14 @@
 import { Group, Vector2 } from "three";
 import { Grid } from "./grid";
 import { PieceConfig } from "./piece";
+import { EndCondition } from "./endCondition";
 
 export interface Level<M extends Record<string, Group>, E extends Record<string, PieceConfig>> {
     title: string,
     map: keyof M,
     entities: [x: number, y: number, entity: keyof E, player?: boolean][]
+    victory?: EndCondition
+    defeat?: EndCondition
 }
 
 export class Levels<M extends Record<string, Group>, E extends Record<string, PieceConfig>> {
