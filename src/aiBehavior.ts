@@ -4,7 +4,7 @@ import { Grid } from "./grid";
 import { Piece } from "./piece";
 
 export interface AiBehavior {
-    takeTurn(piece: Piece, game: Game): void
+    takeTurn(piece: Piece, game: Game): Promise<void>
 }
 
 export interface AiSteps {
@@ -66,7 +66,7 @@ export function approachTarget(piece: Piece, target: Piece, game: Game) {
     return best
 }
 
-function attackWhilePossible(piece: Piece, steps: AiSteps, game: Game) {
+async function attackWhilePossible(piece: Piece, steps: AiSteps, game: Game) {
     const grid = game.gameLogic.grid
     const action = piece.config.actions?.find(element => element.needsTarget)
     const from = grid.getPosition(piece)
@@ -79,14 +79,16 @@ function attackWhilePossible(piece: Piece, steps: AiSteps, game: Game) {
         if (!target)
             return
         action.action(game, target, piece)
+        piece.attack(target.obj.position)
         piece.actionPoints -= action.cost
         grid.removeDead()
+        await piece.wait()
     }
 }
 
 export function createBehavior(steps: AiSteps): AiBehavior {
     return {
-        takeTurn(piece, game) {
+        async takeTurn(piece, game) {
             const grid = game.gameLogic.grid
             const target = steps.chooseTarget(piece, grid.getPieces(!piece.player), game)
             if (!target)
@@ -97,9 +99,10 @@ export function createBehavior(steps: AiSteps): AiBehavior {
             if (from && destination) {
                 grid.move(from, destination)
                 piece.hasMoved = true
+                await piece.wait()
             }
 
-            attackWhilePossible(piece, steps, game)
+            await attackWhilePossible(piece, steps, game)
         },
     }
 }

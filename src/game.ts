@@ -63,7 +63,7 @@ export class Game {
         try {
             for (const piece of this.gameLogic.grid.getPieces(false)) {
                 await new Promise(resolve => setTimeout(resolve, 500))
-                piece.config.behavior?.takeTurn(piece, this)
+                await piece.config.behavior?.takeTurn(piece, this)
                 this.gameLogic.grid.removeDead()
             }
         } finally {

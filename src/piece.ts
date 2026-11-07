@@ -1,4 +1,4 @@
-import { AnimationAction, AnimationClip, AnimationMixer, Mesh, MeshStandardMaterial, Object3D, Vector3 } from "three";
+import { AnimationAction, AnimationClip, AnimationMixer, LoopOnce, LoopRepeat, Mesh, MeshStandardMaterial, Object3D, Vector3 } from "three";
 import { Action } from "./action";
 import { AiBehavior } from "./aiBehavior";
 import { DamageKind, damageReduction, deriveAttributes, Rarity, rarityBudget, rollStats, Stats } from "./stats";
@@ -38,6 +38,8 @@ export class Piece {
     private mixer: AnimationMixer
     private currentAction: AnimationAction | undefined
     private path: Vector3[] = []
+    private playingOnce = false
+    private waiting: (() => void)[] = []
 
     constructor(public config: PieceConfig, public player = false) {
         this.obj = config.obj.clone();
@@ -59,6 +61,16 @@ export class Piece {
             }
         })
         this.mixer = new AnimationMixer(this.obj)
+        this.mixer.addEventListener('finished', event => {
+            if (event.action !== this.currentAction)
+                return
+            this.playingOnce = false
+            if (this.path.length)
+                this.play('walk', walkAnimationSpeed)
+            else
+                this.play('idle')
+            this.resolveWaiting()
+        })
         this.play('idle')
 
     }
@@ -71,16 +83,38 @@ export class Piece {
         this.currentHealt = value
     }
 
-    play(name: string, timeScale = 1) {
+    play(name: string, timeScale = 1, once = false) {
         const clip = this.config.animations?.find(animation => animation.name.toLowerCase() === name)
         if (!clip)
             return
         const action = this.mixer.clipAction(clip)
-        if (action === this.currentAction)
+        if (action === this.currentAction && !once)
             return
-        this.currentAction?.fadeOut(0.2)
+        if (action !== this.currentAction)
+            this.currentAction?.fadeOut(0.2)
+        action.setLoop(once ? LoopOnce : LoopRepeat, Infinity)
+        action.clampWhenFinished = once
         action.reset().setEffectiveTimeScale(timeScale).fadeIn(0.2).play()
         this.currentAction = action
+        this.playingOnce = once
+    }
+
+    attack(targetPosition: Vector3) {
+        this.obj.rotation.y = Math.atan2(targetPosition.x - this.obj.position.x, targetPosition.z - this.obj.position.z)
+        this.play('attack', 1, true)
+    }
+
+    wait() {
+        if (!this.path.length && !this.playingOnce)
+            return Promise.resolve()
+        return new Promise<void>(resolve => this.waiting.push(resolve))
+    }
+
+    private resolveWaiting() {
+        if (this.path.length || this.playingOnce)
+            return
+        for (const resolve of this.waiting.splice(0))
+            resolve()
     }
 
     walk(path: Vector3[]) {
@@ -101,8 +135,10 @@ export class Piece {
                 this.obj.position.copy(next)
                 this.path.shift()
                 distance -= length
-                if (!this.path.length)
+                if (!this.path.length && !this.playingOnce) {
                     this.play('idle')
+                    this.resolveWaiting()
+                }
             } else {
                 this.obj.position.addScaledVector(direction, distance / length)
                 distance = 0
