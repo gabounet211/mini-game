@@ -137,7 +137,7 @@ export class Selector {
         if (this.selectedMov)
             this.showRange(this.selectedMov, Color.NAMES.aquamarine, 0)
 
-        this.selectedAttack = this.gameLogic.grid.attackFill(this.selectedPos, piece.config.attackRange);
+        this.selectedAttack = this.gameLogic.grid.attackFill(this.selectedPos, piece.attackRange);
         this.showRange(this.selectedAttack, Color.NAMES.red, 0.001)
     }
 
@@ -152,7 +152,7 @@ export class Selector {
         this.targetingAction = undefined
         if (!piece || !action || !(target instanceof Piece) || target.player === piece.player)
             return
-        if (Grid.manathanDistance(this.selectedPos, this.grid_pos) > piece.config.attackRange || !this.selectedAttack?.get(this.grid_pos))
+        if (Grid.manathanDistance(this.selectedPos, this.grid_pos) > piece.attackRange || !this.selectedAttack?.get(this.grid_pos))
             return
 
         action.action(this.ui.game, target, piece)

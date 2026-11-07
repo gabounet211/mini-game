@@ -58,7 +58,7 @@ export class Ui {
             return
         this.sheetName.textContent = piece.config.name + ' (' + piece.config.rarity + ')'
         this.sheetDetails.replaceChildren(
-            this.createSection('Attributes', [['Ms', piece.moveRange], ['Range', piece.config.attackRange]]),
+            this.createSection('Attributes', [['Ms', piece.moveRange], ['Range', piece.attackRange]]),
             this.createSection('Stats', Object.entries(piece.stats).map(([name, value]) => [this.formatName(name), value])),
             this.createSection('Equipment', [['Weapon', '-'], ['Armor', '-'], ['Jewelry', '-']]),
             this.createSection('Actions', (piece.config.actions ?? []).map(action => [this.formatName(action.name), action.cost + ' AP'])),

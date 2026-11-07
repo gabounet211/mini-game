@@ -16,7 +16,7 @@ export function canAttackFrom(piece: Piece, from: Vector2, target: Piece, game: 
     const grid = game.gameLogic.grid
     const targetPos = grid.getPosition(target)
     return !!targetPos
-        && Grid.manathanDistance(from, targetPos) <= piece.config.attackRange
+        && Grid.manathanDistance(from, targetPos) <= piece.attackRange
         && grid.canSee(from, targetPos)
 }
 
