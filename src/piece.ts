@@ -1,7 +1,8 @@
 import { AnimationAction, AnimationClip, AnimationMixer, LoopOnce, LoopRepeat, Mesh, MeshStandardMaterial, Object3D, Vector3 } from "three";
 import { Action } from "./action";
 import { AiBehavior } from "./aiBehavior";
-import { DamageKind, damageReduction, deriveAttributes, Rarity, rarityBudget, rollStats, Stats } from "./stats";
+import { DamageKind, damageReduction, deriveAttributes, Rarity, Stats } from "./stats";
+import { Character } from "./character";
 
 const walkSpeed = 1.5
 const walkAnimationSpeed = 2
@@ -43,9 +44,9 @@ export class Piece {
     private dead = false
     private waiting: (() => void)[] = []
 
-    constructor(public config: PieceConfig, public player = false) {
+    constructor(public config: PieceConfig, public character: Character, public player = false) {
         this.obj = config.obj.clone();
-        this.stats = rollStats(rarityBudget[config.rarity])
+        this.stats = character.stats
         const attributes = deriveAttributes(this.stats)
         this.maxHealt = attributes.maxHealt
         this.maxActionPoints = attributes.maxActionPoints

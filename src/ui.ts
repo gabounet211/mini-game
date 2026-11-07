@@ -77,9 +77,9 @@ export class Ui {
         this.sheet.style.display = piece ? 'flex' : 'none'
         if (!piece)
             return
-        this.sheetName.textContent = piece.config.name + ' (' + piece.config.rarity + ')'
+        this.sheetName.textContent = piece.config.name + ' (' + piece.character.rarity + ')'
         this.sheetDetails.replaceChildren(
-            this.createSection('Attributes', [['Ms', piece.moveRange], ['Range', piece.attackRange]]),
+            this.createSection('Attributes', [['Level', piece.character.level], ['Ms', piece.moveRange], ['Range', piece.attackRange]]),
             this.createSection('Stats', Object.entries(piece.stats).map(([name, value]) => [this.formatName(name), value])),
             this.createSection('Equipment', [['Weapon', '-'], ['Armor', '-'], ['Jewelry', '-']]),
             this.createSection('Actions', (piece.config.actions ?? []).map(action => [this.formatName(action.name), action.cost + ' AP'])),
