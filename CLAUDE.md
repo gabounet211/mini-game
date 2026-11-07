@@ -19,6 +19,17 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 - Application : transformer le jeu en application, même s'il roule dans un navigateur pour le moment. Le bouton Quit Game du menu Setting fermera alors l'application (il est désactivé d'ici là).
 - Système de classes : au niveau X, le héros se voit proposer un choix de trois classes, selon ses statistiques.
 
+### Plan du lobby
+
+Le lobby est une zone hors combat pour gérer l'équipement des personnages, choisir les personnages qu'on apporte, faire monter les personnages de niveau et choisir le niveau. Ordre prévu, en petits changements :
+
+1. Victoire et défaite à la fin d'un combat.
+2. Une fiche permanente `Character` (stats, rareté, niveau, expérience, équipement), séparée de `Piece` : les stats sont tirées une seule fois, et chaque personnage choisi devient une `Piece` au début du niveau.
+3. Une sauvegarde dans le navigateur (`localStorage`), isolée dans un seul fichier pour passer à un serveur plus tard (multijoueur, gacha).
+4. Un lobby simple (interface HTML) : choisir les personnages et le niveau, puis lancer. Les niveaux définissent des cases de départ au lieu de héros précis.
+5. L'expérience et la montée de niveau, qui préparent le choix de classe au niveau X.
+6. L'équipement, qui modifie les stats, géré dans le lobby.
+
 L'explication de l'univers du jeu est dans `Univers.md`.
 
 ## Règles de programmation
