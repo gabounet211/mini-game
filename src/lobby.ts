@@ -6,13 +6,15 @@ import { SaveData, writeSave } from "./save"
 
 export class Lobby {
     private element = document.createElement('div')
+    private details = document.createElement('div')
     private team = new Set<Character>()
     private levelKey = levels.keys()[0]
     private confirmingDelete: Character | undefined
 
     constructor(private save: SaveData, private onStart: (team: Character[], levelKey: string) => void) {
         this.element.id = 'lobby'
-        document.body.append(this.element)
+        this.details.id = 'heroWindow'
+        document.body.append(this.element, this.details)
         for (const character of save.roster.slice(0, this.teamLimit()))
             this.team.add(character)
         this.render()
@@ -66,6 +68,7 @@ export class Lobby {
         startButton.disabled = this.team.size === 0 || this.team.size > this.teamLimit()
         startButton.addEventListener('click', () => {
             this.element.remove()
+            this.details.remove()
             this.onStart(this.save.roster.filter(character => this.team.has(character)), this.levelKey)
         })
 
@@ -99,6 +102,7 @@ export class Lobby {
         details.textContent = 'HP ' + attributes.maxHealt + ' · AP ' + attributes.maxActionPoints + ' · Ms ' + attributes.moveRange
             + (character.talent ? ' · Talent: ' + character.talent.charAt(0).toUpperCase() + character.talent.slice(1) : '')
         info.append(name, details)
+        info.addEventListener('click', () => this.showDetails(character))
 
         const deleteButton = document.createElement('button')
         deleteButton.textContent = this.confirmingDelete === character ? 'Confirm' : 'Delete'
@@ -108,6 +112,7 @@ export class Lobby {
                 this.confirmingDelete = character
             } else {
                 this.save.roster.splice(this.save.roster.indexOf(character), 1)
+                this.showDetails(undefined)
                 this.team.delete(character)
                 this.confirmingDelete = undefined
                 writeSave(this.save)
@@ -117,6 +122,54 @@ export class Lobby {
 
         row.append(checkbox, info, deleteButton)
         return row
+    }
+
+    private showDetails(character: Character | undefined) {
+        this.details.style.display = character ? 'flex' : 'none'
+        if (!character)
+            return
+        const characterClass = character.characterClass ? characterClasses[character.characterClass] : undefined
+        const attributes = deriveAttributes(character.stats)
+        const title = document.createElement('div')
+        title.className = 'lobbyTitle'
+        title.textContent = (characterClass?.name ?? character.entity) + ' (' + character.rarity + ')'
+        const closeButton = document.createElement('button')
+        closeButton.textContent = 'Close'
+        closeButton.addEventListener('click', () => this.showDetails(undefined))
+        this.details.replaceChildren(
+            title,
+            this.createSection('Progress', [['Level', character.level], ['Experience', character.experience], ['Talent', character.talent ? this.formatName(character.talent) : '-']]),
+            this.createSection('Attributes', [['HP', attributes.maxHealt], ['AP', attributes.maxActionPoints], ['Ms', attributes.moveRange], ['Range', characterClass?.attackRange ?? '-']]),
+            this.createSection('Stats', Object.entries(character.stats).map(([stat, value]) => [this.formatName(stat), value])),
+            this.createSection('Equipment', [['Weapon', character.equipment.weapon ?? '-'], ['Armor', character.equipment.armor ?? '-'], ['Jewelry', character.equipment.jewelry ?? '-']]),
+            this.createSection('Actions', (characterClass?.actions ?? []).map(action => [this.formatName(action.name), action.cost + ' AP'])),
+            closeButton,
+        )
+    }
+
+    private createSection(title: string, rows: [string, string | number][]) {
+        const section = document.createElement('div')
+        section.className = 'sheetSection'
+        const heading = document.createElement('div')
+        heading.className = 'sheetTitle'
+        heading.textContent = title
+        section.append(heading)
+        for (const [label, value] of rows) {
+            const row = document.createElement('div')
+            row.className = 'sheetRow'
+            const name = document.createElement('span')
+            name.textContent = label
+            const content = document.createElement('span')
+            content.textContent = String(value)
+            row.append(name, content)
+            section.append(row)
+        }
+        return section
+    }
+
+    private formatName(name: string) {
+        const words = name.replace(/([A-Z])/g, ' $1').trim()
+        return words.charAt(0).toUpperCase() + words.slice(1)
     }
 
     private summon() {
