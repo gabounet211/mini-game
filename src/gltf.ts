@@ -31,7 +31,6 @@ export const levels = new Levels({
     map1: gltf.scenes.find(d => d.name == '1Map')!
 }, {
     hero: {
-        offset: 0.1,
         name: "Hero",
         rarity: "common",
         attackRange: 1,
@@ -39,7 +38,6 @@ export const levels = new Levels({
         actions: [basicAttack],
     },
     goblinCleric: {
-        offset: 0.1,
         name: "Goblin Cleric",
         rarity: "common",
         behavior: goblinBehavior,
@@ -48,7 +46,6 @@ export const levels = new Levels({
         ...goblinModel,
     },
     goblinFigther: {
-        offset: 0.1,
         name: "Goblin Fighter",
         rarity: "common",
         behavior: goblinBehavior,
@@ -57,7 +54,6 @@ export const levels = new Levels({
         ...goblinModel,
     },
     goblinTank: {
-        offset: 0.1,
         name: "Goblin Tank",
         rarity: "common",
         behavior: goblinBehavior,
@@ -66,7 +62,6 @@ export const levels = new Levels({
         ...goblinModel,
     },
     goblinArcher: {
-        offset: 0.1,
         name: "Goblin Archer",
         rarity: "common",
         behavior: goblinBehavior,
@@ -79,9 +74,8 @@ export const levels = new Levels({
 levels.createLevel("level1", {
     title: "level1",
     map: "map1",
+    startCells: [[15, 0], [15, 3], [13, 1], [17, 1]],
     entities: [
-        [15, 0, "hero", true],
-        [15, 3, "hero", true],
         [15, 29, "goblinTank"],
         [15, 28, "goblinCleric"],
     ]
