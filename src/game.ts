@@ -65,6 +65,9 @@ export class Game {
                 .map(piece => ({ piece, initiative: piece.config.behavior?.initiative(piece, this) ?? 0 }))
                 .sort((a, b) => a.initiative - b.initiative)
             for (const { piece } of order) {
+                this.gameLogic.checkEnd()
+                if (this.gameLogic.state !== "AiTurn")
+                    break
                 if (piece.healt <= 0)
                     continue
                 await new Promise(resolve => setTimeout(resolve, 500))

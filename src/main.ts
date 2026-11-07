@@ -33,6 +33,7 @@ function animation() {
   game.selector.update();
   game.ui.update()
   game.gameLogic.grid.update(clock.getDelta())
+  game.gameLogic.checkEnd()
 
   game.renderer.render(game.scene, game.camera);
 }

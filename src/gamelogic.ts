@@ -4,10 +4,13 @@ import { levels } from './gltf';
 import { Scene, Vector2 } from "three";
 import { Selector } from "./selector";
 import { CameraControle } from "./cameraControle";
+import { allEnemiesDefeated, allHeroesDefeated, EndCondition } from "./endCondition";
 
 const STATE = {
     PlayerTurn: {},
-    AiTurn: {}
+    AiTurn: {},
+    Victory: {},
+    Defeat: {},
 } as const satisfies Record<string, {
 
 }>;
@@ -15,6 +18,8 @@ const STATE = {
 export class GameLogic {
     grid: Grid
     state: keyof typeof STATE = "PlayerTurn"
+    victory: EndCondition
+    defeat: EndCondition
 
 
     constructor(
@@ -24,6 +29,8 @@ export class GameLogic {
         const level1 = levels.getNext()
         const desLevel1 = levels.getLevel(level1)
         this.grid = new Grid(levels.maps[desLevel1.map])
+        this.victory = desLevel1.victory ?? allEnemiesDefeated
+        this.defeat = desLevel1.defeat ?? allHeroesDefeated
         scene.add(this.grid.scene)
         cameraControle.boundMax.setScalar(this.grid.gridsize / 2)
         cameraControle.boundMin.setScalar(-this.grid.gridsize / 2)
@@ -34,7 +41,18 @@ export class GameLogic {
 
     }
 
+    checkEnd() {
+        if (this.state !== "PlayerTurn" && this.state !== "AiTurn")
+            return
+        if (this.defeat(this.grid))
+            this.state = "Defeat"
+        else if (this.victory(this.grid))
+            this.state = "Victory"
+    }
+
     endTurn() {
+        if (this.state !== "PlayerTurn" && this.state !== "AiTurn")
+            return
         this.state = this.state === "PlayerTurn" ? "AiTurn" : "PlayerTurn"
         for (const piece of this.grid.getPieces(this.state === "PlayerTurn")) {
             piece.hasMoved = false
