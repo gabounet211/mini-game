@@ -2,6 +2,7 @@ import { Action } from "./action"
 import { Game } from "./game"
 import { VolumeKind } from "./audioManager"
 import { Piece } from "./piece"
+import { clearSave } from "./save"
 
 
 
@@ -175,6 +176,14 @@ export class Ui {
             row.append(slider)
             this.settingMenu.append(row)
         }
+
+        const resetButton = document.createElement('button')
+        resetButton.textContent = 'Reset save'
+        resetButton.addEventListener('click', () => {
+            clearSave()
+            location.reload()
+        })
+        this.settingMenu.append(resetButton)
 
         const quitButton = document.createElement('button')
         quitButton.textContent = 'Quit Game'
