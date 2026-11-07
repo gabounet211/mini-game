@@ -2,11 +2,13 @@ import { Character } from "./character"
 import { characterClasses } from "./characterClass"
 import { Piece } from "./piece"
 import { loadSave, writeSave } from "./save"
+import { items, randomItem } from "./items"
 
 export const killExperience = 6
 export const victoryExperience = 3
 export const statPointsPerLevel = 2
 export const summonRewardChance = 0.25
+export const lootChance = 0.5
 
 export function experienceToNextLevel(level: number) {
     return 10 * level
@@ -39,6 +41,11 @@ export function grantVictoryRewards(heroes: Piece[]) {
     if (Math.random() < summonRewardChance) {
         save.summons++
         lines.push('You found a summon token!')
+    }
+    if (Math.random() < lootChance) {
+        const item = randomItem()
+        save.inventory.push(item)
+        lines.push('You found: ' + items[item].name)
     }
     writeSave(save)
     return lines

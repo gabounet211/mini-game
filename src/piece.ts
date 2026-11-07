@@ -4,6 +4,7 @@ import { AiBehavior } from "./aiBehavior";
 import { DamageKind, damageReduction, deriveAttributes, Rarity, Stats } from "./stats";
 import { Character } from "./character";
 import { characterClasses } from "./characterClass";
+import { equippedStats } from "./items";
 
 const walkSpeed = 1.5
 const walkAnimationSpeed = 2
@@ -52,7 +53,7 @@ export class Piece {
 
     constructor(public config: PieceConfig, public character: Character, public player = false) {
         this.obj = config.obj.clone();
-        this.stats = character.stats
+        this.stats = equippedStats(character)
         const attributes = deriveAttributes(this.stats)
         this.maxHealt = attributes.maxHealt
         this.maxActionPoints = attributes.maxActionPoints

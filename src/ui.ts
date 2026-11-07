@@ -3,6 +3,7 @@ import { Game } from "./game"
 import { VolumeKind } from "./audioManager"
 import { Piece } from "./piece"
 import { clearSave } from "./save"
+import { items } from "./items"
 
 
 
@@ -89,7 +90,7 @@ export class Ui {
         this.sheetDetails.replaceChildren(
             this.createSection('Attributes', [['Level', piece.character.level], ['Talent', piece.character.talent ? this.formatName(piece.character.talent) : '-'], ['Ms', piece.moveRange], ['Range', piece.attackRange]]),
             this.createSection('Stats', Object.entries(piece.stats).map(([name, value]) => [this.formatName(name), value])),
-            this.createSection('Equipment', [['Weapon', '-'], ['Armor', '-'], ['Jewelry', '-']]),
+            this.createSection('Equipment', [['Weapon', items[piece.character.equipment.weapon ?? '']?.name ?? '-'], ['Armor', items[piece.character.equipment.armor ?? '']?.name ?? '-'], ['Jewelry', items[piece.character.equipment.jewelry ?? '']?.name ?? '-']]),
             this.createSection('Actions', piece.actions.map(action => [this.formatName(action.name), action.cost + ' AP'])),
         )
     }

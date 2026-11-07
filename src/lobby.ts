@@ -3,6 +3,7 @@ import { characterClasses } from "./characterClass"
 import { levels } from "./gltf"
 import { deriveAttributes, Stats } from "./stats"
 import { experienceToNextLevel } from "./rewards"
+import { equipmentBonuses, equippedStats, items, itemSlots, ItemSlot } from "./items"
 import { SaveData, writeSave } from "./save"
 
 export class Lobby {
@@ -56,6 +57,9 @@ export class Lobby {
         summonButton.addEventListener('click', () => this.summon())
         summonRow.append(summonButton)
 
+        const inventoryInfo = document.createElement('div')
+        inventoryInfo.textContent = 'Inventory: ' + (this.save.inventory.map(key => items[key]?.name ?? key).join(', ') || 'empty')
+
         const teamInfo = document.createElement('div')
         teamInfo.textContent = 'Team: ' + this.team.size + '/' + this.teamLimit()
 
@@ -73,7 +77,7 @@ export class Lobby {
             this.onStart(this.save.roster.filter(character => this.team.has(character)), this.levelKey)
         })
 
-        this.element.replaceChildren(title, levelRow, summonRow, teamInfo, heroList, startButton)
+        this.element.replaceChildren(title, levelRow, summonRow, inventoryInfo, teamInfo, heroList, startButton)
     }
 
     private createHeroRow(character: Character) {
@@ -93,7 +97,7 @@ export class Lobby {
         })
 
         const characterClass = character.characterClass ? characterClasses[character.characterClass] : undefined
-        const attributes = deriveAttributes(character.stats)
+        const attributes = deriveAttributes(equippedStats(character))
         const info = document.createElement('div')
         info.className = 'heroInfo'
         const name = document.createElement('div')
@@ -113,6 +117,11 @@ export class Lobby {
             if (this.confirmingDelete !== character) {
                 this.confirmingDelete = character
             } else {
+                for (const slot of itemSlots) {
+                    const item = character.equipment[slot]
+                    if (item)
+                        this.save.inventory.push(item)
+                }
                 this.save.roster.splice(this.save.roster.indexOf(character), 1)
                 this.showDetails(undefined)
                 this.team.delete(character)
@@ -131,7 +140,7 @@ export class Lobby {
         if (!character)
             return
         const characterClass = character.characterClass ? characterClasses[character.characterClass] : undefined
-        const attributes = deriveAttributes(character.stats)
+        const attributes = deriveAttributes(equippedStats(character))
         const title = document.createElement('div')
         title.className = 'lobbyTitle'
         title.textContent = (characterClass?.name ?? character.entity) + ' (' + character.rarity + ')'
@@ -143,7 +152,7 @@ export class Lobby {
             this.createSection('Progress', [['Level', character.level], ['Experience', character.experience + '/' + experienceToNextLevel(character.level)], ['Stat points', character.statPoints], ['Talent', character.talent ? this.formatName(character.talent) : '-']]),
             this.createSection('Attributes', [['HP', attributes.maxHealt], ['AP', attributes.maxActionPoints], ['Ms', attributes.moveRange], ['Range', characterClass?.attackRange ?? '-']]),
             this.createStatsSection(character),
-            this.createSection('Equipment', [['Weapon', character.equipment.weapon ?? '-'], ['Armor', character.equipment.armor ?? '-'], ['Jewelry', character.equipment.jewelry ?? '-']]),
+            this.createEquipmentSection(character),
             this.createSection('Actions', (characterClass?.actions ?? []).map(action => [this.formatName(action.name), action.cost + ' AP'])),
             closeButton,
         )
@@ -151,13 +160,14 @@ export class Lobby {
 
     private createStatsSection(character: Character) {
         const section = this.createSection('Stats', [])
+        const bonuses = equipmentBonuses(character)
         for (const stat of Object.keys(character.stats) as (keyof Stats)[]) {
             const row = document.createElement('div')
             row.className = 'sheetRow'
             const name = document.createElement('span')
             name.textContent = this.formatName(stat)
             const value = document.createElement('span')
-            value.textContent = String(character.stats[stat])
+            value.textContent = String(character.stats[stat] + bonuses[stat]) + (bonuses[stat] ? ' (+' + bonuses[stat] + ')' : '')
             row.append(name)
             if (character.statPoints > 0) {
                 const plusButton = document.createElement('button')
@@ -178,6 +188,46 @@ export class Lobby {
             section.append(row)
         }
         return section
+    }
+
+    private createEquipmentSection(character: Character) {
+        const section = this.createSection('Equipment', [])
+        for (const slot of itemSlots) {
+            const row = document.createElement('div')
+            row.className = 'sheetRow'
+            const name = document.createElement('span')
+            name.textContent = this.formatName(slot)
+            const select = document.createElement('select')
+            const current = character.equipment[slot]
+            const choices = [...new Set(this.save.inventory.filter(key => items[key]?.slot === slot))]
+            for (const key of ['', ...(current ? [current] : []), ...choices.filter(key => key !== current)]) {
+                const option = document.createElement('option')
+                option.value = key
+                option.textContent = key ? items[key].name + ' (' + this.formatBonuses(key) + ')' : '-'
+                option.selected = key === (current ?? '')
+                select.append(option)
+            }
+            select.addEventListener('change', () => this.equip(character, slot, select.value || undefined))
+            row.append(name, select)
+            section.append(row)
+        }
+        return section
+    }
+
+    private formatBonuses(key: string) {
+        return Object.entries(items[key].bonuses).map(([stat, value]) => '+' + value + ' ' + this.formatName(stat)).join(', ')
+    }
+
+    private equip(character: Character, slot: ItemSlot, item: string | undefined) {
+        const previous = character.equipment[slot]
+        if (previous)
+            this.save.inventory.push(previous)
+        if (item)
+            this.save.inventory.splice(this.save.inventory.indexOf(item), 1)
+        character.equipment[slot] = item
+        writeSave(this.save)
+        this.render()
+        this.showDetails(character)
     }
 
     private createSection(title: string, rows: [string, string | number][]) {

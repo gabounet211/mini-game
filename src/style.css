@@ -250,6 +250,11 @@ button{
   align-self: center;
 }
 
+#heroWindow select{
+  max-width: 65%;
+  min-width: 0;
+}
+
 .statButton{
   padding: 0 8px;
   margin-right: 8px;
