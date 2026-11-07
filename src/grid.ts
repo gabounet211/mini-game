@@ -6,6 +6,7 @@ export class Grid {
     readonly gridsize: number;
     private cells: Record<string, true | undefined | Piece> = {};
     private planes: Object3D[]
+    private dying: Piece[] = []
     public readonly scene: Group = new Group();
 
     constructor(public readonly map: Group) {
@@ -50,6 +51,8 @@ export class Grid {
             if (cell instanceof Piece)
                 cell.update(delta)
         }
+        for (const piece of this.dying)
+            piece.update(delta)
     }
 
     getPieces(player: boolean) {
@@ -68,8 +71,12 @@ export class Grid {
     removeDead() {
         for (const [index, cell] of Object.entries(this.cells)) {
             if (cell instanceof Piece && cell.healt <= 0) {
-                this.scene.remove(cell.obj)
                 this.cells[index] = true
+                this.dying.push(cell)
+                cell.die().then(() => {
+                    this.scene.remove(cell.obj)
+                    this.dying.splice(this.dying.indexOf(cell), 1)
+                })
             }
         }
     }

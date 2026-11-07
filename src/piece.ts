@@ -39,6 +39,7 @@ export class Piece {
     private currentAction: AnimationAction | undefined
     private path: Vector3[] = []
     private playingOnce = false
+    private dead = false
     private waiting: (() => void)[] = []
 
     constructor(public config: PieceConfig, public player = false) {
@@ -65,6 +66,10 @@ export class Piece {
             if (event.action !== this.currentAction)
                 return
             this.playingOnce = false
+            if (this.dead) {
+                this.resolveWaiting()
+                return
+            }
             if (this.path.length)
                 this.play('walk', walkAnimationSpeed)
             else
@@ -102,6 +107,13 @@ export class Piece {
     attack(targetPosition: Vector3) {
         this.obj.rotation.y = Math.atan2(targetPosition.x - this.obj.position.x, targetPosition.z - this.obj.position.z)
         this.play('attack', 1, true)
+    }
+
+    die() {
+        this.dead = true
+        this.path = []
+        this.play('death', 1, true)
+        return this.wait()
     }
 
     wait() {
