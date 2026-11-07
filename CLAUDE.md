@@ -14,7 +14,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 
 - Personnages de type gacha : les 8 statistiques aléatoires (force, résistance, constitution, volonté, savoir, intelligence, dextérité, perception) et la rareté sont faites. Reste le système pour obtenir de nouveaux personnages.
 - Savoir et perception : elles n'ont pas d'effet pour le moment, elles seront utilisées plus tard.
-- Équipement : armes, armures et bijoux, dans les emplacements déjà prévus sur la fiche du personnage.
+- Équipement : la base est faite (objets qui donnent des bonus de stats, butin de victoire, inventaire et équipement dans le lobby). Plus tard : restrictions par classe, objets plus rares, effets propres.
 - Modèles et animations : remplacer le modèle rough par des modèles plus complets, puis ajuster la vitesse de marche et le moment du coup (`walkSpeed`, `walkAnimationSpeed`, `hitDelay` dans `piece.ts`).
 - Application : transformer le jeu en application, même s'il roule dans un navigateur pour le moment. Le bouton Quit Game du menu Setting fermera alors l'application (il est désactivé d'ici là).
 

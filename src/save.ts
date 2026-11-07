@@ -7,6 +7,7 @@ const startingHeroes = 5
 export interface SaveData {
     roster: Character[],
     summons: number,
+    inventory: string[],
 }
 
 export function loadSave(): SaveData {
@@ -14,12 +15,12 @@ export function loadSave(): SaveData {
         const data = JSON.parse(localStorage.getItem(saveKey) ?? "null")
         if (data?.version === saveVersion && Array.isArray(data.roster)) {
             const roster: Character[] = data.roster.map((character: Character) => ({ ...character, id: character.id ?? createId(), statPoints: character.statPoints ?? 0 }))
-            return { roster, summons: data.summons ?? 0 }
+            return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [] }
         }
     } catch (error) {
         console.warn("Save could not be loaded", error)
     }
-    return { roster: [], summons: 0 }
+    return { roster: [], summons: 0, inventory: [] }
 }
 
 export function loadOrCreateSave(): SaveData {
