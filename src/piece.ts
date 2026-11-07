@@ -5,6 +5,7 @@ import { DamageKind, damageReduction, deriveAttributes, Rarity, rarityBudget, ro
 
 const walkSpeed = 1.5
 const walkAnimationSpeed = 2
+const hitDelay = 0.5
 
 export interface PieceConfig {
     obj: Object3D,
@@ -109,11 +110,12 @@ export class Piece {
         this.play('attack', 1, true)
     }
 
-    die() {
+    async die() {
         this.dead = true
         this.path = []
+        await new Promise(resolve => setTimeout(resolve, hitDelay * 1000))
         this.play('death', 1, true)
-        return this.wait()
+        await this.wait()
     }
 
     wait() {
