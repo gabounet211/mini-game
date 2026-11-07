@@ -78,7 +78,7 @@ function attackWhilePossible(piece: Piece, steps: AiSteps, game: Game) {
         const target = steps.chooseTarget(piece, reachable, game)
         if (!target)
             return
-        action.action(game, target)
+        action.action(game, target, piece)
         piece.actionPoints -= action.cost
         grid.removeDead()
     }

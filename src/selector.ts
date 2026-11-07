@@ -155,7 +155,7 @@ export class Selector {
         if (Grid.manathanDistance(this.selectedPos, this.grid_pos) > piece.config.attackRange || !this.selectedAttack?.get(this.grid_pos))
             return
 
-        action.action(this.ui.game, target)
+        action.action(this.ui.game, target, piece)
         piece.actionPoints -= action.cost
         this.gameLogic.grid.removeDead()
         this.ui.setActions(piece.config.actions ?? [])

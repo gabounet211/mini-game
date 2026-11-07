@@ -206,7 +206,7 @@ export class Ui {
                     this.game.selector.startTargeting(element)
                     return
                 }
-                element.action(this.game)
+                element.action(this.game, undefined, piece)
                 piece.actionPoints -= element.cost
                 this.game.gameLogic.grid.removeDead()
                 if (piece.healt <= 0)

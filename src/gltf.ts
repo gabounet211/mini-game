@@ -1,7 +1,7 @@
 import { GLTFLoader } from "three/addons";
 import asset from '../public/assets/assets.gltf?url';
 import { Levels } from "./level";
-import { basicAttack } from "./action";
+import { basicAttack, magicAttack } from "./action";
 import { aggressiveBehavior } from "./aiBehavior";
 
 const goblinBehavior = aggressiveBehavior
@@ -21,7 +21,7 @@ export const levels = new Levels({
         rarity: "rare",
         attackRange: 3,
         obj: gltf.scenes.find(d => d.name == 'cleric')!,
-        actions: [basicAttack, {
+        actions: [basicAttack, magicAttack, {
             action(game) {
                 const piece = game.selector.selected
                 if (!piece)
