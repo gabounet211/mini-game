@@ -5,6 +5,8 @@ import { Scene, Vector2 } from "three";
 import { Selector } from "./selector";
 import { CameraControle } from "./cameraControle";
 import { Character, createCharacter } from "./character";
+import { Piece } from "./piece";
+import { grantVictoryRewards } from "./rewards";
 import { allEnemiesDefeated, allHeroesDefeated, EndCondition } from "./endCondition";
 
 const STATE = {
@@ -21,6 +23,8 @@ export class GameLogic {
     state: keyof typeof STATE = "PlayerTurn"
     victory: EndCondition
     defeat: EndCondition
+    heroes: Piece[] = []
+    rewards: string[] = []
 
 
     constructor(
@@ -38,7 +42,7 @@ export class GameLogic {
         cameraControle.boundMin.setScalar(-this.grid.gridsize / 2)
         team.slice(0, desLevel1.startCells.length).forEach((character, index) => {
             const [x, y] = desLevel1.startCells[index]
-            this.grid.add(levels.entities[character.entity as keyof typeof levels.entities], character, new Vector2(x, y), true)
+            this.heroes.push(this.grid.add(levels.entities[character.entity as keyof typeof levels.entities], character, new Vector2(x, y), true))
         })
         for (const [x, y, entity, player] of desLevel1.entities) {
             const config = levels.entities[entity]
@@ -53,8 +57,10 @@ export class GameLogic {
             return
         if (this.defeat(this.grid))
             this.state = "Defeat"
-        else if (this.victory(this.grid))
+        else if (this.victory(this.grid)) {
             this.state = "Victory"
+            this.rewards = grantVictoryRewards(this.heroes)
+        }
     }
 
     endTurn() {

@@ -2,11 +2,9 @@ import { Action } from "./action"
 import { Game } from "./game"
 import { VolumeKind } from "./audioManager"
 import { Piece } from "./piece"
-import { clearSave, loadSave, writeSave } from "./save"
+import { clearSave } from "./save"
 
 
-
-const summonRewardChance = 0.25
 
 export class Ui {
 
@@ -69,12 +67,12 @@ export class Ui {
         title.className = 'endTitle'
         title.textContent = state
         const reward = document.createElement('div')
-        if (state === "Victory" && Math.random() < summonRewardChance) {
-            const save = loadSave()
-            save.summons++
-            writeSave(save)
-            reward.textContent = 'You found a summon token!'
-        }
+        reward.className = 'endRewards'
+        reward.append(...this.game.gameLogic.rewards.map(line => {
+            const row = document.createElement('div')
+            row.textContent = line
+            return row
+        }))
         const lobbyButton = document.createElement('button')
         lobbyButton.textContent = 'Back to lobby'
         lobbyButton.addEventListener('click', () => location.reload())

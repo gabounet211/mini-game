@@ -39,6 +39,9 @@ export class Piece {
     actions: Action[]
     name: string
 
+    kills = 0
+    lastAttacker: Piece | undefined
+
     private currentHealt: number
     private mixer: AnimationMixer
     private currentAction: AnimationAction | undefined
@@ -172,7 +175,8 @@ export class Piece {
         this.healt = Math.min(this.maxHealt, this.healt + amount)
     }
 
-    takeDamage(amount: number, kind: DamageKind) {
+    takeDamage(amount: number, kind: DamageKind, attacker?: Piece) {
+        this.lastAttacker = attacker
         this.healt -= Math.max(1, amount - damageReduction(this.stats, kind))
     }
 }

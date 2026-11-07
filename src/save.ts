@@ -1,4 +1,4 @@
-import { Character, createHero } from "./character"
+import { Character, createHero, createId } from "./character"
 
 const saveKey = "miniGameSave"
 const saveVersion = 1
@@ -12,8 +12,10 @@ export interface SaveData {
 export function loadSave(): SaveData {
     try {
         const data = JSON.parse(localStorage.getItem(saveKey) ?? "null")
-        if (data?.version === saveVersion && Array.isArray(data.roster))
-            return { roster: data.roster, summons: data.summons ?? 0 }
+        if (data?.version === saveVersion && Array.isArray(data.roster)) {
+            const roster: Character[] = data.roster.map((character: Character) => ({ ...character, id: character.id ?? createId(), statPoints: character.statPoints ?? 0 }))
+            return { roster, summons: data.summons ?? 0 }
+        }
     } catch (error) {
         console.warn("Save could not be loaded", error)
     }

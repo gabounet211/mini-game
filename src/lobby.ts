@@ -1,7 +1,8 @@
 import { Character, createHero } from "./character"
 import { characterClasses } from "./characterClass"
 import { levels } from "./gltf"
-import { deriveAttributes } from "./stats"
+import { deriveAttributes, Stats } from "./stats"
+import { experienceToNextLevel } from "./rewards"
 import { SaveData, writeSave } from "./save"
 
 export class Lobby {
@@ -101,6 +102,7 @@ export class Lobby {
         details.className = 'heroDetails'
         details.textContent = 'HP ' + attributes.maxHealt + ' · AP ' + attributes.maxActionPoints + ' · Ms ' + attributes.moveRange
             + (character.talent ? ' · Talent: ' + character.talent.charAt(0).toUpperCase() + character.talent.slice(1) : '')
+            + (character.statPoints ? ' · ' + character.statPoints + ' points to spend' : '')
         info.append(name, details)
         info.addEventListener('click', () => this.showDetails(character))
 
@@ -138,13 +140,44 @@ export class Lobby {
         closeButton.addEventListener('click', () => this.showDetails(undefined))
         this.details.replaceChildren(
             title,
-            this.createSection('Progress', [['Level', character.level], ['Experience', character.experience], ['Talent', character.talent ? this.formatName(character.talent) : '-']]),
+            this.createSection('Progress', [['Level', character.level], ['Experience', character.experience + '/' + experienceToNextLevel(character.level)], ['Stat points', character.statPoints], ['Talent', character.talent ? this.formatName(character.talent) : '-']]),
             this.createSection('Attributes', [['HP', attributes.maxHealt], ['AP', attributes.maxActionPoints], ['Ms', attributes.moveRange], ['Range', characterClass?.attackRange ?? '-']]),
-            this.createSection('Stats', Object.entries(character.stats).map(([stat, value]) => [this.formatName(stat), value])),
+            this.createStatsSection(character),
             this.createSection('Equipment', [['Weapon', character.equipment.weapon ?? '-'], ['Armor', character.equipment.armor ?? '-'], ['Jewelry', character.equipment.jewelry ?? '-']]),
             this.createSection('Actions', (characterClass?.actions ?? []).map(action => [this.formatName(action.name), action.cost + ' AP'])),
             closeButton,
         )
+    }
+
+    private createStatsSection(character: Character) {
+        const section = this.createSection('Stats', [])
+        for (const stat of Object.keys(character.stats) as (keyof Stats)[]) {
+            const row = document.createElement('div')
+            row.className = 'sheetRow'
+            const name = document.createElement('span')
+            name.textContent = this.formatName(stat)
+            const value = document.createElement('span')
+            value.textContent = String(character.stats[stat])
+            row.append(name)
+            if (character.statPoints > 0) {
+                const plusButton = document.createElement('button')
+                plusButton.className = 'statButton'
+                plusButton.textContent = '+'
+                plusButton.addEventListener('click', () => {
+                    if (character.statPoints < 1)
+                        return
+                    character.stats[stat]++
+                    character.statPoints--
+                    writeSave(this.save)
+                    this.render()
+                    this.showDetails(character)
+                })
+                value.prepend(plusButton)
+            }
+            row.append(value)
+            section.append(row)
+        }
+        return section
     }
 
     private createSection(title: string, rows: [string, string | number][]) {
