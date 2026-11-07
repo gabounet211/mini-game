@@ -85,9 +85,32 @@ export class Grid {
         if (currentFrom === true || !currentFrom)
             throw new Error("no object at " + iFrom)
 
-        currentFrom.obj.position.set(to.x - this.gridsize / 2 + .5, currentFrom.offset, to.y - this.gridsize / 2 + .5);
+        const path = this.findPath(from, to) ?? [to]
+        currentFrom.walk(path.map(cell => new Vector3(cell.x - this.gridsize / 2 + .5, currentFrom.offset, cell.y - this.gridsize / 2 + .5)))
         this.cells[iFrom] = true;
         this.cells[iTo] = currentFrom;
+    }
+
+    findPath(from: Vector2, to: Vector2) {
+        const previous = new Map<string, Vector2 | undefined>([[from.x + ',' + from.y, undefined]])
+        const queue = [from]
+        for (let index = 0; index < queue.length; index++) {
+            const current = queue[index]
+            if (current.equals(to)) {
+                const path: Vector2[] = []
+                for (let step: Vector2 | undefined = current; step && !step.equals(from); step = previous.get(step.x + ',' + step.y))
+                    path.unshift(step)
+                return path
+            }
+            for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+                const next = new Vector2(current.x + dx, current.y + dy)
+                const key = next.x + ',' + next.y
+                if (previous.has(key) || this.cells[key] !== true)
+                    continue
+                previous.set(key, current)
+                queue.push(next)
+            }
+        }
     }
 
     screenTest(mousePosition: Vector2, camera: PerspectiveCamera, worldPos?: Vector3, gridPos?: Vector2) {
