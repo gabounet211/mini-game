@@ -7,6 +7,7 @@ export interface Action{
     name : string
     cost : number
     needsTarget? : boolean
+    targets? : "enemy" | "ally"
 }
 
 export function physicalAttack(name: string, cost: number): Action {
@@ -31,6 +32,20 @@ export function magicalAttack(name: string, cost: number): Action {
             if (!target || !user)
                 return
             target.takeDamage(2 + user.stats.intelligence, "magic")
+        },
+    }
+}
+
+export function healing(name: string, cost: number): Action {
+    return {
+        name,
+        cost,
+        needsTarget: true,
+        targets: "ally",
+        action(_game, target, user) {
+            if (!target || !user)
+                return
+            target.heal(2 + Math.floor(user.stats.willpower / 2))
         },
     }
 }

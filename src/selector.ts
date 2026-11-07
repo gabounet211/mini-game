@@ -14,6 +14,7 @@ export class Selector {
         new MeshBasicMaterial()
     )
 
+    private attackBlocks: Mesh<PlaneGeometry, MeshBasicMaterial>[] = []
     block = new Mesh(
         new PlaneGeometry(1, 1),
         new MeshBasicMaterial({ color: Color.NAMES.aquamarine })
@@ -66,7 +67,9 @@ export class Selector {
 
             this.ui.showSheet(this.hoveredCase instanceof Piece ? this.hoveredCase : undefined)
 
-            if (this.isPlayerEntity(this.hoveredCase)) {
+            if (this.selected && this.targetingAction) {
+                this.target()
+            } else if (this.isPlayerEntity(this.hoveredCase)) {
 
                 if (this.selected === this.hoveredCase)
                     this.unselect()
@@ -75,9 +78,7 @@ export class Selector {
 
             } else if (this.selected) {//We move
 
-                if (this.targetingAction)
-                    this.target()
-                else if (this.selectedMov?.get(this.grid_pos)) {
+                if (this.selectedMov?.get(this.grid_pos)) {
                     this.gameLogic.grid.move(this.selectedPos, this.grid_pos)
                     this.selected.hasMoved = true
                     this.unselect()
@@ -138,11 +139,17 @@ export class Selector {
             this.showRange(this.selectedMov, Color.NAMES.aquamarine, 0)
 
         this.selectedAttack = this.gameLogic.grid.attackFill(this.selectedPos, piece.attackRange);
-        this.showRange(this.selectedAttack, Color.NAMES.red, 0.001)
+        this.attackBlocks = this.showRange(this.selectedAttack, Color.NAMES.red, 0.001)
     }
 
     startTargeting(action: Action) {
         this.targetingAction = action
+        this.setAttackColor(action.targets === "ally" ? Color.NAMES.limegreen : Color.NAMES.red)
+    }
+
+    private setAttackColor(color: number) {
+        for (const block of this.attackBlocks)
+            block.material.color.set(color)
     }
 
     private target() {
@@ -150,9 +157,12 @@ export class Selector {
         const action = this.targetingAction
         const target = this.hoveredCase
         this.targetingAction = undefined
-        if (!piece || !action || !(target instanceof Piece) || target.player === piece.player)
+        this.setAttackColor(Color.NAMES.red)
+        const wantsAlly = action?.targets === "ally"
+        if (!piece || !action || !(target instanceof Piece) || (target.player === piece.player) !== wantsAlly)
             return
-        if (Grid.manathanDistance(this.selectedPos, this.grid_pos) > piece.attackRange || !this.selectedAttack?.get(this.grid_pos))
+        const inRange = Grid.manathanDistance(this.selectedPos, this.grid_pos) <= piece.attackRange && this.selectedAttack?.get(this.grid_pos)
+        if (!inRange && !(wantsAlly && target === piece))
             return
 
         action.action(this.ui.game, target, piece)
@@ -164,6 +174,7 @@ export class Selector {
 
     private showRange(range: SmallGrid<boolean>, color: number, height: number) {
         const pos = new Vector2();
+        const blocks: Mesh<PlaneGeometry, MeshBasicMaterial>[] = []
         range.forEach((x, y, state) => {
             if (!state)
                 return;
@@ -175,7 +186,9 @@ export class Selector {
             this.gameLogic.grid.gridToWorldPos(pos.set(x, y));
             block.position.set(pos.x - this.block.position.x, -pos.y + this.block.position.z, height);
             this.block.add(block)
+            blocks.push(block)
         })
+        return blocks
     }
 
     private isPlayerEntity(entity: any): entity is Piece {

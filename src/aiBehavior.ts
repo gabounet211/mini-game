@@ -86,7 +86,7 @@ export function approachTarget(piece: Piece, target: Piece, game: Game) {
 
 async function attackWhilePossible(piece: Piece, steps: AiSteps, game: Game) {
     const grid = game.gameLogic.grid
-    const action = piece.actions.find(element => element.needsTarget)
+    const action = piece.actions.find(element => element.needsTarget && element.targets !== "ally")
     const from = grid.getPosition(piece)
     if (!action || !from)
         return
