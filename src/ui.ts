@@ -77,12 +77,12 @@ export class Ui {
         this.sheet.style.display = piece ? 'flex' : 'none'
         if (!piece)
             return
-        this.sheetName.textContent = piece.config.name + ' (' + piece.character.rarity + ')'
+        this.sheetName.textContent = piece.name + ' (' + piece.character.rarity + ')'
         this.sheetDetails.replaceChildren(
-            this.createSection('Attributes', [['Level', piece.character.level], ['Ms', piece.moveRange], ['Range', piece.attackRange]]),
+            this.createSection('Attributes', [['Level', piece.character.level], ['Talent', piece.character.talent ? this.formatName(piece.character.talent) : '-'], ['Ms', piece.moveRange], ['Range', piece.attackRange]]),
             this.createSection('Stats', Object.entries(piece.stats).map(([name, value]) => [this.formatName(name), value])),
             this.createSection('Equipment', [['Weapon', '-'], ['Armor', '-'], ['Jewelry', '-']]),
-            this.createSection('Actions', (piece.config.actions ?? []).map(action => [this.formatName(action.name), action.cost + ' AP'])),
+            this.createSection('Actions', piece.actions.map(action => [this.formatName(action.name), action.cost + ' AP'])),
         )
     }
 
@@ -146,7 +146,7 @@ export class Ui {
         element.className = 'partyCard'
         element.addEventListener('click', () => this.game.selector.selectPiece(piece))
         const name = document.createElement('div')
-        name.textContent = piece.config.name
+        name.textContent = piece.name
         const health = document.createElement('div')
         element.append(name, health)
         this.partyCards.append(element)

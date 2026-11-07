@@ -17,12 +17,18 @@ export const rarityBudget: Record<Rarity, number> = {
     legendary: 40,
 }
 
-const statNames: (keyof Stats)[] = ["strength", "resistance", "constitution", "willpower", "knowledge", "intelligence", "dexterity", "perception"]
+export type StatWeights = Partial<Record<keyof Stats, number>>
 
-export function rollStats(budget: number, random = Math.random): Stats {
+export const statNames: (keyof Stats)[] = ["strength", "resistance", "constitution", "willpower", "knowledge", "intelligence", "dexterity", "perception"]
+
+export function rollStats(budget: number, weights: StatWeights = {}, random = Math.random): Stats {
     const stats = Object.fromEntries(statNames.map(name => [name, 1])) as unknown as Stats
-    for (let points = statNames.length; points < budget; points++)
-        stats[statNames[Math.floor(random() * statNames.length)]]++
+    const total = statNames.reduce((sum, name) => sum + (weights[name] ?? 1), 0)
+    for (let points = statNames.length; points < budget; points++) {
+        let roll = random() * total
+        const name = statNames.find(name => (roll -= weights[name] ?? 1) < 0) ?? statNames[statNames.length - 1]
+        stats[name]++
+    }
     return stats
 }
 

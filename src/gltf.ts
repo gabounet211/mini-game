@@ -3,7 +3,7 @@ import asset from '../public/assets/assets.gltf?url';
 import characterAsset from '../public/assets/roughCharacter.glb?url';
 import { Group } from "three";
 import { Levels } from "./level";
-import { basicAttack, magicAttack } from "./action";
+import { basicAttack } from "./action";
 import { approachTarget, createBehavior, nearestTarget, randomInitiative } from "./aiBehavior";
 
 const goblinBehavior = createBehavior({
@@ -30,54 +30,13 @@ const goblinModel = { obj: characterModel, offset: 0, animations: characterGltf.
 export const levels = new Levels({
     map1: gltf.scenes.find(d => d.name == '1Map')!
 }, {
-    cleric: {
+    hero: {
         offset: 0.1,
-        name: "Cleric",
-        rarity: "rare",
-        attackRange: 3,
-        ...heroModel,
-        actions: [basicAttack, magicAttack, {
-            action(game) {
-                const piece = game.selector.selected
-                if (!piece)
-                    return
-                piece.healt -= 2
-
-            },
-            name: "allo",
-            cost: 2,
-        }, {
-            action(game) {
-                console.log((game.selector.selected as any).healt)
-            },
-            name: "log life",
-            cost: 0,
-        }]
-
-    },
-    figther: {
-        offset: 0.1,
-        name: "Fighter",
-        rarity: "rare",
-        actions: [basicAttack],
+        name: "Hero",
+        rarity: "common",
         attackRange: 1,
         ...heroModel,
-    },
-    tank: {
-        offset: 0.1,
-        name: "Tank",
-        rarity: "rare",
         actions: [basicAttack],
-        attackRange: 1,
-        ...heroModel,
-    },
-    archer: {
-        offset: 0.1,
-        name: "Archer",
-        rarity: "rare",
-        actions: [basicAttack],
-        attackRange: 4,
-        ...heroModel,
     },
     goblinCleric: {
         offset: 0.1,
@@ -121,8 +80,8 @@ levels.createLevel("level1", {
     title: "level1",
     map: "map1",
     entities: [
-        [15, 0, "cleric", true],
-        [15, 3, "figther", true],
+        [15, 0, "hero", true],
+        [15, 3, "hero", true],
         [15, 29, "goblinTank"],
         [15, 28, "goblinCleric"],
     ]

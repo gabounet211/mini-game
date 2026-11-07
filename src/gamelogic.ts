@@ -4,7 +4,7 @@ import { levels } from './gltf';
 import { Scene, Vector2 } from "three";
 import { Selector } from "./selector";
 import { CameraControle } from "./cameraControle";
-import { Character, createCharacter } from "./character";
+import { Character, createCharacter, createHero } from "./character";
 import { allEnemiesDefeated, allHeroesDefeated, EndCondition } from "./endCondition";
 
 const STATE = {
@@ -41,7 +41,7 @@ export class GameLogic {
             const config = levels.entities[entity]
             let character = player ? roster.find(candidate => candidate.entity === entity && !used.has(candidate)) : undefined
             if (!character) {
-                character = createCharacter(entity, config.rarity)
+                character = player ? createHero(entity) : createCharacter(entity, config.rarity)
                 if (player)
                     roster.push(character)
             }
