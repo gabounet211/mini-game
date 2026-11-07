@@ -1,7 +1,9 @@
 import { AnimationAction, AnimationClip, AnimationMixer, LoopOnce, LoopRepeat, Mesh, MeshStandardMaterial, Object3D, Vector3 } from "three";
 import { Action } from "./action";
 import { AiBehavior } from "./aiBehavior";
-import { DamageKind, damageReduction, deriveAttributes, Rarity, rarityBudget, rollStats, Stats } from "./stats";
+import { DamageKind, damageReduction, deriveAttributes, Rarity, Stats } from "./stats";
+import { Character } from "./character";
+import { characterClasses } from "./characterClass";
 
 const walkSpeed = 1.5
 const walkAnimationSpeed = 2
@@ -34,6 +36,8 @@ export class Piece {
     maxActionPoints: number
     moveRange: number
     attackRange: number
+    actions: Action[]
+    name: string
 
     private currentHealt: number
     private mixer: AnimationMixer
@@ -43,14 +47,17 @@ export class Piece {
     private dead = false
     private waiting: (() => void)[] = []
 
-    constructor(public config: PieceConfig, public player = false) {
+    constructor(public config: PieceConfig, public character: Character, public player = false) {
         this.obj = config.obj.clone();
-        this.stats = rollStats(rarityBudget[config.rarity])
+        this.stats = character.stats
         const attributes = deriveAttributes(this.stats)
         this.maxHealt = attributes.maxHealt
         this.maxActionPoints = attributes.maxActionPoints
         this.moveRange = attributes.moveRange
-        this.attackRange = config.attackRange
+        const characterClass = character.characterClass ? characterClasses[character.characterClass] : undefined
+        this.attackRange = characterClass?.attackRange ?? config.attackRange
+        this.actions = characterClass?.actions ?? config.actions ?? []
+        this.name = characterClass?.name ?? config.name
         this.currentHealt = this.maxHealt
         this.actionPoints = this.maxActionPoints
         this.offset = config.offset;

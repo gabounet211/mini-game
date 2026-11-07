@@ -17,7 +17,20 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 - Équipement : armes, armures et bijoux, dans les emplacements déjà prévus sur la fiche du personnage.
 - Modèles et animations : remplacer le modèle rough par des modèles plus complets, puis ajuster la vitesse de marche et le moment du coup (`walkSpeed`, `walkAnimationSpeed`, `hitDelay` dans `piece.ts`).
 - Application : transformer le jeu en application, même s'il roule dans un navigateur pour le moment. Le bouton Quit Game du menu Setting fermera alors l'application (il est désactivé d'ici là).
-- Système de classes : au niveau X, le héros se voit proposer un choix de trois classes, selon ses statistiques.
+
+### Système de classes
+
+- La classe de départ dépend de la rareté et explique, dans le lore, ce que le personnage faisait avant le jeu (et donc ses stats). Paliers :
+  - palier 1 (commun) : métiers de villageois (fermier, bûcheron, chasseur…) ;
+  - palier 2 (rare) : classes spécialisées (soldat, apprenti, soigneur…) ;
+  - palier 3 (légendaire) : classes au gameplay plus unique (berserker, élémentaliste, cleric…) ;
+  - palier 4 et plus : évolutions avancées.
+- La classe oriente le tirage des stats (préférences par classe). Les classes communes ont une chance d'avoir un talent caché : une stat « hors norme » (ex. un bûcheron intelligent), qui ouvre des évolutions différentes.
+- Chaque classe a ses actions, avec leur propre nom. Pour le moment elles fonctionnent comme les attaques actuelles ; on ajoutera des effets propres quand la liste d'actions sera plus grande.
+- À chaque niveau, le joueur répartit lui-même ses points de stats.
+- Au niveau X (puis à d'autres paliers), de nouvelles classes sont proposées selon la stat la plus haute et des minimums dans d'autres stats (ex. intelligence la plus haute → classes magiques ; avec une force au-dessus d'un seuil → mageblade).
+- Un héros commun peut monter jusqu'au palier des classes légendaires de départ (palier 3, plafond à revoir). Un légendaire commence à ce palier et a donc accès plus tôt aux classes uniques.
+- Lien avec les nations : certaines classes sont plus présentes dans certaines nations (plus de chevaliers dans la nation bleue, etc.), mais les classes communes et certaines rares existent dans plusieurs nations, pour ne pas priver un joueur d'un type de classe. À approfondir plus tard.
 
 ### Plan du lobby
 

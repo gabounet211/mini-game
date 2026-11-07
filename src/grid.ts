@@ -1,5 +1,6 @@
 import { BufferAttribute, BufferGeometry, Group, Object3D, PerspectiveCamera, Points, PointsMaterial, Raycaster, Vector2, Vector3 } from "three";
 import { Piece, PieceConfig } from "./piece";
+import { Character } from "./character";
 
 const raycaster = new Raycaster
 export class Grid {
@@ -32,8 +33,8 @@ export class Grid {
         console.log(this.cells)
     }
 
-    add(pieceConfig: PieceConfig, grid_pos: Vector2, player = false) {
-        const piece = new Piece(pieceConfig, player);
+    add(pieceConfig: PieceConfig, character: Character, grid_pos: Vector2, player = false) {
+        const piece = new Piece(pieceConfig, character, player);
         const index = grid_pos.x + "," + grid_pos.y;
         const current = this.cells[index];
 

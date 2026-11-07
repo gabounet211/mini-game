@@ -124,7 +124,7 @@ export class Selector {
         this.selectedPos.copy(gridPos);
 
         this.ui.setActionsVisible(true);
-        this.ui.setActions(piece.config.actions??[]);
+        this.ui.setActions(piece.actions);
         this.ui.showSheet(piece)
 
         const worldPos = this.gameLogic.grid.gridToWorldPos(gridPos.clone())
@@ -159,7 +159,7 @@ export class Selector {
         piece.attack(target.obj.position)
         piece.actionPoints -= action.cost
         this.gameLogic.grid.removeDead()
-        this.ui.setActions(piece.config.actions ?? [])
+        this.ui.setActions(piece.actions)
     }
 
     private showRange(range: SmallGrid<boolean>, color: number, height: number) {

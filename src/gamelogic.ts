@@ -4,6 +4,7 @@ import { levels } from './gltf';
 import { Scene, Vector2 } from "three";
 import { Selector } from "./selector";
 import { CameraControle } from "./cameraControle";
+import { Character, createCharacter, createHero } from "./character";
 import { allEnemiesDefeated, allHeroesDefeated, EndCondition } from "./endCondition";
 
 const STATE = {
@@ -24,7 +25,8 @@ export class GameLogic {
 
     constructor(
         scene: Scene,
-        cameraControle: CameraControle
+        cameraControle: CameraControle,
+        roster: Character[],
     ) {
         const level1 = levels.getNext()
         const desLevel1 = levels.getLevel(level1)
@@ -34,8 +36,17 @@ export class GameLogic {
         scene.add(this.grid.scene)
         cameraControle.boundMax.setScalar(this.grid.gridsize / 2)
         cameraControle.boundMin.setScalar(-this.grid.gridsize / 2)
+        const used = new Set<Character>()
         for (const [x, y, entity, player] of desLevel1.entities) {
-            this.grid.add(levels.entities[entity], new Vector2(x, y), player)
+            const config = levels.entities[entity]
+            let character = player ? roster.find(candidate => candidate.entity === entity && !used.has(candidate)) : undefined
+            if (!character) {
+                character = player ? createHero(entity) : createCharacter(entity, config.rarity)
+                if (player)
+                    roster.push(character)
+            }
+            used.add(character)
+            this.grid.add(config, character, new Vector2(x, y), player)
         }
 
 
