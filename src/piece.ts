@@ -113,7 +113,8 @@ export class Piece {
     }
 
     attack(targetPosition: Vector3) {
-        this.obj.rotation.y = Math.atan2(targetPosition.x - this.obj.position.x, targetPosition.z - this.obj.position.z)
+        if (targetPosition.distanceTo(this.obj.position) > 0.01)
+            this.obj.rotation.y = Math.atan2(targetPosition.x - this.obj.position.x, targetPosition.z - this.obj.position.z)
         this.play('attack', 1, true)
     }
 
@@ -165,6 +166,10 @@ export class Piece {
                 distance = 0
             }
         }
+    }
+
+    heal(amount: number) {
+        this.healt = Math.min(this.maxHealt, this.healt + amount)
     }
 
     takeDamage(amount: number, kind: DamageKind) {
