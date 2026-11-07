@@ -20,6 +20,8 @@ export class Ui {
     private sheetPoints = document.createElement('div')
     private sheetDetails = document.createElement('div')
     private inspected: Piece | undefined
+    private endScreen = document.createElement('div')
+    private endScreenShown = false
 
     constructor(public game: Game) {
         this.partyCards.id = 'partyCards'
@@ -44,11 +46,30 @@ export class Ui {
         this.actionButtons.id = 'thoseAreTheAction'
         document.body.append(this.actionButtons)
 
+        this.endScreen.id = 'endScreen'
+        document.body.append(this.endScreen)
+
     }
 
     update() {
         this.updateCards()
         this.updateSheet()
+        this.updateEndScreen()
+    }
+
+    private updateEndScreen() {
+        const state = this.game.gameLogic.state
+        if (this.endScreenShown || (state !== "Victory" && state !== "Defeat"))
+            return
+        this.endScreenShown = true
+        const title = document.createElement('div')
+        title.className = 'endTitle'
+        title.textContent = state
+        const replayButton = document.createElement('button')
+        replayButton.textContent = 'Replay'
+        replayButton.addEventListener('click', () => location.reload())
+        this.endScreen.append(title, replayButton)
+        setTimeout(() => this.endScreen.style.display = 'flex', 2500)
     }
 
     showSheet(piece: Piece | undefined) {

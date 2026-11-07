@@ -131,6 +131,26 @@ canvas {
   z-index: 200;
 }
 
+#endScreen{
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  min-width: 280px;
+  padding: 32px;
+  border: 2px solid rgba(255, 255, 255, 0.87);
+  background-color: rgba(20, 20, 20, 0.95);
+  z-index: 200;
+}
+
+.endTitle{
+  font-size: 2em;
+  font-weight: 600;
+}
+
 #settingMenu label{
   display: flex;
   flex-direction: column;

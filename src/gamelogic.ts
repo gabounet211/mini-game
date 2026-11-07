@@ -7,7 +7,9 @@ import { CameraControle } from "./cameraControle";
 
 const STATE = {
     PlayerTurn: {},
-    AiTurn: {}
+    AiTurn: {},
+    Victory: {},
+    Defeat: {},
 } as const satisfies Record<string, {
 
 }>;
@@ -34,7 +36,18 @@ export class GameLogic {
 
     }
 
+    checkEnd() {
+        if (this.state !== "PlayerTurn" && this.state !== "AiTurn")
+            return
+        if (!this.grid.getPieces(false).length)
+            this.state = "Victory"
+        else if (!this.grid.getPieces(true).length)
+            this.state = "Defeat"
+    }
+
     endTurn() {
+        if (this.state !== "PlayerTurn" && this.state !== "AiTurn")
+            return
         this.state = this.state === "PlayerTurn" ? "AiTurn" : "PlayerTurn"
         for (const piece of this.grid.getPieces(this.state === "PlayerTurn")) {
             piece.hasMoved = false
