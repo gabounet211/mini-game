@@ -58,7 +58,7 @@ export class Ui {
             return
         this.sheetName.textContent = piece.config.name + ' (' + piece.config.rarity + ')'
         this.sheetDetails.replaceChildren(
-            this.createSection('Attributes', [['Ms', piece.moveRange], ['Range', piece.config.attackRange]]),
+            this.createSection('Attributes', [['Ms', piece.moveRange], ['Range', piece.attackRange]]),
             this.createSection('Stats', Object.entries(piece.stats).map(([name, value]) => [this.formatName(name), value])),
             this.createSection('Equipment', [['Weapon', '-'], ['Armor', '-'], ['Jewelry', '-']]),
             this.createSection('Actions', (piece.config.actions ?? []).map(action => [this.formatName(action.name), action.cost + ' AP'])),
@@ -206,7 +206,7 @@ export class Ui {
                     this.game.selector.startTargeting(element)
                     return
                 }
-                element.action(this.game)
+                element.action(this.game, undefined, piece)
                 piece.actionPoints -= element.cost
                 this.game.gameLogic.grid.removeDead()
                 if (piece.healt <= 0)

@@ -26,6 +26,12 @@ export function rollStats(budget: number, random = Math.random): Stats {
     return stats
 }
 
+export type DamageKind = "physical" | "magic"
+
+export function damageReduction(stats: Stats, kind: DamageKind) {
+    return kind === "physical" ? Math.floor(stats.resistance / 3) : 0
+}
+
 export function deriveAttributes(stats: Stats) {
     return {
         maxHealt: 6 + stats.constitution * 2,

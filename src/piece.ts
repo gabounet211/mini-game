@@ -1,7 +1,7 @@
 import { Object3D, Vector3 } from "three";
 import { Action } from "./action";
 import { AiBehavior } from "./aiBehavior";
-import { deriveAttributes, Rarity, rarityBudget, rollStats, Stats } from "./stats";
+import { DamageKind, damageReduction, deriveAttributes, Rarity, rarityBudget, rollStats, Stats } from "./stats";
 
 export interface PieceConfig {
     obj: Object3D,
@@ -27,6 +27,7 @@ export class Piece {
     maxHealt: number
     maxActionPoints: number
     moveRange: number
+    attackRange: number
 
     private currentHealt: number
 
@@ -37,6 +38,7 @@ export class Piece {
         this.maxHealt = attributes.maxHealt
         this.maxActionPoints = attributes.maxActionPoints
         this.moveRange = attributes.moveRange
+        this.attackRange = config.attackRange
         this.currentHealt = this.maxHealt
         this.actionPoints = this.maxActionPoints
         this.offset = config.offset;
@@ -49,5 +51,9 @@ export class Piece {
 
     set healt(value: number) {
         this.currentHealt = value
+    }
+
+    takeDamage(amount: number, kind: DamageKind) {
+        this.healt -= Math.max(1, amount - damageReduction(this.stats, kind))
     }
 }
