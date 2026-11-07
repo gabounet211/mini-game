@@ -12,8 +12,10 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 
 ### Idées futures
 
-- Remplacer les personnages fixes par un système de personnages de type gacha, avec des statistiques aléatoires : armure, résistance, volonté, savoir, intelligence, dextérité et perception.
-- Fiche du personnage : remplacer la barre de vie par une fiche qui affiche les informations du personnage (HP restant / HP max, PA, Ms (= `moveRange`), etc.).
+- Personnages de type gacha : les 8 statistiques aléatoires (force, résistance, constitution, volonté, savoir, intelligence, dextérité, perception) et la rareté sont faites. Reste le système pour obtenir de nouveaux personnages.
+- Savoir et perception : elles n'ont pas d'effet pour le moment, elles seront utilisées plus tard.
+- Équipement : armes, armures et bijoux, dans les emplacements déjà prévus sur la fiche du personnage.
+- Modèles et animations : remplacer le modèle rough par des modèles plus complets, puis ajuster la vitesse de marche et le moment du coup (`walkSpeed`, `walkAnimationSpeed`, `hitDelay` dans `piece.ts`).
 - Application : transformer le jeu en application, même s'il roule dans un navigateur pour le moment. Le bouton Quit Game du menu Setting fermera alors l'application (il est désactivé d'ici là).
 - Système de classes : au niveau X, le héros se voit proposer un choix de trois classes, selon ses statistiques.
 
