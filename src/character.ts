@@ -8,6 +8,7 @@ export interface Equipment {
 }
 
 export interface Character {
+    id: string,
     entity: string,
     rarity: Rarity,
     characterClass?: string,
@@ -15,7 +16,12 @@ export interface Character {
     stats: Stats,
     level: number,
     experience: number,
+    statPoints: number,
     equipment: Equipment,
+}
+
+export function createId() {
+    return Math.random().toString(36).slice(2) + Date.now().toString(36)
 }
 
 export const rarityChances: Record<Rarity, number> = {
@@ -36,11 +42,13 @@ export function rollRarity(random = Math.random): Rarity {
 
 export function createCharacter(entity: string, rarity: Rarity): Character {
     return {
+        id: createId(),
         entity,
         rarity,
         stats: rollStats(rarityBudget[rarity]),
         level: 1,
         experience: 0,
+        statPoints: 0,
         equipment: {},
     }
 }
@@ -55,6 +63,7 @@ export function createHero(entity: string, rarity = rollRarity(), random = Math.
         weights[talent] = (weights[talent] ?? 1) + talentWeight
     }
     return {
+        id: createId(),
         entity,
         rarity,
         characterClass,
@@ -62,6 +71,7 @@ export function createHero(entity: string, rarity = rollRarity(), random = Math.
         stats: rollStats(rarityBudget[rarity], weights, random),
         level: 1,
         experience: 0,
+        statPoints: 0,
         equipment: {},
     }
 }

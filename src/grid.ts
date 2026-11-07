@@ -44,6 +44,7 @@ export class Grid {
         piece.obj.position.set(grid_pos.x - this.gridsize / 2 + .5, piece.offset, grid_pos.y - this.gridsize / 2 + .5);
         this.scene.add(piece.obj);
         this.cells[index] = piece;
+        return piece
     }
 
 
@@ -72,6 +73,8 @@ export class Grid {
     removeDead() {
         for (const [index, cell] of Object.entries(this.cells)) {
             if (cell instanceof Piece && cell.healt <= 0) {
+                if (cell.lastAttacker && cell.lastAttacker.player !== cell.player)
+                    cell.lastAttacker.kills++
                 this.cells[index] = true
                 this.dying.push(cell)
                 cell.die().then(() => {

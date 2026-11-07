@@ -18,7 +18,7 @@ export function physicalAttack(name: string, cost: number): Action {
         action(_game, target, user) {
             if (!target || !user)
                 return
-            target.takeDamage(1 + Math.floor(user.stats.strength / 2), "physical")
+            target.takeDamage(1 + Math.floor(user.stats.strength / 2), "physical", user)
         },
     }
 }
@@ -31,7 +31,7 @@ export function magicalAttack(name: string, cost: number): Action {
         action(_game, target, user) {
             if (!target || !user)
                 return
-            target.takeDamage(2 + user.stats.intelligence, "magic")
+            target.takeDamage(2 + user.stats.intelligence, "magic", user)
         },
     }
 }
