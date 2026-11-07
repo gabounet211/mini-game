@@ -20,8 +20,8 @@ characterGltf.scene.scale.setScalar(0.4)
 characterGltf.scene.position.x = -0.12 * 0.4
 characterModel.add(characterGltf.scene)
 
-const heroModel = { obj: characterModel, animations: characterGltf.animations, color: 0x4f7fe0 }
-const goblinModel = { obj: characterModel, animations: characterGltf.animations, color: 0x5fa040 }
+const heroModel = { obj: characterModel, offset: 0, animations: characterGltf.animations, color: 0x4f7fe0 }
+const goblinModel = { obj: characterModel, offset: 0, animations: characterGltf.animations, color: 0x5fa040 }
 
 export const levels = new Levels({
     map1: gltf.scenes.find(d => d.name == '1Map')!
