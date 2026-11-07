@@ -3,7 +3,8 @@ import { Action } from "./action";
 import { AiBehavior } from "./aiBehavior";
 import { DamageKind, damageReduction, deriveAttributes, Rarity, rarityBudget, rollStats, Stats } from "./stats";
 
-const walkSpeed = 2.5
+const walkSpeed = 1.5
+const walkAnimationSpeed = 2
 
 export interface PieceConfig {
     obj: Object3D,
@@ -70,7 +71,7 @@ export class Piece {
         this.currentHealt = value
     }
 
-    play(name: string) {
+    play(name: string, timeScale = 1) {
         const clip = this.config.animations?.find(animation => animation.name.toLowerCase() === name)
         if (!clip)
             return
@@ -78,13 +79,13 @@ export class Piece {
         if (action === this.currentAction)
             return
         this.currentAction?.fadeOut(0.2)
-        action.reset().fadeIn(0.2).play()
+        action.reset().setEffectiveTimeScale(timeScale).fadeIn(0.2).play()
         this.currentAction = action
     }
 
     walk(path: Vector3[]) {
         this.path = path
-        this.play('walk')
+        this.play('walk', walkAnimationSpeed)
     }
 
     update(delta: number) {
