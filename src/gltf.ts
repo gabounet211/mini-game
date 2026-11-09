@@ -96,6 +96,7 @@ levels.createLevel("level1", {
     entities: [
         [15, 29, "goblinTank"],
         [15, 28, "goblinCleric"],
+        [13, 28, "goblinFigther"],
     ]
 })
 
@@ -108,6 +109,7 @@ levels.createLevel("level2", {
         [13, 28, "goblinFigther"],
         [15, 29, "goblinTank"],
         [17, 29, "goblinArcher"],
+        [17, 28, "goblinFigther"],
     ]
 })
 
@@ -121,6 +123,7 @@ levels.createLevel("level3", {
         [15, 28, "goblinTank"],
         [17, 28, "goblinFigther"],
         [15, 29, "goblinCleric"],
+        [12, 29, "goblinArcher"],
     ]
 })
 
@@ -135,6 +138,7 @@ levels.createLevel("level4", {
         [18, 27, "goblinFigther"],
         [13, 29, "goblinArcher"],
         [17, 29, "goblinArcher"],
+        [15, 29, "goblinCleric"],
     ]
 })
 
@@ -150,5 +154,7 @@ levels.createLevel("level5", {
         [17, 27, "goblinTank"],
         [12, 29, "goblinArcher"],
         [18, 29, "goblinCleric"],
+        [11, 27, "goblinFigther"],
+        [19, 27, "goblinFigther"],
     ]
 })
