@@ -5,6 +5,8 @@ import { EndCondition } from "./endCondition";
 
 export interface Level<M extends Record<string, Group>, E extends Record<string, PieceConfig>> {
     title: string,
+    chapter: string,
+    finale?: boolean,
     map: keyof M,
     startCells: [x: number, y: number][]
     entities: [x: number, y: number, entity: keyof E, player?: boolean][]
