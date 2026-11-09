@@ -8,19 +8,27 @@ export interface SaveData {
     roster: Character[],
     summons: number,
     inventory: string[],
+    unlockedLevels: number,
 }
 
 export function loadSave(): SaveData {
     try {
         const data = JSON.parse(localStorage.getItem(saveKey) ?? "null")
         if (data?.version === saveVersion && Array.isArray(data.roster)) {
-            const roster: Character[] = data.roster.map((character: Character) => ({ ...character, id: character.id ?? createId(), statPoints: character.statPoints ?? 0 }))
-            return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [] }
+            const roster: Character[] = data.roster.map((character: Character) => ({
+                ...character,
+                id: character.id ?? createId(),
+                statPoints: character.statPoints ?? 0,
+                finaleAttempts: character.finaleAttempts ?? [],
+                championsDefeated: character.championsDefeated ?? [],
+                classChanges: character.classChanges ?? [],
+            }))
+            return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [], unlockedLevels: data.unlockedLevels ?? 1 }
         }
     } catch (error) {
         console.warn("Save could not be loaded", error)
     }
-    return { roster: [], summons: 0, inventory: [] }
+    return { roster: [], summons: 0, inventory: [], unlockedLevels: 1 }
 }
 
 export function loadOrCreateSave(): SaveData {

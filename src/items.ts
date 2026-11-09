@@ -21,6 +21,16 @@ export const items: Record<string, Item> = {
     luckyCharm: { name: "Lucky Charm", slot: "jewelry", bonuses: { perception: 2 } },
 }
 
+export const classChangeItems: Record<string, { name: string }> = {
+    bloodTotem: { name: "Blood Totem" },
+    elementalCore: { name: "Elemental Core" },
+    holyRelic: { name: "Holy Relic" },
+}
+
+export function itemName(key: string) {
+    return items[key]?.name ?? classChangeItems[key]?.name ?? key
+}
+
 export const itemSlots: ItemSlot[] = ["weapon", "armor", "jewelry"]
 
 export function equipmentBonuses(character: Character) {

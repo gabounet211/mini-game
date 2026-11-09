@@ -6,7 +6,7 @@ import { Selector } from "./selector";
 import { CameraControle } from "./cameraControle";
 import { Character, createCharacter } from "./character";
 import { Piece } from "./piece";
-import { grantVictoryRewards } from "./rewards";
+import { grantDefeatResults, grantVictoryRewards } from "./rewards";
 import { allEnemiesDefeated, allHeroesDefeated, EndCondition } from "./endCondition";
 
 const STATE = {
@@ -25,6 +25,7 @@ export class GameLogic {
     defeat: EndCondition
     heroes: Piece[] = []
     rewards: string[] = []
+    levelKey: string
 
 
     constructor(
@@ -33,6 +34,7 @@ export class GameLogic {
         team: Character[],
         levelKey: string,
     ) {
+        this.levelKey = levelKey
         const desLevel1 = levels.getLevel(levelKey)
         this.grid = new Grid(levels.maps[desLevel1.map])
         this.victory = desLevel1.victory ?? allEnemiesDefeated
@@ -55,11 +57,13 @@ export class GameLogic {
     checkEnd() {
         if (this.state !== "PlayerTurn" && this.state !== "AiTurn")
             return
-        if (this.defeat(this.grid))
+        if (this.defeat(this.grid)) {
             this.state = "Defeat"
+            grantDefeatResults(this.heroes, this.levelKey)
+        }
         else if (this.victory(this.grid)) {
             this.state = "Victory"
-            this.rewards = grantVictoryRewards(this.heroes)
+            this.rewards = grantVictoryRewards(this.heroes, this.levelKey)
         }
     }
 
