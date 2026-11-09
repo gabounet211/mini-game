@@ -32,6 +32,15 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 - Un héros commun peut monter jusqu'au palier des classes légendaires de départ (palier 3, plafond à revoir). Un légendaire commence à ce palier et a donc accès plus tôt aux classes uniques.
 - Lien avec les nations : certaines classes sont plus présentes dans certaines nations (plus de chevaliers dans la nation bleue, etc.), mais les classes communes et certaines rares existent dans plusieurs nations, pour ne pas priver un joueur d'un type de classe. À approfondir plus tard.
 
+### Chapitres et changement de classe
+
+- Les niveaux sont regroupés en chapitres de 5 niveaux à histoire continue, avec le même type de monstres (ex. chapitre gobelin : peu de gobelins au début, puis plus de gobelins et des gobelins plus forts, et un gobelin champion au niveau 5). De nouveaux types de gobelins seront ajoutés avec les prochains niveaux.
+- Les niveaux se débloquent un à un et restent débloqués : on peut y emmener n'importe quel héros (ex. un héros niveau 1 dans le niveau 4). Les niveaux 1 à 4 se rejouent librement, ce qui permet aux héros arrivés plus tard de rattraper l'XP (en plus de la future zone de transfert d'XP).
+- Niveau 5 (fin de chapitre) : chaque héros n'a qu'un seul essai contre le champion. Le changement de classe se gagne héros par héros : une deuxième équipe peut faire le niveau 5 à son tour, et un héros trop fort ne peut pas tuer le champion à répétition pendant que les autres attendent.
+- Changement de classe : double condition, le héros doit avoir atteint le niveau X et avoir participé au combat contre le champion de fin de chapitre. Seuls les héros qui ont participé y ont droit.
+- Choix proposés : des classes accessibles avec peu de stats (pour ne bloquer personne qui a eu de mauvaises stats de départ) et des classes aux conditions plus dures (pour récompenser les joueurs qui investissent leurs points de façon créative).
+- Légendaires : leur changement de classe passe par un objet spécifique (ex. un cleric avec un objet sacré devient un saint).
+
 ### Plan du lobby
 
 Le lobby est une zone hors combat pour gérer l'équipement des personnages, choisir les personnages qu'on apporte, faire monter les personnages de niveau et choisir le niveau. Ordre prévu, en petits changements :
@@ -54,4 +63,7 @@ L'explication de l'univers du jeu est dans `Univers.md`.
 
 ## Questions ouvertes
 
-(à remplir au fur et à mesure)
+- Essai unique au niveau 5 : en cas de défaite, les héros perdent-ils leur chance pour de bon ? Faut-il avoir gagné contre le champion, ou seulement participé ?
+- Valeur de X pour le changement de classe (proposition : 4, atteint par une équipe de 4 héros équilibrée à la fin du chapitre sans rejouer).
+- Objets de changement de classe des légendaires : comment s'obtiennent-ils (butin du champion ?) et un légendaire doit-il aussi remplir les deux conditions ?
+- Liste des classes du palier 2 (pour les communs) et du palier 3 (pour les rares), avec leurs conditions de stats.
