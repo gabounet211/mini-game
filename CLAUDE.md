@@ -40,6 +40,12 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 - Changement de classe : double condition, le héros doit avoir atteint le niveau X (X = 4 pour le moment, à revoir avec l'équilibrage de l'XP) et avoir participé au combat contre le champion de fin de chapitre. Seuls les héros qui ont participé y ont droit.
 - Choix proposés : des classes accessibles avec peu de stats (pour ne bloquer personne qui a eu de mauvaises stats de départ) et des classes aux conditions plus dures (pour récompenser les joueurs qui investissent leurs points de façon créative).
 - Légendaires : leur changement de classe passe par un objet spécifique (ex. un cleric avec un objet sacré devient un saint).
+- Défaite au niveau 5 : les héros emmenés ne peuvent pas refaire le niveau et perdent leur chance de changer de classe pour ce chapitre. La fin du chapitre suivant leur donnera une nouvelle chance. Il faut donc gagner contre le champion.
+- Objet légendaire : le champion laisse obligatoirement tomber l'objet de changement de classe si un héros légendaire participe au combat. Le légendaire doit aussi remplir les deux autres conditions (niveau X et victoire contre le champion).
+- Liste des classes validée pour une première version testable (noms en anglais, seuils à faire tester). Chaque branche correspond à la stat la plus haute, avec une classe facile et une classe exigeante (minimum dans une autre stat) :
+  - palier 2 (pour les communs) : Soldier / Mercenary, Guard / Shieldbearer, Brawler / Warden, Healer / Exorcist, Scholar / Alchemist, Apprentice / Mageblade, Scout / Duelist, Tracker / Sharpshooter ;
+  - palier 3 (pour les rares) : Berserker / Warlord, Knight / Paladin, Juggernaut / Gladiator, Cleric / Inquisitor, Sage / Runesmith, Elementalist / Spellblade, Ranger / Assassin, Marksman / Beastmaster.
+- Des classes et des conditions pourront être ajoutées ou retirées plus tard.
 
 ### Plan du lobby
 
@@ -63,6 +69,5 @@ L'explication de l'univers du jeu est dans `Univers.md`.
 
 ## Questions ouvertes
 
-- Essai unique au niveau 5 : en cas de défaite, les héros perdent-ils leur chance pour de bon ? Faut-il avoir gagné contre le champion, ou seulement participé ?
-- Objets de changement de classe des légendaires : comment s'obtiennent-ils (butin du champion ?) et un légendaire doit-il aussi remplir les deux conditions ?
-- Liste des classes du palier 2 (pour les communs) et du palier 3 (pour les rares), avec leurs conditions de stats.
+(à remplir au fur et à mesure)
+

@@ -1,9 +1,9 @@
 import { Character, createHero } from "./character"
-import { characterClasses } from "./characterClass"
+import { applyClassChange, canChangeClass, characterClasses, classChangeOffers } from "./characterClass"
 import { levels } from "./gltf"
 import { deriveAttributes, Stats } from "./stats"
 import { experienceToNextLevel } from "./rewards"
-import { equipmentBonuses, equippedStats, items, itemSlots, ItemSlot } from "./items"
+import { equipmentBonuses, equippedStats, itemName, items, itemSlots, ItemSlot } from "./items"
 import { SaveData, writeSave } from "./save"
 
 export class Lobby {
@@ -17,9 +17,14 @@ export class Lobby {
         this.element.id = 'lobby'
         this.details.id = 'heroWindow'
         document.body.append(this.element, this.details)
-        for (const character of save.roster.slice(0, this.teamLimit()))
+        for (const character of save.roster.filter(character => this.canBring(character)).slice(0, this.teamLimit()))
             this.team.add(character)
         this.render()
+    }
+
+    private canBring(character: Character) {
+        const level = levels.getLevel(this.levelKey)
+        return !level.finale || !character.finaleAttempts.includes(level.chapter)
     }
 
     private teamLimit() {
@@ -35,7 +40,7 @@ export class Lobby {
         levelRow.className = 'lobbyRow'
         levelRow.textContent = 'Level'
         const levelSelect = document.createElement('select')
-        for (const key of levels.keys()) {
+        for (const key of levels.keys().slice(0, this.save.unlockedLevels)) {
             const option = document.createElement('option')
             option.value = key
             option.textContent = levels.getLevel(key).title
@@ -44,6 +49,9 @@ export class Lobby {
         }
         levelSelect.addEventListener('change', () => {
             this.levelKey = levelSelect.value
+            for (const character of [...this.team])
+                if (!this.canBring(character))
+                    this.team.delete(character)
             this.render()
         })
         levelRow.append(levelSelect)
@@ -58,7 +66,7 @@ export class Lobby {
         summonRow.append(summonButton)
 
         const inventoryInfo = document.createElement('div')
-        inventoryInfo.textContent = 'Inventory: ' + (this.save.inventory.map(key => items[key]?.name ?? key).join(', ') || 'empty')
+        inventoryInfo.textContent = 'Inventory: ' + (this.save.inventory.map(key => itemName(key)).join(', ') || 'empty')
 
         const teamInfo = document.createElement('div')
         teamInfo.textContent = 'Team: ' + this.team.size + '/' + this.teamLimit()
@@ -87,7 +95,7 @@ export class Lobby {
         const checkbox = document.createElement('input')
         checkbox.type = 'checkbox'
         checkbox.checked = this.team.has(character)
-        checkbox.disabled = !checkbox.checked && this.team.size >= this.teamLimit()
+        checkbox.disabled = !this.canBring(character) || (!checkbox.checked && this.team.size >= this.teamLimit())
         checkbox.addEventListener('change', () => {
             if (checkbox.checked)
                 this.team.add(character)
@@ -107,6 +115,8 @@ export class Lobby {
         details.textContent = 'HP ' + attributes.maxHealt + ' · AP ' + attributes.maxActionPoints + ' · Ms ' + attributes.moveRange
             + (character.talent ? ' · Talent: ' + character.talent.charAt(0).toUpperCase() + character.talent.slice(1) : '')
             + (character.statPoints ? ' · ' + character.statPoints + ' points to spend' : '')
+            + (canChangeClass(character) ? ' · Class change ready!' : '')
+            + (this.canBring(character) ? '' : ' · Already faced the champion')
         info.append(name, details)
         info.addEventListener('click', () => this.showDetails(character))
 
@@ -154,8 +164,36 @@ export class Lobby {
             this.createStatsSection(character),
             this.createEquipmentSection(character),
             this.createSection('Actions', (characterClass?.actions ?? []).map(action => [this.formatName(action.name), action.cost + ' AP'])),
+            ...this.createClassChangeSection(character),
             closeButton,
         )
+    }
+
+    private createClassChangeSection(character: Character) {
+        if (!canChangeClass(character))
+            return []
+        const section = this.createSection('Class change', [])
+        const offers = classChangeOffers(character, this.save.inventory)
+        if (!offers.length) {
+            const text = document.createElement('div')
+            text.textContent = character.rarity === "legendary" ? 'A special item is needed to change class.' : 'No class available.'
+            section.append(text)
+        }
+        for (const key of offers) {
+            const characterClass = characterClasses[key]
+            const button = document.createElement('button')
+            const minimums = Object.entries(characterClass.requirement?.minimums ?? {}).map(([stat, value]) => this.formatName(stat) + ' ' + value)
+            button.textContent = 'Become ' + characterClass.name + (minimums.length ? ' (' + minimums.join(', ') + ')' : '')
+            button.addEventListener('click', () => {
+                if (!applyClassChange(character, key, this.save.inventory))
+                    return
+                writeSave(this.save)
+                this.render()
+                this.showDetails(character)
+            })
+            section.append(button)
+        }
+        return [section]
     }
 
     private createStatsSection(character: Character) {

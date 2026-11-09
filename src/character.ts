@@ -18,6 +18,9 @@ export interface Character {
     experience: number,
     statPoints: number,
     equipment: Equipment,
+    finaleAttempts: string[],
+    championsDefeated: string[],
+    classChanges: string[],
 }
 
 export function createId() {
@@ -50,11 +53,14 @@ export function createCharacter(entity: string, rarity: Rarity): Character {
         experience: 0,
         statPoints: 0,
         equipment: {},
+        finaleAttempts: [],
+        championsDefeated: [],
+        classChanges: [],
     }
 }
 
 export function createHero(entity: string, rarity = rollRarity(), random = Math.random): Character {
-    const choices = Object.keys(characterClasses).filter(key => characterClasses[key].tier === rarityTier[rarity])
+    const choices = Object.keys(characterClasses).filter(key => characterClasses[key].starting && characterClasses[key].tier === rarityTier[rarity])
     const characterClass = choices[Math.floor(random() * choices.length)]
     const weights: StatWeights = { ...characterClasses[characterClass].statWeights }
     let talent: keyof Stats | undefined
@@ -73,5 +79,8 @@ export function createHero(entity: string, rarity = rollRarity(), random = Math.
         experience: 0,
         statPoints: 0,
         equipment: {},
+        finaleAttempts: [],
+        championsDefeated: [],
+        classChanges: [],
     }
 }
