@@ -7,6 +7,7 @@ import { levels } from "./gltf"
 
 export const killExperience = 6
 export const victoryExperience = 3
+export const championExperience = 10
 export const statPointsPerLevel = 2
 export const summonRewardChance = 0.25
 export const lootChance = 0.5
@@ -65,7 +66,7 @@ export function grantVictoryRewards(heroes: Piece[], levelKey: string) {
             save.inventory.push(classItem)
             lines.push('The champion dropped: ' + itemName(classItem))
         }
-        const amount = victoryExperience + hero.kills * killExperience
+        const amount = victoryExperience + hero.kills * killExperience + (levels.getLevel(levelKey).finale ? championExperience : 0)
         const levelsGained = addExperience(character, amount)
         const name = character.characterClass ? characterClasses[character.characterClass].name : character.entity
         lines.push(name + ': +' + amount + ' XP' + (levelsGained ? ' - Level up! (Level ' + character.level + ')' : ''))
