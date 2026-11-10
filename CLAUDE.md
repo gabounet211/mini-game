@@ -47,6 +47,15 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
   - palier 3 (pour les rares) : Berserker / Warlord, Knight / Paladin, Juggernaut / Gladiator, Cleric / Inquisitor, Sage / Runesmith, Elementalist / Spellblade, Ranger / Assassin, Marksman / Beastmaster.
 - Des classes et des conditions pourront être ajoutées ou retirées plus tard.
 
+### Chapitres prévus et ennemis
+
+- Chapitre 1 (gobelins), nouvelle répartition des gobelins :
+  - jeunes gobelins : gobelins de rareté commune ;
+  - gobelins adultes : archers et guerriers ;
+  - chef gobelin : un mage. C'est le seul gobelin avec une petite stratégie : il attaque le personnage qui a le moins de HP dans sa portée, et il cherche à rester derrière ses gobelins.
+- Chapitre 2 : contre des bandits de l'Empire. Le champion est un ancien commandant de l'Empire devenu chef du groupe de bandits.
+- L'histoire de chaque classe (ce qu'elle faisait avant le jeu et sa nation) est dans `Univers.md`, section « Les classes ».
+
 ### Plan du lobby
 
 Le lobby est une zone hors combat pour gérer l'équipement des personnages, choisir les personnages qu'on apporte, faire monter les personnages de niveau et choisir le niveau. Ordre prévu, en petits changements :
