@@ -54,7 +54,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
   - gobelins adultes : archers et guerriers, de rareté rare (plus de stats) ;
   - chef gobelin : un mage, chef de la tribu que les joueurs affrontent pendant tout le chapitre. Il remplace le Goblin Champion au niveau 5. C'est le seul gobelin avec une petite stratégie : il attaque le personnage qui a le moins de HP dans sa portée, et il cherche à rester derrière ses gobelins. Quand aucun personnage n'est à sa portée, il se rapproche.
 - Chapitre 2 : contre des bandits de l'Empire. Le champion est un ancien commandant de l'Empire devenu chef du groupe de bandits.
-- L'histoire de chaque classe (ce qu'elle faisait avant le jeu et sa nation) est dans `Univers.md`, section « Les classes ».
+- L'histoire de chaque classe (ce qu'elle faisait avant le jeu et sa nation) est dans la Bible de l'univers, onglet Classes (lien dans `Univers.md`).
 
 ### Plan du lobby
 
@@ -67,7 +67,7 @@ Le lobby est une zone hors combat pour gérer l'équipement des personnages, cho
 5. L'expérience et la montée de niveau, qui préparent le choix de classe au niveau X.
 6. L'équipement, qui modifie les stats, géré dans le lobby.
 
-L'explication de l'univers du jeu est dans `Univers.md`.
+L'univers du jeu est dans la Bible de l'univers, la référence unique partagée avec les autres projets : https://claude.ai/artifact/5DQAoGp56bztgddjvBzBYv (lien aussi dans `Univers.md`).
 
 ## Règles de programmation
 
