@@ -105,8 +105,11 @@ Ce que chaque classe faisait avant le jeu, et où on la trouve. Les « 4 région
 ## Les dieux
 
 - 30 sous-dieux.
-- Influence négligeable sur l'univers (susceptible de changer : l'auteur y réfléchit encore).
+- Les « dieux » sont en fait d'anciens habitants du monde. Ils avaient tellement de pouvoir et une telle compréhension des fondements de la magie que leur pouvoir était trop grand pour être contenu dans le monde.
+- Ils ont causé beaucoup de catastrophes : la création des différents types de monstres, la forme du Royaume des chevaliers, et d'autres.
+- Ils ont été emprisonnés dans un univers de poche (« pocket universe »). Le savoir de cette époque est en grande partie perdu.
 - Ils ont perdu la possibilité de se matérialiser, que ce soit par un avatar ou par eux-mêmes.
+- Depuis leur prison, ils peuvent converser avec leurs croyants et intervenir un peu, mais ils ne peuvent pas leur expliquer que les forces du monde sont en fait gouvernées par la simple volonté et le savoir.
 - Ancêtres des races et des peuples du continent.
 
 ## Histoire globale
@@ -155,5 +158,4 @@ Basically, des objets dans lesquels on a pu obtenir une volonté ou une intellig
 ## Questions ouvertes
 
 - Autres continents : l'espace vide dans le texte original était prévu pour d'autres continents. Pas sûr qu'il y en ait pour le moment.
-- Influence des dieux : à redéfinir plus tard.
 - Nom du Gabounathium : à trouver.
