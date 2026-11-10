@@ -16,7 +16,6 @@ const goblinBehavior = createBehavior({
 const loader = new GLTFLoader();
 
 export const gltf = await loader.loadAsync(asset)
-console.log(gltf.scenes)
 
 const characterGltf = await loader.loadAsync(characterAsset)
 const characterModel = new Group()

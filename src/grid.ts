@@ -30,7 +30,6 @@ export class Grid {
                     this.cells[x + ',' + y] = true
             }
         }
-        console.log(this.cells)
     }
 
     add(pieceConfig: PieceConfig, character: Character, grid_pos: Vector2, player = false) {
@@ -257,7 +256,6 @@ export class Grid {
         const that = this;
 
         let cnt = 500;
-        console.time("flood");
         while (cellsToVisit.length && --cnt > 0) {
             const cur = cellsToVisit.reverse().pop()!
 
@@ -266,8 +264,6 @@ export class Grid {
             testValide(new Vector2(cur[0].x, cur[0].y + 1), cur[1] + 1);
             testValide(new Vector2(cur[0].x, cur[0].y - 1), cur[1] + 1);
         }
-        console.timeEnd("flood");
-        console.log(cnt);
 
         function testValide(pos: Vector2, howManyStep: number) {
             if (howManyStep > moveRange)
