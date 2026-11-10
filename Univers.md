@@ -50,7 +50,7 @@ Un continent avec cinq territoires, un par grande puissance :
 
 ## Les classes
 
-Ce que chaque classe faisait avant le jeu, et où on la trouve. Noms des nations : le Royaume (des chevaliers, bleu clair), le territoire vert, l'Empire (orange), le territoire des marchands (bleu) et le territoire des monstres (or). La liste des classes et leurs règles de jeu sont dans `CLAUDE.md`.
+Ce que chaque classe faisait avant le jeu, et où on la trouve. Les « 4 régions principales » sont les quatre territoires sans celui des monstres. Noms des nations : le Royaume (des chevaliers, bleu clair), le territoire vert, l'Empire (orange), le territoire des marchands (bleu) et le territoire des monstres (or). La liste des classes et leurs règles de jeu sont dans `CLAUDE.md`.
 
 ### Palier 1 : communs
 
