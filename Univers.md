@@ -110,7 +110,7 @@ Ce que chaque classe faisait avant le jeu, et où on la trouve. Les « 4 région
 - Ils ont été emprisonnés dans un univers de poche (« pocket universe »). Le savoir de cette époque est en grande partie perdu.
 - Ils ont perdu la possibilité de se matérialiser, que ce soit par un avatar ou par eux-mêmes.
 - Depuis leur prison, ils peuvent converser avec leurs croyants et intervenir un peu, mais ils ne peuvent pas leur expliquer que les forces du monde sont en fait gouvernées par la simple volonté et le savoir.
-- Ancêtres des races et des peuples du continent.
+- Ancêtres des races et des peuples du continent : humains, elfes, nains et beastmen. Les traits de chaque race viennent de leurs ancêtres : leur compréhension et leur volonté étaient si grandes qu'elles se sont représentées dans leurs caractéristiques physiques.
 
 ## Histoire globale
 
