@@ -81,7 +81,7 @@ Ce que chaque classe faisait avant le jeu, et où on la trouve. Les « 4 région
 
 - **Berserker** (Empire) : les unités spéciales des nobles de l'Empire. On dit qu'un noble n'est respecté que lorsqu'il en a au moins un.
 - **Elementalist** (territoire vert) : des mages qui ont abandonné les écoles pour apprendre leur magie dans des lieux naturels à la vieille histoire. Ils veillent sur l'équilibre des forces de leur territoire.
-- **Cleric** : pas encore de description.
+- **Cleric** : présents dans les églises réparties dans les différentes régions principales du monde, ils répandent la parole et les règles de leur propre dieu.
 - **Knight** (Royaume) : la force principale d'un noble du Royaume. Certains nobles en sont eux-mêmes. Ils consacrent leur vie au bien public et à la protection des plus faibles.
 - **Juggernaut** : ils passent de territoire en territoire entre le territoire des monstres et celui des marchands. Ils sont la raison pour laquelle les marchands ont réussi à protéger leur territoire si longtemps contre l'invasion des monstres.
 - **Sage** (territoire vert) : les mages qui n'ont jamais abandonné les écoles. Ils se sentent obligés de faire avancer la compréhension de la magie et de partager leur savoir avec les plus jeunes générations.
