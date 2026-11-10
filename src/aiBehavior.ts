@@ -59,6 +59,64 @@ export function nearestTarget(piece: Piece, candidates: Piece[], game: Game) {
     return best
 }
 
+export function weakestInRange(piece: Piece, candidates: Piece[], game: Game) {
+    const from = game.gameLogic.grid.getPosition(piece)
+    const inRange = from ? candidates.filter(candidate => canAttackFrom(piece, from, candidate, game)) : []
+    if (!inRange.length)
+        return nearestTarget(piece, candidates, game)
+    return inRange.reduce((weakest, candidate) => candidate.healt < weakest.healt ? candidate : weakest)
+}
+
+function distanceToEnemies(piece: Piece, game: Game) {
+    const grid = game.gameLogic.grid
+    const maps = grid.getPieces(!piece.player)
+        .map(enemy => grid.getPosition(enemy))
+        .filter((pos): pos is Vector2 => !!pos)
+        .map(pos => grid.distanceMap(pos))
+    return (cell: Vector2) => Math.min(...maps.map(map => map.get(cell) ?? 500))
+}
+
+export function stayBehindAllies(piece: Piece, target: Piece, game: Game) {
+    const grid = game.gameLogic.grid
+    const from = grid.getPosition(piece)
+    const targetPos = grid.getPosition(target)
+    if (!from || !targetPos || canAttackFrom(piece, from, target, game))
+        return
+    const enemyDistance = distanceToEnemies(piece, game)
+    const allyDistances = grid.getPieces(piece.player)
+        .filter(ally => ally !== piece)
+        .map(ally => grid.getPosition(ally))
+        .filter((pos): pos is Vector2 => !!pos)
+        .map(pos => enemyDistance(pos))
+    const frontLine = allyDistances.length ? Math.min(...allyDistances) : 0
+    const targetDistances = grid.distanceMap(targetPos)
+
+    let attackCell: Vector2 | undefined
+    let attackScore = -Infinity
+    let safeCell: Vector2 | undefined
+    let safeScore = Infinity
+    grid.floodFill(from, piece.moveRange).forEach((x, y, reachable) => {
+        if (!reachable)
+            return
+        const cell = new Vector2(x, y)
+        const distance = enemyDistance(cell)
+        if (canAttackFrom(piece, cell, target, game)) {
+            const score = distance - Grid.manathanDistance(from, cell) / 100
+            if (score > attackScore) {
+                attackCell = cell
+                attackScore = score
+            }
+        } else if (distance > frontLine) {
+            const score = (targetDistances.get(cell) ?? 500) + Grid.manathanDistance(cell, targetPos) / 100
+            if (score < safeScore) {
+                safeCell = cell
+                safeScore = score
+            }
+        }
+    })
+    return attackCell ?? safeCell ?? approachTarget(piece, target, game)
+}
+
 export function approachTarget(piece: Piece, target: Piece, game: Game) {
     const grid = game.gameLogic.grid
     const from = grid.getPosition(piece)
