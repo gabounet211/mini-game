@@ -94,7 +94,7 @@ export class Ui {
             return
         this.sheetName.textContent = piece.name + ' (' + piece.character.rarity + ')'
         this.sheetDetails.replaceChildren(
-            this.createSection('Attributes', [...(piece.drainTurns ? [['Willpower drained', '-' + piece.willpowerDrain + ' (' + piece.drainTurns + ' turns)'] as [string, string]] : []), ['Level', piece.character.level], ['Talent', piece.character.talent ? this.formatName(piece.character.talent) : '-'], ['Ms', piece.moveRange], ['Range', piece.attackRange]]),
+            this.createSection('Attributes', [...(piece.drainTurns ? [['Willpower drained', '-' + piece.willpowerDrain + ' (' + piece.drainTurns + ' turns)'] as [string, string]] : []), ['Level', piece.character.level], ['Talent', piece.character.talent ? this.formatName(piece.character.talent) : '-'], ['Ms', piece.movePoints + ' / ' + piece.moveRange], ['Range', piece.attackRange]]),
             this.createSection('Stats', Object.entries(piece.stats).map(([name, value]) => [this.formatName(name), value])),
             this.createSection('Equipment', [['Weapon', items[piece.character.equipment.weapon ?? '']?.name ?? '-'], ['Armor', items[piece.character.equipment.armor ?? '']?.name ?? '-'], ['Jewelry', items[piece.character.equipment.jewelry ?? '']?.name ?? '-']]),
             this.createSection('Actions', [...(piece.inspiresAllies ? [['Inspire allies', '+1 damage'] as [string, string]] : []), ...piece.actions.map(action => [this.formatName(action.name), action.cost + ' AP'] as [string, string])]),

@@ -99,6 +99,7 @@ export class Grid {
         currentFrom.walk(path.map(cell => new Vector3(cell.x - this.gridsize / 2 + .5, currentFrom.offset, cell.y - this.gridsize / 2 + .5)))
         this.cells[iFrom] = true;
         this.cells[iTo] = currentFrom;
+        return path.length
     }
 
     findPath(from: Vector2, to: Vector2) {

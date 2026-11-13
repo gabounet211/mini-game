@@ -79,9 +79,9 @@ export class Selector {
             } else if (this.selected) {//We move
 
                 if (this.selectedMov?.get(this.grid_pos)) {
-                    this.gameLogic.grid.move(this.selectedPos, this.grid_pos)
-                    this.selected.hasMoved = true
-                    this.unselect()
+                    const piece = this.selected
+                    piece.movePoints -= this.gameLogic.grid.move(this.selectedPos, this.grid_pos)
+                    this.select(piece, this.grid_pos.clone())
                 }
 
             } else
@@ -135,7 +135,7 @@ export class Selector {
         this.block.children.length = 0
         this.cameraControle.target.copy(this.block.position)
 
-        this.selectedMov = piece.hasMoved ? undefined : this.gameLogic.grid.floodFill(this.selectedPos, piece.moveRange);
+        this.selectedMov = piece.movePoints > 0 ? this.gameLogic.grid.floodFill(this.selectedPos, piece.movePoints) : undefined;
         if (this.selectedMov)
             this.showRange(this.selectedMov, Color.NAMES.aquamarine, 0)
 

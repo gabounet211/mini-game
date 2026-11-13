@@ -80,7 +80,7 @@ export class GameLogic {
             piece.endOwnTurn()
         this.state = this.state === "PlayerTurn" ? "AiTurn" : "PlayerTurn"
         for (const piece of this.grid.getPieces(this.state === "PlayerTurn")) {
-            piece.hasMoved = false
+            piece.movePoints = piece.moveRange
             piece.actionPoints = piece.maxActionPoints
         }
     }
