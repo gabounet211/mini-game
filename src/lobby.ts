@@ -163,7 +163,7 @@ export class Lobby {
             this.createSection('Attributes', [['HP', attributes.maxHealt], ['AP', attributes.maxActionPoints], ['Ms', attributes.moveRange], ['Range', characterClass?.attackRange ?? '-']]),
             this.createStatsSection(character),
             this.createEquipmentSection(character),
-            this.createSection('Actions', (characterClass?.actions ?? []).map(action => [this.formatName(action.name), action.cost + ' AP'])),
+            this.createSection('Actions', [...(characterClass?.inspiresAllies ? [['Inspire allies', '+1 damage'] as [string, string]] : []), ...(characterClass?.actions ?? []).map(action => [this.formatName(action.name), action.cost + ' AP'] as [string, string])]),
             ...this.createClassChangeSection(character),
             closeButton,
         )

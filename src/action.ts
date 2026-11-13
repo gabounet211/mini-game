@@ -10,15 +10,25 @@ export interface Action{
     targets? : "enemy" | "ally"
 }
 
+export const moraleBonus = 1
+
+export function allyBonus(game: Game, user: Piece) {
+    const grid = game?.gameLogic?.grid
+    if (!grid)
+        return 0
+    const inspired = grid.getPieces(user.player).some(ally => ally !== user && ally.healt > 0 && ally.inspiresAllies)
+    return inspired ? moraleBonus : 0
+}
+
 export function physicalAttack(name: string, cost: number): Action {
     return {
         name,
         cost,
         needsTarget: true,
-        action(_game, target, user) {
+        action(game, target, user) {
             if (!target || !user)
                 return
-            target.takeDamage(1 + Math.floor(user.stats.strength / 2), "physical", user)
+            target.takeDamage(1 + Math.floor(user.stats.strength / 2) + allyBonus(game, user), "physical", user)
         },
     }
 }
@@ -28,10 +38,25 @@ export function magicalAttack(name: string, cost: number): Action {
         name,
         cost,
         needsTarget: true,
+        action(game, target, user) {
+            if (!target || !user)
+                return
+            target.takeDamage(2 + user.stats.intelligence + allyBonus(game, user), "magic", user)
+        },
+    }
+}
+
+export const drainDuration = 2
+
+export function willpowerDrain(name: string, cost: number): Action {
+    return {
+        name,
+        cost,
+        needsTarget: true,
         action(_game, target, user) {
             if (!target || !user)
                 return
-            target.takeDamage(2 + user.stats.intelligence, "magic", user)
+            target.drainWillpower(Math.max(1, Math.floor(user.stats.willpower / 3)), drainDuration)
         },
     }
 }

@@ -53,7 +53,11 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
   - jeunes gobelins : gobelins de rareté commune, qui remplacent les gobelins actuels (même nombre). Comme les gobelins actuels, ils attaquent le personnage le plus proche avec une attaque simple au corps à corps ;
   - gobelins adultes : archers et guerriers, de rareté rare (plus de stats) ;
   - chef gobelin : un mage, chef de la tribu que les joueurs affrontent pendant tout le chapitre. Il remplace le Goblin Champion au niveau 5. C'est le seul gobelin avec une petite stratégie : il attaque le personnage qui a le moins de HP dans sa portée, et il cherche à rester derrière ses gobelins. Quand aucun personnage n'est à sa portée, il se rapproche.
-- Chapitre 2 : contre des bandits de l'Empire. Le champion est un ancien commandant de l'Empire devenu chef du groupe de bandits.
+- Chapitre 2 : contre les bandits de Marco, un Warlord, ancien général de l'Empire (histoire dans la Bible de l'univers). Sur la carte actuelle pour le moment (une carte de plaines viendra plus tard).
+  - Les bandits utilisent les classes des héros : Brawler, Mercenary et Scout de rareté rare pour les troupes, un Berserker fidèle (mini-boss du niveau 2-4), et Marco avec deux Apprentice au niveau 2-5.
+  - Combat plus ordonné : les bandits les plus proches des héros jouent en premier. Le berserker fonce sur la cible la plus proche. Marco va au corps à corps, mais joue après ses troupes. Les apprentis restent derrière Marco et jouent en dernier.
+- Pas de deuxième changement de classe pour le moment (le système est à repenser) : un héros ne change de classe qu'une fois. Battre le champion du chapitre 2 donne quand même leur chance aux héros qui ne l'ont pas encore eue.
+- Bard (classe de départ rare) et Skald (évolution du Bard, toujours proposée à un Bard). Seul le Skald a la capacité unique : pour le moment +1 dégât sur les attaques des alliés tant qu'un Skald est en vie (ne se cumule pas, ne s'applique pas à lui-même). L'action dissonantChord du Bard ne fait pas de dégâts : elle réduit la volonté de la cible de (volonté du Bard ÷ 3, au moins 1) pendant 2 tours de la cible, sans cumul (relancer remet seulement la durée à 2).
 - L'histoire de chaque classe (ce qu'elle faisait avant le jeu et sa nation) est dans la Bible de l'univers, onglet Classes (lien dans `Univers.md`).
 
 ### Plan du lobby

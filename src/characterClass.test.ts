@@ -62,6 +62,29 @@ describe("classChangeOffers", () => {
     })
 })
 
+describe("bard and skald", () => {
+    it("always offers Skald to a bard", () => {
+        const offers = classChangeOffers(hero("bard", "rare", { strength: 9 }), [])
+        expect(offers[0]).toBe("skald")
+        expect(offers).toContain("berserker")
+    })
+})
+
+describe("one class change for now", () => {
+    it("does not offer a second class change after another champion", () => {
+        const character = hero("lumberjack", "common", { strength: 8 })
+        character.championsDefeated = ["chapter1", "chapter2"]
+        character.classChanges = ["chapter1"]
+        expect(canChangeClass(character)).toBe(false)
+    })
+
+    it("lets a hero who missed the first chapter change class after the second", () => {
+        const character = hero("lumberjack", "common", { strength: 8 })
+        character.championsDefeated = ["chapter2"]
+        expect(canChangeClass(character)).toBe(true)
+    })
+})
+
 describe("applyClassChange", () => {
     it("changes the class, uses the chapter and consumes the item", () => {
         const character = hero("cleric", "legendary", { willpower: 9 })

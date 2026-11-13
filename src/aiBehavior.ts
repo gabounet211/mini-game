@@ -18,6 +18,10 @@ export function randomInitiative() {
     return Math.random()
 }
 
+export function delayedInitiative(delay: number) {
+    return (piece: Piece, game: Game) => delay + nearestFirstInitiative(piece, game)
+}
+
 export function nearestFirstInitiative(piece: Piece, game: Game) {
     const grid = game.gameLogic.grid
     const from = grid.getPosition(piece)
@@ -76,14 +80,25 @@ function distanceToEnemies(piece: Piece, game: Game) {
     return (cell: Vector2) => Math.min(...maps.map(map => map.get(cell) ?? 500))
 }
 
+export function stayBehind(isAnchor: (ally: Piece) => boolean = () => true) {
+    return (piece: Piece, target: Piece, game: Game) => {
+        const anchors = game.gameLogic.grid.getPieces(piece.player).filter(ally => ally !== piece && isAnchor(ally))
+        return moveBehind(piece, target, game, anchors.length ? anchors : undefined)
+    }
+}
+
 export function stayBehindAllies(piece: Piece, target: Piece, game: Game) {
+    return moveBehind(piece, target, game)
+}
+
+function moveBehind(piece: Piece, target: Piece, game: Game, anchors?: Piece[]) {
     const grid = game.gameLogic.grid
     const from = grid.getPosition(piece)
     const targetPos = grid.getPosition(target)
     if (!from || !targetPos || canAttackFrom(piece, from, target, game))
         return
     const enemyDistance = distanceToEnemies(piece, game)
-    const allyDistances = grid.getPieces(piece.player)
+    const allyDistances = (anchors ?? grid.getPieces(piece.player))
         .filter(ally => ally !== piece)
         .map(ally => grid.getPosition(ally))
         .filter((pos): pos is Vector2 => !!pos)
