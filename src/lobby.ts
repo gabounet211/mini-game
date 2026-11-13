@@ -10,10 +10,12 @@ export class Lobby {
     private element = document.createElement('div')
     private details = document.createElement('div')
     private team = new Set<Character>()
-    private levelKey = levels.keys()[0]
+    private levelKey: string
     private confirmingDelete: Character | undefined
 
     constructor(private save: SaveData, private onStart: (team: Character[], levelKey: string) => void) {
+        const unlocked = levels.keys().slice(0, save.unlockedLevels)
+        this.levelKey = unlocked[unlocked.length - 1] ?? levels.keys()[0]
         this.element.id = 'lobby'
         this.details.id = 'heroWindow'
         document.body.append(this.element, this.details)
