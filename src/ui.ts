@@ -23,6 +23,8 @@ export class Ui {
     private sheetDetails = document.createElement('div')
     private inspected: Piece | undefined
     private endScreen = document.createElement('div')
+    private turnBanner = document.createElement('div')
+    private bannerTimeout: number | undefined
     private endScreenShown = false
 
     constructor(public game: Game) {
@@ -50,6 +52,9 @@ export class Ui {
 
         this.endScreen.id = 'endScreen'
         document.body.append(this.endScreen)
+
+        this.turnBanner.id = 'turnBanner'
+        document.body.append(this.turnBanner)
 
     }
 
@@ -212,6 +217,15 @@ export class Ui {
     private formatName(name: string) {
         const words = name.replace(/([A-Z])/g, ' $1').trim()
         return words.charAt(0).toUpperCase() + words.slice(1)
+    }
+
+    showBanner(text: string) {
+        this.turnBanner.textContent = text
+        this.turnBanner.classList.remove('visible')
+        void this.turnBanner.offsetWidth
+        this.turnBanner.classList.add('visible')
+        clearTimeout(this.bannerTimeout)
+        this.bannerTimeout = window.setTimeout(() => this.turnBanner.classList.remove('visible'), 1500)
     }
 
     setActionsVisible(visible: boolean) {
