@@ -5,6 +5,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 ## Idées pour le jeu
 
 - Jeu au tour par tour sur un échiquier (TypeScript, Three.js, Vite).
+- Site de test : la version de `main` est publiée automatiquement sur https://gabounet211.github.io/mini-game/ à chaque fusion (GitHub Pages). Chaque push lance aussi la vérification (types, construction, tests Vitest).
 - Portée d'attaque (`attackRange`) : elle n'a jamais été utilisée. Je veux qu'elle tienne compte de certains types d'objets bloquants (on ne peut pas passer par-dessus), sur le même principe que le déplacement des unités.
 - Système de tour : à intégrer dans le jeu. Tour camp par camp : tous les personnages d'un camp jouent dans l'ordre voulu, puis le tour passe à l'autre camp. Pendant son tour, un personnage a un déplacement gratuit (un seul par tour) et des actions qui coûtent des points d'action (PA). Les PA sont une valeur unique à chaque personnage (les personnages vont devenir des personnages à statistiques et classe aléatoires) et reviennent au maximum à chaque tour.
 - Ordre de tour des ennemis : il dépend du comportement de leur race (les gobelins jouent dans un ordre au hasard, comme une bande désorganisée). On ne peut pas traverser les cases de ses alliés : c'est voulu, pour la profondeur stratégique.
