@@ -57,7 +57,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
   - Les bandits utilisent les classes des héros : Brawler, Mercenary et Scout de rareté rare pour les troupes, un Berserker fidèle (mini-boss du niveau 2-4), et Marco avec deux Apprentice au niveau 2-5.
   - Combat plus ordonné : les bandits les plus proches des héros jouent en premier. Le berserker fonce sur la cible la plus proche. Marco va au corps à corps, mais joue après ses troupes. Les apprentis restent derrière Marco et jouent en dernier.
 - Pas de deuxième changement de classe pour le moment (le système est à repenser) : un héros ne change de classe qu'une fois. Battre le champion du chapitre 2 donne quand même leur chance aux héros qui ne l'ont pas encore eue.
-- Bard (classe de départ rare) et Skald (évolution du Bard, toujours proposée à un Bard) : capacité unique, pour le moment +1 dégât sur les attaques des alliés tant qu'un Bard ou un Skald est en vie (ne se cumule pas, ne s'applique pas à lui-même).
+- Bard (classe de départ rare) et Skald (évolution du Bard, toujours proposée à un Bard). Seul le Skald a la capacité unique : pour le moment +1 dégât sur les attaques des alliés tant qu'un Skald est en vie (ne se cumule pas, ne s'applique pas à lui-même).
 - L'histoire de chaque classe (ce qu'elle faisait avant le jeu et sa nation) est dans la Bible de l'univers, onglet Classes (lien dans `Univers.md`).
 
 ### Plan du lobby

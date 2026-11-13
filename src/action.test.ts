@@ -27,9 +27,9 @@ function setup(pieces: [x: number, y: number, piece: Piece][]) {
 }
 
 describe("allyBonus", () => {
-    it("adds 1 damage to allies of a living bard or skald", () => {
+    it("adds 1 damage to allies of a living skald", () => {
         const fighter = piece(true)
-        const bard = piece(true, "bard")
+        const bard = piece(true, "skald")
         const enemy = piece(false)
         const game = setup([[0, 0, fighter], [5, 5, bard], [0, 1, enemy]])
         expect(allyBonus(game, fighter)).toBe(1)
@@ -49,9 +49,15 @@ describe("allyBonus", () => {
         expect(allyBonus(game, fighter)).toBe(0)
     })
 
-    it("does not stack with two bards", () => {
+    it("does not stack with two skalds", () => {
         const fighter = piece(true)
-        const game = setup([[0, 0, fighter], [5, 5, piece(true, "bard")], [5, 4, piece(true, "skald")]])
+        const game = setup([[0, 0, fighter], [5, 5, piece(true, "skald")], [5, 4, piece(true, "skald")]])
         expect(allyBonus(game, fighter)).toBe(1)
+    })
+
+    it("is not given by a bard", () => {
+        const fighter = piece(true)
+        const game = setup([[0, 0, fighter], [5, 5, piece(true, "bard")]])
+        expect(allyBonus(game, fighter)).toBe(0)
     })
 })
