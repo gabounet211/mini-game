@@ -46,6 +46,21 @@ export function magicalAttack(name: string, cost: number): Action {
     }
 }
 
+export const drainDuration = 2
+
+export function willpowerDrain(name: string, cost: number): Action {
+    return {
+        name,
+        cost,
+        needsTarget: true,
+        action(_game, target, user) {
+            if (!target || !user)
+                return
+            target.drainWillpower(Math.max(1, Math.floor(user.stats.willpower / 3)), drainDuration)
+        },
+    }
+}
+
 export function healing(name: string, cost: number): Action {
     return {
         name,

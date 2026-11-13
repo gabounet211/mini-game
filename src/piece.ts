@@ -43,6 +43,8 @@ export class Piece {
     inspiresAllies: boolean
 
     kills = 0
+    willpowerDrain = 0
+    drainTurns = 0
     lastAttacker: Piece | undefined
 
     private currentHealt: number
@@ -173,6 +175,26 @@ export class Piece {
                 distance = 0
             }
         }
+    }
+
+    drainWillpower(amount: number, turns: number) {
+        this.restoreWillpower()
+        this.willpowerDrain = Math.min(amount, this.stats.willpower)
+        this.drainTurns = turns
+        this.stats.willpower -= this.willpowerDrain
+        this.maxActionPoints = deriveAttributes(this.stats).maxActionPoints
+    }
+
+    endOwnTurn() {
+        if (this.drainTurns > 0 && --this.drainTurns === 0)
+            this.restoreWillpower()
+    }
+
+    private restoreWillpower() {
+        this.stats.willpower += this.willpowerDrain
+        this.willpowerDrain = 0
+        this.drainTurns = 0
+        this.maxActionPoints = deriveAttributes(this.stats).maxActionPoints
     }
 
     heal(amount: number) {
