@@ -152,13 +152,15 @@ export const levels = new Levels({
     },
 })
 
-const startCells: [number, number][] = [[15, 0], [15, 3], [13, 1], [17, 1]]
+const startCells: [number, number][] = [[14, 2], [15, 2], [16, 2], [15, 1], [14, 1], [16, 1], [14, 0], [15, 0], [16, 0]]
+const teamSize = 4
 
 levels.createLevel("level1", {
     title: "Chapter 1 - 1",
     chapter: "chapter1",
     map: "map1",
     startCells,
+    teamSize,
     entities: [
         [15, 29, "goblinYoung"],
         [15, 28, "goblinYoung"],
@@ -171,6 +173,7 @@ levels.createLevel("level2", {
     chapter: "chapter1",
     map: "map1",
     startCells,
+    teamSize,
     entities: [
         [13, 28, "goblinYoung"],
         [15, 28, "goblinYoung"],
@@ -184,6 +187,7 @@ levels.createLevel("level3", {
     chapter: "chapter1",
     map: "map1",
     startCells,
+    teamSize,
     entities: [
         [13, 28, "goblinYoung"],
         [15, 28, "goblinYoung"],
@@ -198,6 +202,7 @@ levels.createLevel("level4", {
     chapter: "chapter1",
     map: "map1",
     startCells,
+    teamSize,
     entities: [
         [12, 27, "goblinYoung"],
         [15, 27, "goblinYoung"],
@@ -214,6 +219,7 @@ levels.createLevel("level5", {
     finale: true,
     map: "map1",
     startCells,
+    teamSize,
     entities: [
         [15, 29, "goblinChief"],
         [13, 27, "goblinYoung"],
@@ -230,6 +236,7 @@ levels.createLevel("level6", {
     chapter: "chapter2",
     map: "map1",
     startCells,
+    teamSize,
     entities: [
         [13, 28, "banditBrawler"],
         [17, 28, "banditBrawler"],
@@ -242,6 +249,7 @@ levels.createLevel("level7", {
     chapter: "chapter2",
     map: "map1",
     startCells,
+    teamSize,
     entities: [
         [13, 28, "banditBrawler"],
         [17, 28, "banditBrawler"],
@@ -255,6 +263,7 @@ levels.createLevel("level8", {
     chapter: "chapter2",
     map: "map1",
     startCells,
+    teamSize,
     entities: [
         [12, 28, "banditBrawler"],
         [18, 28, "banditBrawler"],
@@ -269,6 +278,7 @@ levels.createLevel("level9", {
     chapter: "chapter2",
     map: "map1",
     startCells,
+    teamSize,
     entities: [
         [15, 27, "banditBerserker"],
         [12, 28, "banditBrawler"],
@@ -285,6 +295,7 @@ levels.createLevel("level10", {
     finale: true,
     map: "map1",
     startCells,
+    teamSize,
     entities: [
         [15, 28, "marco"],
         [13, 27, "banditBrawler"],

@@ -1,4 +1,4 @@
-import { BufferAttribute, BufferGeometry, Color, Line, LineBasicMaterial, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, Vector2, Vector3 } from "three";
+import { BufferAttribute, BufferGeometry, Color, Group, Line, LineBasicMaterial, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, Vector2, Vector3 } from "three";
 import { Grid, SmallGrid } from "./grid";
 import { Piece } from "./piece";
 import { Action } from "./action";
@@ -19,6 +19,8 @@ export class Selector {
         new PlaneGeometry(1, 1),
         new MeshBasicMaterial({ color: Color.NAMES.aquamarine })
     )
+
+    placementZone = new Group()
 
     movementGrid = new Line(
         new BufferGeometry(),
@@ -45,6 +47,8 @@ export class Selector {
         this.block.rotateX(-Math.PI / 2);
         this.block.visible = false;
 
+        this.showPlacementZone()
+
         this.movementGrid.visible = false;
         const positions = new Float32Array(200 * 3); // 3 number per point
         this.movementGrid.geometry.setAttribute('position', new BufferAttribute(positions, 3));
@@ -67,7 +71,9 @@ export class Selector {
 
             this.ui.showSheet(this.hoveredCase instanceof Piece ? this.hoveredCase : undefined)
 
-            if (this.selected && this.targetingAction) {
+            if (this.gameLogic.state === "Placement") {
+                this.placementClick()
+            } else if (this.selected && this.targetingAction) {
                 this.target()
             } else if (this.isPlayerEntity(this.hoveredCase)) {
 
@@ -100,6 +106,40 @@ export class Selector {
         this.obj.position.set(this.world_pos.x, 0.01, this.world_pos.z)
     }
 
+    private placementClick() {
+        const hovered = this.hoveredCase
+        const canSwap = this.isPlayerEntity(hovered) || (hovered === true && this.gameLogic.isStartCell(this.grid_pos))
+        if (this.selected && this.selected !== hovered && canSwap) {
+            this.gameLogic.grid.swap(this.selectedPos, this.grid_pos)
+            this.unselect()
+        } else if (this.isPlayerEntity(hovered)) {
+            if (this.selected === hovered)
+                this.unselect()
+            else
+                this.select(hovered, this.grid_pos)
+        }
+    }
+
+    private showPlacementZone() {
+        if (this.gameLogic.state !== "Placement")
+            return
+        for (const cell of this.gameLogic.startCells) {
+            const pos = this.gameLogic.grid.gridToWorldPos(cell.clone())
+            const block = new Mesh(
+                new PlaneGeometry(0.9, 0.9),
+                new MeshBasicMaterial({ color: Color.NAMES.gold, opacity: 0.4, transparent: true })
+            )
+            block.rotateX(-Math.PI / 2)
+            block.position.set(pos.x, .009, pos.y)
+            this.placementZone.add(block)
+        }
+    }
+
+    endPlacement() {
+        this.unselect()
+        this.placementZone.clear()
+    }
+
     unselect() {
         this.selected = false;
         this.targetingAction = undefined;
@@ -125,8 +165,11 @@ export class Selector {
         this.targetingAction = undefined;
         this.selectedPos.copy(gridPos);
 
-        this.ui.setActionsVisible(true);
-        this.ui.setActions(piece.actions);
+        const placing = this.gameLogic.state === "Placement"
+        if (!placing) {
+            this.ui.setActionsVisible(true);
+            this.ui.setActions(piece.actions);
+        }
         this.ui.showSheet(piece)
 
         const worldPos = this.gameLogic.grid.gridToWorldPos(gridPos.clone())
@@ -134,6 +177,8 @@ export class Selector {
         this.block.position.set(worldPos.x, .0105, worldPos.y);
         this.block.children.length = 0
         this.cameraControle.target.copy(this.block.position)
+        if (placing)
+            return
 
         this.selectedMov = piece.movePoints > 0 ? this.gameLogic.grid.floodFill(this.selectedPos, piece.movePoints) : undefined;
         if (this.selectedMov)
@@ -201,7 +246,7 @@ export class Selector {
     }
 
     private isPlayerEntity(entity: any): entity is Piece {
-        return entity instanceof Piece && entity.player && this.gameLogic.state === "PlayerTurn"
+        return entity instanceof Piece && entity.player && (this.gameLogic.state === "PlayerTurn" || this.gameLogic.state === "Placement")
     }
 
 }

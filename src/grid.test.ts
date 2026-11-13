@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { Vector2 } from "three"
+import { Object3D, Vector2 } from "three"
+import { Piece } from "./piece"
 import { Grid } from "./grid"
 
 function createGrid(size: number, walls: string[]) {
@@ -36,6 +37,20 @@ describe("move", () => {
         Object.assign((grid as unknown as { cells: Record<string, unknown> }).cells, { '0,0': piece })
         Object.assign(grid, { gridsize: 7 })
         expect(grid.move(new Vector2(0, 0), new Vector2(2, 0))).toBe(6)
+    })
+})
+
+describe("swap", () => {
+    it("moves a piece to an empty cell and refuses walls", () => {
+        const grid = createGrid(3, ['2,2'])
+        const piece = Object.assign(Object.create(Piece.prototype), { offset: 0, obj: new Object3D() }) as Piece
+        Object.assign((grid as unknown as { cells: Record<string, unknown> }).cells, { '0,0': piece })
+        Object.assign(grid, { gridsize: 3 })
+        grid.swap(new Vector2(0, 0), new Vector2(1, 0))
+        expect(grid.getPosition(piece)!.equals(new Vector2(1, 0))).toBe(true)
+        expect(grid.isFree(new Vector2(0, 0))).toBe(true)
+        expect(piece.obj.position.x).toBe(0)
+        expect(() => grid.swap(new Vector2(1, 0), new Vector2(2, 2))).toThrow()
     })
 })
 

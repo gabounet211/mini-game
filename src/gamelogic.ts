@@ -10,6 +10,7 @@ import { grantDefeatResults, grantVictoryRewards } from "./rewards";
 import { allEnemiesDefeated, allHeroesDefeated, EndCondition } from "./endCondition";
 
 const STATE = {
+    Placement: {},
     PlayerTurn: {},
     AiTurn: {},
     Victory: {},
@@ -20,7 +21,8 @@ const STATE = {
 
 export class GameLogic {
     grid: Grid
-    state: keyof typeof STATE = "PlayerTurn"
+    state: keyof typeof STATE = "Placement"
+    startCells: Vector2[] = []
     victory: EndCondition
     defeat: EndCondition
     heroes: Piece[] = []
@@ -42,9 +44,9 @@ export class GameLogic {
         scene.add(this.grid.scene)
         cameraControle.boundMax.setScalar(this.grid.gridsize / 2)
         cameraControle.boundMin.setScalar(-this.grid.gridsize / 2)
-        team.slice(0, desLevel1.startCells.length).forEach((character, index) => {
-            const [x, y] = desLevel1.startCells[index]
-            this.heroes.push(this.grid.add(levels.entities[character.entity as keyof typeof levels.entities], character, new Vector2(x, y), true))
+        this.startCells = desLevel1.startCells.map(([x, y]) => new Vector2(x, y)).filter(cell => this.grid.isFree(cell))
+        team.slice(0, Math.min(desLevel1.teamSize, this.startCells.length)).forEach((character, index) => {
+            this.heroes.push(this.grid.add(levels.entities[character.entity as keyof typeof levels.entities], character, this.startCells[index], true))
         })
         for (const [x, y, entity, player] of desLevel1.entities) {
             const config: PieceConfig = levels.entities[entity]
@@ -58,6 +60,15 @@ export class GameLogic {
         }
 
 
+    }
+
+    isStartCell(pos: Vector2) {
+        return this.startCells.some(cell => cell.equals(pos))
+    }
+
+    startBattle() {
+        if (this.state === "Placement")
+            this.state = "PlayerTurn"
     }
 
     checkEnd() {

@@ -50,10 +50,22 @@ export class Game {
         this.selector = new Selector(this.cameraControle, this.gameLogic, this.ui)
         this.scene.add(this.selector.obj)
         this.scene.add(this.selector.block)
+        this.scene.add(this.selector.placementZone)
+        if (this.gameLogic.state === "Placement") {
+            this.ui.setEndTurnLabel('Start battle')
+            this.ui.showBanner('Place your heroes')
+        }
         this.announceTurn()
     }
 
     endTurn() {
+        if (this.gameLogic.state === "Placement") {
+            this.selector.endPlacement()
+            this.gameLogic.startBattle()
+            this.ui.setEndTurnLabel('End turn')
+            this.announceTurn()
+            return
+        }
         if (this.gameLogic.state !== "PlayerTurn")
             return
         this.selector.unselect()

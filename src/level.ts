@@ -9,6 +9,7 @@ export interface Level<M extends Record<string, Group>, E extends Record<string,
     finale?: boolean,
     map: keyof M,
     startCells: [x: number, y: number][]
+    teamSize: number
     entities: [x: number, y: number, entity: keyof E, player?: boolean][]
     victory?: EndCondition
     defeat?: EndCondition

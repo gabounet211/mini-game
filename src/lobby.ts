@@ -30,7 +30,7 @@ export class Lobby {
     }
 
     private teamLimit() {
-        return levels.getLevel(this.levelKey).startCells.length
+        return levels.getLevel(this.levelKey).teamSize
     }
 
     private render() {
