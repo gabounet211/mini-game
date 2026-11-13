@@ -3,6 +3,7 @@ import { Audio, AudioListener, AudioLoader, Object3D } from 'three';
 export type VolumeKind = 'main' | 'sfx' | 'music'
 
 const musicGain = 0.1
+const volumesKey = "miniGameVolumes"
 
 export class AudioManager {
     volumes: Record<VolumeKind, number> = { main: 1, sfx: 1, music: 0.5 }
@@ -14,6 +15,7 @@ export class AudioManager {
 
     constructor(camera: Object3D) {
         camera.add(this.listener)
+        this.loadVolumes()
 
         new AudioLoader().load('music_test.mp3', (buffer) => {
             this.music.setBuffer(buffer)
@@ -30,6 +32,44 @@ export class AudioManager {
     setVolume(kind: VolumeKind, value: number) {
         this.volumes[kind] = value
         this.applyVolumes()
+        try {
+            localStorage.setItem(volumesKey, JSON.stringify(this.volumes))
+        } catch (error) {
+            console.warn("Volumes could not be saved", error)
+        }
+    }
+
+    playChime() {
+        const context = this.listener.context
+        if (!this.started || context.state !== "running")
+            return
+        const volume = this.volumes.main * this.volumes.sfx * 0.2
+        if (volume <= 0)
+            return
+        const notes = [660, 880]
+        notes.forEach((frequency, index) => {
+            const start = context.currentTime + index * 0.12
+            const oscillator = context.createOscillator()
+            const gain = context.createGain()
+            oscillator.type = "triangle"
+            oscillator.frequency.value = frequency
+            gain.gain.setValueAtTime(volume, start)
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.2)
+            oscillator.connect(gain).connect(context.destination)
+            oscillator.start(start)
+            oscillator.stop(start + 0.2)
+        })
+    }
+
+    private loadVolumes() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(volumesKey) ?? "null")
+            for (const kind of Object.keys(this.volumes) as VolumeKind[])
+                if (typeof saved?.[kind] === "number")
+                    this.volumes[kind] = saved[kind]
+        } catch (error) {
+            console.warn("Volumes could not be loaded", error)
+        }
     }
 
     private applyVolumes() {

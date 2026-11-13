@@ -1,7 +1,7 @@
 import { Game } from "./game";
 import { Grid } from "./grid";
 import { levels } from './gltf';
-import { Scene, Vector2 } from "three";
+import { Scene, Vector2, Vector3 } from "three";
 import { Selector } from "./selector";
 import { CameraControle } from "./cameraControle";
 import { Character, createCharacter } from "./character";
@@ -49,6 +49,12 @@ export class GameLogic {
         for (const [x, y, entity, player] of desLevel1.entities) {
             const config: PieceConfig = levels.entities[entity]
             this.grid.add(config, createCharacter(entity, config.rarity, config.characterClass), new Vector2(x, y), player)
+        }
+        if (this.heroes.length) {
+            const center = new Vector3()
+            for (const hero of this.heroes)
+                center.add(hero.obj.position)
+            cameraControle.jumpTo(center.divideScalar(this.heroes.length), Math.PI)
         }
 
 

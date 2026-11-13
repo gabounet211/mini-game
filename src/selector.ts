@@ -103,6 +103,7 @@ export class Selector {
     unselect() {
         this.selected = false;
         this.targetingAction = undefined;
+        this.ui.setTargeting(undefined)
         this.block.visible = false;
         this.ui.setActionsVisible(false)
     }
@@ -143,8 +144,15 @@ export class Selector {
     }
 
     startTargeting(action: Action) {
+        if (this.targetingAction === action) {
+            this.targetingAction = undefined
+            this.setAttackColor(Color.NAMES.red)
+            this.ui.setTargeting(undefined)
+            return
+        }
         this.targetingAction = action
         this.setAttackColor(action.targets === "ally" ? Color.NAMES.limegreen : Color.NAMES.red)
+        this.ui.setTargeting(action)
     }
 
     private setAttackColor(color: number) {
@@ -158,6 +166,7 @@ export class Selector {
         const target = this.hoveredCase
         this.targetingAction = undefined
         this.setAttackColor(Color.NAMES.red)
+        this.ui.setTargeting(undefined)
         const wantsAlly = action?.targets === "ally"
         if (!piece || !action || !(target instanceof Piece) || (target.player === piece.player) !== wantsAlly)
             return

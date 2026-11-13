@@ -50,6 +50,7 @@ export class Game {
         this.selector = new Selector(this.cameraControle, this.gameLogic, this.ui)
         this.scene.add(this.selector.obj)
         this.scene.add(this.selector.block)
+        this.announceTurn()
     }
 
     endTurn() {
@@ -57,7 +58,16 @@ export class Game {
             return
         this.selector.unselect()
         this.gameLogic.endTurn()
+        this.announceTurn()
         this.playAiTurn()
+    }
+
+    announceTurn() {
+        const state = this.gameLogic.state
+        if (state !== "PlayerTurn" && state !== "AiTurn")
+            return
+        this.ui.showBanner(state === "PlayerTurn" ? "Your turn" : "Enemy turn")
+        this.audio.playChime()
     }
 
     private async playAiTurn() {
@@ -77,6 +87,7 @@ export class Game {
             }
         } finally {
             this.gameLogic.endTurn()
+            this.announceTurn()
         }
     }
 }
