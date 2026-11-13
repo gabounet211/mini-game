@@ -56,6 +56,10 @@ export class Grid {
             piece.update(delta)
     }
 
+    isFree(pos: Vector2) {
+        return this.cells[pos.x + ',' + pos.y] === true
+    }
+
     getPieces(player: boolean) {
         return Object.values(this.cells).filter((cell): cell is Piece => cell instanceof Piece && cell.player === player)
     }

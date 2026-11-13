@@ -42,9 +42,9 @@ export class GameLogic {
         scene.add(this.grid.scene)
         cameraControle.boundMax.setScalar(this.grid.gridsize / 2)
         cameraControle.boundMin.setScalar(-this.grid.gridsize / 2)
-        team.slice(0, desLevel1.startCells.length).forEach((character, index) => {
-            const [x, y] = desLevel1.startCells[index]
-            this.heroes.push(this.grid.add(levels.entities[character.entity as keyof typeof levels.entities], character, new Vector2(x, y), true))
+        const startCells = desLevel1.startCells.map(([x, y]) => new Vector2(x, y)).filter(cell => this.grid.isFree(cell))
+        team.slice(0, Math.min(desLevel1.teamSize, startCells.length)).forEach((character, index) => {
+            this.heroes.push(this.grid.add(levels.entities[character.entity as keyof typeof levels.entities], character, startCells[index], true))
         })
         for (const [x, y, entity, player] of desLevel1.entities) {
             const config: PieceConfig = levels.entities[entity]
