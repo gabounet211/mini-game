@@ -110,7 +110,7 @@ function moveBehind(piece: Piece, target: Piece, game: Game, anchors?: Piece[]) 
     let attackScore = -Infinity
     let safeCell: Vector2 | undefined
     let safeScore = Infinity
-    grid.floodFill(from, piece.moveRange).forEach((x, y, reachable) => {
+    grid.floodFill(from, piece.movePoints).forEach((x, y, reachable) => {
         if (!reachable)
             return
         const cell = new Vector2(x, y)
@@ -142,7 +142,7 @@ export function approachTarget(piece: Piece, target: Piece, game: Game) {
     const distances = grid.distanceMap(targetPos)
     let best: Vector2 | undefined
     let bestScore = Infinity
-    grid.floodFill(from, piece.moveRange).forEach((x, y, reachable) => {
+    grid.floodFill(from, piece.movePoints).forEach((x, y, reachable) => {
         if (!reachable)
             return
         const cell = new Vector2(x, y)
@@ -187,10 +187,9 @@ export function createBehavior(steps: AiSteps): AiBehavior {
                 return
 
             const from = grid.getPosition(piece)
-            const destination = piece.hasMoved ? undefined : steps.chooseDestination(piece, target, game)
+            const destination = piece.movePoints > 0 ? steps.chooseDestination(piece, target, game) : undefined
             if (from && destination) {
-                grid.move(from, destination)
-                piece.hasMoved = true
+                piece.movePoints -= grid.move(from, destination)
                 await piece.wait()
             }
 

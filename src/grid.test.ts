@@ -29,6 +29,16 @@ describe("findPath", () => {
     })
 })
 
+describe("move", () => {
+    it("returns the number of cells walked, around walls", () => {
+        const grid = createGrid(7, ['1,0', '1,1'])
+        const piece = { offset: 0, walk() { } }
+        Object.assign((grid as unknown as { cells: Record<string, unknown> }).cells, { '0,0': piece })
+        Object.assign(grid, { gridsize: 7 })
+        expect(grid.move(new Vector2(0, 0), new Vector2(2, 0))).toBe(6)
+    })
+})
+
 describe("distanceMap", () => {
     it("counts the real walking distance around walls", () => {
         const distances = createGrid(7, wall).distanceMap(new Vector2(0, 0))

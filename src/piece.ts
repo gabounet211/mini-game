@@ -30,7 +30,7 @@ export class Piece {
     offset: number
     to = new Vector3()
     
-    hasMoved = false
+    movePoints: number
     actionPoints: number
 
     stats: Stats
@@ -69,6 +69,7 @@ export class Piece {
         this.inspiresAllies = !!characterClass?.inspiresAllies
         this.currentHealt = this.maxHealt
         this.actionPoints = this.maxActionPoints
+        this.movePoints = this.moveRange
         this.offset = config.offset;
         if (!player)
             this.obj.rotation.y = Math.PI
