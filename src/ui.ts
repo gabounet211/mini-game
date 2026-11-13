@@ -220,6 +220,10 @@ export class Ui {
         return words.charAt(0).toUpperCase() + words.slice(1)
     }
 
+    setEndTurnLabel(text: string) {
+        this.endTurnButton.textContent = text
+    }
+
     showBanner(text: string) {
         this.turnBanner.textContent = text
         this.turnBanner.classList.remove('visible')

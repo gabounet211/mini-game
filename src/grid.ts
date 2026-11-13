@@ -106,6 +106,21 @@ export class Grid {
         return path.length
     }
 
+    swap(a: Vector2, b: Vector2) {
+        const iA = a.x + "," + a.y
+        const iB = b.x + "," + b.y
+        const cellA = this.cells[iA]
+        const cellB = this.cells[iB]
+        if (cellA === undefined || cellB === undefined)
+            throw new Error("Cannot swap with a blocked cell")
+        this.cells[iA] = cellB
+        this.cells[iB] = cellA
+        for (const [cell, pos] of [[cellB, a], [cellA, b]] as const) {
+            if (cell instanceof Piece)
+                cell.obj.position.set(pos.x - this.gridsize / 2 + .5, cell.offset, pos.y - this.gridsize / 2 + .5)
+        }
+    }
+
     findPath(from: Vector2, to: Vector2) {
         const previous = new Map<string, Vector2 | undefined>([[from.x + ',' + from.y, undefined]])
         const queue = [from]
