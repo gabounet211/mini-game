@@ -24,6 +24,7 @@ export class Ui {
     private inspected: Piece | undefined
     private endScreen = document.createElement('div')
     private turnBanner = document.createElement('div')
+    private actionButtonsByAction = new Map<Action, HTMLButtonElement>()
     private bannerTimeout: number | undefined
     private endScreenShown = false
 
@@ -232,8 +233,15 @@ export class Ui {
         this.actionButtons.style.display = visible ? 'flex' : 'none'
     }
 
+    setTargeting(action: Action | undefined) {
+        for (const [buttonAction, button] of this.actionButtonsByAction)
+            button.classList.toggle('selectedAction', buttonAction === action)
+        document.body.classList.toggle('targeting', !!action)
+    }
+
     setActions(actions: Action[]) {
         this.actionButtons.innerHTML = ''
+        this.actionButtonsByAction.clear()
         const piece = this.game.selector.selected
         if (!piece)
             return
@@ -251,6 +259,7 @@ export class Ui {
             attackBouton.textContent = this.formatName(element.name) + ' (' + element.cost + ')';
             attackBouton.disabled = piece.actionPoints < element.cost
             this.actionButtons.append(attackBouton);
+            this.actionButtonsByAction.set(element, attackBouton)
             attackBouton.addEventListener('click', () =>{
                 if (piece.actionPoints < element.cost)
                     return

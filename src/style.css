@@ -285,3 +285,12 @@ button{
 #turnBanner.visible{
   opacity: 1;
 }
+
+.selectedAction{
+  outline: 3px solid #ffd54a;
+  background-color: #6b5a1e;
+}
+
+body.targeting canvas{
+  cursor: crosshair;
+}
