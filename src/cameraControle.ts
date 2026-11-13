@@ -16,6 +16,15 @@ export class CameraControle {
     ) {
         this.camera.rotation.order = "YXZ"
     }
+    jumpTo(target: Vector3, theta: number) {
+        this.target.copy(target)
+        this.orbit.theta = theta
+        this.realTarget.setFromCylindrical(this.orbit).add(this.target)
+        this.camera.position.copy(this.realTarget)
+        this.lookAtTarget.copy(this.target)
+        this.camera.lookAt(this.lookAtTarget)
+    }
+
     update() {
         const angle = -this.camera.rotation.y;
         this.delta.rotateAround(zero, angle)
