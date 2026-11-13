@@ -34,7 +34,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 
 ### Chapitres et changement de classe
 
-- Les niveaux sont regroupés en chapitres de 5 niveaux à histoire continue, avec le même type de monstres (ex. chapitre gobelin : peu de gobelins au début, puis plus de gobelins et des gobelins plus forts, et un gobelin champion au niveau 5). De nouveaux types de gobelins seront ajoutés avec les prochains niveaux.
+- Les niveaux sont regroupés en chapitres de 5 niveaux à histoire continue, avec le même type de monstres (ex. chapitre gobelin : peu de gobelins au début, puis plus de gobelins et des gobelins plus forts, et le chef gobelin au niveau 5).
 - Les niveaux se débloquent un à un et restent débloqués : on peut y emmener n'importe quel héros (ex. un héros niveau 1 dans le niveau 4). Les niveaux 1 à 4 se rejouent librement, ce qui permet aux héros arrivés plus tard de rattraper l'XP (en plus de la future zone de transfert d'XP).
 - Niveau 5 (fin de chapitre) : chaque héros n'a qu'un seul essai contre le champion. Le changement de classe se gagne héros par héros : une deuxième équipe peut faire le niveau 5 à son tour, et un héros trop fort ne peut pas tuer le champion à répétition pendant que les autres attendent.
 - Changement de classe : double condition, le héros doit avoir atteint le niveau X (X = 4 pour le moment, à revoir avec l'équilibrage de l'XP) et avoir participé au combat contre le champion de fin de chapitre. Seuls les héros qui ont participé y ont droit.
