@@ -5,7 +5,7 @@ import { Scene, Vector2 } from "three";
 import { Selector } from "./selector";
 import { CameraControle } from "./cameraControle";
 import { Character, createCharacter } from "./character";
-import { Piece } from "./piece";
+import { Piece, PieceConfig } from "./piece";
 import { grantDefeatResults, grantVictoryRewards } from "./rewards";
 import { allEnemiesDefeated, allHeroesDefeated, EndCondition } from "./endCondition";
 
@@ -47,8 +47,8 @@ export class GameLogic {
             this.heroes.push(this.grid.add(levels.entities[character.entity as keyof typeof levels.entities], character, new Vector2(x, y), true))
         })
         for (const [x, y, entity, player] of desLevel1.entities) {
-            const config = levels.entities[entity]
-            this.grid.add(config, createCharacter(entity, config.rarity), new Vector2(x, y), player)
+            const config: PieceConfig = levels.entities[entity]
+            this.grid.add(config, createCharacter(entity, config.rarity, config.characterClass), new Vector2(x, y), player)
         }
 
 

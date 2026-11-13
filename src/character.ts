@@ -43,12 +43,13 @@ export function rollRarity(random = Math.random): Rarity {
     return "common"
 }
 
-export function createCharacter(entity: string, rarity: Rarity): Character {
+export function createCharacter(entity: string, rarity: Rarity, characterClass?: string): Character {
     return {
         id: createId(),
         entity,
         rarity,
-        stats: rollStats(rarityBudget[rarity]),
+        characterClass,
+        stats: rollStats(rarityBudget[rarity], characterClass ? characterClasses[characterClass].statWeights : {}),
         level: 1,
         experience: 0,
         statPoints: 0,

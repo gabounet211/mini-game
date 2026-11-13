@@ -12,6 +12,7 @@ export interface CharacterClass {
     requirement?: { highest: keyof Stats, minimums?: Partial<Stats> },
     evolvesFrom?: string,
     requiredItem?: string,
+    inspiresAllies?: boolean,
 }
 
 export const characterClasses: Record<string, CharacterClass> = {
@@ -21,6 +22,7 @@ export const characterClasses: Record<string, CharacterClass> = {
     soldier: { name: "Soldier", tier: 2, starting: true, attackRange: 1, actions: [physicalAttack("swordStrike", 1)], statWeights: { strength: 3, resistance: 3 }, requirement: { highest: "strength" } },
     apprentice: { name: "Apprentice", tier: 2, starting: true, attackRange: 3, actions: [physicalAttack("staffStrike", 1), magicalAttack("arcaneBolt", 2)], statWeights: { intelligence: 3, knowledge: 3 }, requirement: { highest: "intelligence" } },
     healer: { name: "Healer", tier: 2, starting: true, attackRange: 2, actions: [physicalAttack("staffStrike", 1), magicalAttack("lightRay", 2), healing("healingTouch", 2)], statWeights: { willpower: 3, intelligence: 2 }, requirement: { highest: "willpower" } },
+    bard: { name: "Bard", tier: 2, starting: true, attackRange: 2, actions: [physicalAttack("rapierStrike", 1), magicalAttack("dissonantChord", 2)], statWeights: { willpower: 3, dexterity: 2 }, inspiresAllies: true },
     berserker: { name: "Berserker", tier: 3, starting: true, attackRange: 1, actions: [physicalAttack("frenzyStrike", 1)], statWeights: { strength: 4, constitution: 3 }, requirement: { highest: "strength" } },
     elementalist: { name: "Elementalist", tier: 3, starting: true, attackRange: 4, actions: [physicalAttack("staffStrike", 1), magicalAttack("elementalBlast", 2)], statWeights: { intelligence: 4, knowledge: 2 }, requirement: { highest: "intelligence" } },
     cleric: { name: "Cleric", tier: 3, starting: true, attackRange: 3, actions: [physicalAttack("maceStrike", 1), magicalAttack("smite", 2), healing("divineHealing", 2)], statWeights: { willpower: 3, intelligence: 3 }, requirement: { highest: "willpower" } },
@@ -39,6 +41,7 @@ export const characterClasses: Record<string, CharacterClass> = {
     duelist: { name: "Duelist", tier: 2, attackRange: 1, actions: [physicalAttack("riposte", 1)], statWeights: {}, requirement: { highest: "dexterity", minimums: { strength: 5 } } },
     sharpshooter: { name: "Sharpshooter", tier: 2, attackRange: 5, actions: [physicalAttack("piercingShot", 1)], statWeights: {}, requirement: { highest: "perception", minimums: { dexterity: 6 } } },
 
+    skald: { name: "Skald", tier: 3, attackRange: 2, actions: [physicalAttack("axeStrike", 1), magicalAttack("warChant", 2)], statWeights: {}, evolvesFrom: "bard", inspiresAllies: true },
     knight: { name: "Knight", tier: 3, attackRange: 1, actions: [physicalAttack("lanceStrike", 1)], statWeights: {}, requirement: { highest: "resistance" } },
     juggernaut: { name: "Juggernaut", tier: 3, attackRange: 1, actions: [physicalAttack("crush", 1)], statWeights: {}, requirement: { highest: "constitution" } },
     sage: { name: "Sage", tier: 3, attackRange: 4, actions: [physicalAttack("staffStrike", 1), magicalAttack("mindBlast", 2), healing("restore", 2)], statWeights: {}, requirement: { highest: "knowledge" } },
@@ -67,8 +70,11 @@ export const rarityTier: Record<Rarity, number> = {
 export const classChangeLevel = 4
 export const commonTierCap = 3
 
+export const maxClassChanges = 1
+
 export function canChangeClass(character: Character) {
     return character.level >= classChangeLevel
+        && character.classChanges.length < maxClassChanges
         && character.championsDefeated.some(chapter => !character.classChanges.includes(chapter))
 }
 
@@ -92,9 +98,10 @@ export function classChangeOffers(character: Character, inventory: string[]) {
             && character.stats[requirement.highest] === highest
             && Object.entries(requirement.minimums ?? {}).every(([stat, value]) => character.stats[stat as keyof Stats] >= value)
     })
+    const path = keys.filter(key => characterClasses[key].tier === tier && characterClasses[key].evolvesFrom === character.characterClass && !characterClasses[key].requiredItem)
     const hard = eligible.filter(key => characterClasses[key].requirement?.minimums)
     const easy = eligible.filter(key => !characterClasses[key].requirement?.minimums)
-    return [...hard.slice(0, 2), ...easy].slice(0, 3)
+    return [...path, ...hard.slice(0, 2), ...easy].slice(0, 3)
 }
 
 export function applyClassChange(character: Character, classKey: string, inventory: string[]) {

@@ -3,7 +3,7 @@ import { Object3D, Vector2 } from "three"
 import { Grid } from "./grid"
 import { Piece, PieceConfig } from "./piece"
 import { createCharacter } from "./character"
-import { stayBehindAllies, weakestInRange } from "./aiBehavior"
+import { delayedInitiative, nearestFirstInitiative, stayBehind, stayBehindAllies, weakestInRange } from "./aiBehavior"
 import { Game } from "./game"
 
 function setup(size: number, pieces: [x: number, y: number, piece: Piece][]) {
@@ -18,8 +18,8 @@ function setup(size: number, pieces: [x: number, y: number, piece: Piece][]) {
     return { gameLogic: { grid } } as unknown as Game
 }
 
-function piece(player: boolean, attackRange: number, dexterity = 4) {
-    const config: PieceConfig = { obj: new Object3D(), name: "test", offset: 0, rarity: "common", attackRange, actions: [] }
+function piece(player: boolean, attackRange: number, dexterity = 4, name = "test") {
+    const config: PieceConfig = { obj: new Object3D(), name, offset: 0, rarity: "common", attackRange, actions: [] }
     const character = createCharacter("test", "common")
     character.stats = { strength: 2, resistance: 1, constitution: 5, willpower: 3, knowledge: 1, intelligence: 1, dexterity, perception: 1 }
     return new Piece(config, character, player)
@@ -70,5 +70,40 @@ describe("stayBehindAllies", () => {
         const hero = piece(true, 1)
         const game = setup(10, [[5, 2, hero], [5, 5, chief]])
         expect(stayBehindAllies(chief, hero, game)).toBeUndefined()
+    })
+})
+
+describe("stayBehind", () => {
+    it("stays behind the chosen ally rather than the whole front line", () => {
+        const hero = piece(true, 1)
+        const brawler = piece(false, 1)
+        const marco = piece(false, 1, 4, "Marco")
+        const apprentice = piece(false, 3)
+        const game = setup(15, [[7, 0, hero], [7, 2, brawler], [7, 6, marco], [8, 10, apprentice]])
+        const behindMarco = stayBehind(ally => ally.config.name === "Marco")(apprentice, hero, game)!
+        expect(Grid.manathanDistance(behindMarco, new Vector2(7, 0))).toBe(7)
+        const behindEveryone = stayBehindAllies(apprentice, hero, game)!
+        expect(Grid.manathanDistance(behindEveryone, new Vector2(7, 0))).toBe(6)
+    })
+
+    it("falls back to every ally when the chosen one is gone", () => {
+        const hero = piece(true, 1)
+        const brawler = piece(false, 1)
+        const apprentice = piece(false, 3)
+        const game = setup(15, [[7, 0, hero], [7, 2, brawler], [7, 10, apprentice]])
+        const destination = stayBehind(ally => ally.config.name === "Marco")(apprentice, hero, game)!
+        expect(Grid.manathanDistance(destination, new Vector2(7, 0))).toBe(5)
+    })
+})
+
+describe("initiative", () => {
+    it("plays the closest first, and a delayed piece after all of them", () => {
+        const hero = piece(true, 1)
+        const near = piece(false, 1)
+        const far = piece(false, 1)
+        const marco = piece(false, 1)
+        const game = setup(15, [[7, 0, hero], [7, 3, near], [7, 12, far], [7, 1, marco]])
+        expect(nearestFirstInitiative(near, game)).toBeLessThan(nearestFirstInitiative(far, game))
+        expect(delayedInitiative(1000)(marco, game)).toBeGreaterThan(nearestFirstInitiative(far, game))
     })
 })
