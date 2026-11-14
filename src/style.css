@@ -204,6 +204,29 @@ button{
   gap: 16px;
 }
 
+.lobbyTabs{
+  display: flex;
+  gap: 6px;
+}
+
+.lobbyTabs button{
+  flex: 1;
+  opacity: 0.6;
+}
+
+.lobbyTabs button.activeTab{
+  opacity: 1;
+  outline: 2px solid gold;
+}
+
+.lobbyContent{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .heroList{
   display: flex;
   flex-direction: column;

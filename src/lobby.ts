@@ -6,12 +6,17 @@ import { experienceToNextLevel } from "./rewards"
 import { equipmentBonuses, equippedStats, itemName, items, itemSlots, ItemSlot } from "./items"
 import { SaveData, writeSave } from "./save"
 
+type LobbyTab = "heroes" | "inventory"
+
+const tabs: [LobbyTab, string][] = [["heroes", "Heroes"], ["inventory", "Inventory"]]
+
 export class Lobby {
     private element = document.createElement('div')
     private details = document.createElement('div')
     private team = new Set<Character>()
     private levelKey: string
     private confirmingDelete: Character | undefined
+    private tab: LobbyTab = "heroes"
 
     constructor(private save: SaveData, private onStart: (team: Character[], levelKey: string) => void) {
         const unlocked = levels.keys().slice(0, save.unlockedLevels)
@@ -58,24 +63,25 @@ export class Lobby {
         })
         levelRow.append(levelSelect)
 
-        const summonRow = document.createElement('div')
-        summonRow.className = 'lobbyRow'
-        summonRow.textContent = 'Summon tokens: ' + this.save.summons
-        const summonButton = document.createElement('button')
-        summonButton.textContent = 'Summon (1)'
-        summonButton.disabled = this.save.summons < 1
-        summonButton.addEventListener('click', () => this.summon())
-        summonRow.append(summonButton)
-
-        const inventoryInfo = document.createElement('div')
-        inventoryInfo.textContent = 'Inventory: ' + (this.save.inventory.map(key => itemName(key)).join(', ') || 'empty')
-
         const teamInfo = document.createElement('div')
         teamInfo.textContent = 'Team: ' + this.team.size + '/' + this.teamLimit()
 
-        const heroList = document.createElement('div')
-        heroList.className = 'heroList'
-        heroList.append(...this.save.roster.map(character => this.createHeroRow(character)))
+        const tabRow = document.createElement('div')
+        tabRow.className = 'lobbyTabs'
+        for (const [key, label] of tabs) {
+            const tabButton = document.createElement('button')
+            tabButton.textContent = label
+            tabButton.classList.toggle('activeTab', key === this.tab)
+            tabButton.addEventListener('click', () => {
+                this.tab = key
+                this.render()
+            })
+            tabRow.append(tabButton)
+        }
+
+        const content = document.createElement('div')
+        content.className = 'lobbyContent'
+        content.append(...(this.tab === "heroes" ? this.renderHeroes() : this.renderInventory()))
 
         const startButton = document.createElement('button')
         startButton.className = 'startButton'
@@ -87,7 +93,48 @@ export class Lobby {
             this.onStart(this.save.roster.filter(character => this.team.has(character)), this.levelKey)
         })
 
-        this.element.replaceChildren(title, levelRow, summonRow, inventoryInfo, teamInfo, heroList, startButton)
+        this.element.replaceChildren(title, levelRow, teamInfo, tabRow, content, startButton)
+    }
+
+    private renderHeroes() {
+        const summonRow = document.createElement('div')
+        summonRow.className = 'lobbyRow'
+        summonRow.textContent = 'Summon tokens: ' + this.save.summons
+        const summonButton = document.createElement('button')
+        summonButton.textContent = 'Summon (1)'
+        summonButton.disabled = this.save.summons < 1
+        summonButton.addEventListener('click', () => this.summon())
+        summonRow.append(summonButton)
+
+        const heroList = document.createElement('div')
+        heroList.className = 'heroList'
+        heroList.append(...this.save.roster.map(character => this.createHeroRow(character)))
+        return [summonRow, heroList]
+    }
+
+    private renderInventory() {
+        const counts = new Map<string, number>()
+        for (const key of this.save.inventory)
+            counts.set(key, (counts.get(key) ?? 0) + 1)
+        const list = document.createElement('div')
+        list.className = 'heroList'
+        if (!counts.size)
+            list.textContent = 'No unused items.'
+        for (const [key, count] of counts) {
+            const row = document.createElement('div')
+            row.className = 'heroRow'
+            const info = document.createElement('div')
+            info.className = 'heroInfo'
+            const name = document.createElement('div')
+            name.textContent = itemName(key) + (count > 1 ? ' ×' + count : '')
+            const details = document.createElement('div')
+            details.className = 'heroDetails'
+            details.textContent = items[key] ? this.formatName(items[key].slot) + ' · ' + this.formatBonuses(key) : 'Class change item'
+            info.append(name, details)
+            row.append(info)
+            list.append(row)
+        }
+        return [list]
     }
 
     private createHeroRow(character: Character) {
