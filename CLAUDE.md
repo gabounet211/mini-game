@@ -37,7 +37,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 ### Chapitres et changement de classe
 
 - Les niveaux sont regroupés en chapitres de 5 niveaux à histoire continue, avec le même type de monstres (ex. chapitre gobelin : peu de gobelins au début, puis plus de gobelins et des gobelins plus forts, et le chef gobelin au niveau 5).
-- Les niveaux se débloquent un à un et restent débloqués : on peut y emmener n'importe quel héros (ex. un héros niveau 1 dans le niveau 4). Les niveaux 1 à 4 se rejouent librement, ce qui permet aux héros arrivés plus tard de rattraper l'XP (en plus de la future zone de transfert d'XP).
+- Les niveaux se débloquent un à un et restent débloqués : on peut y emmener n'importe quel héros (ex. un héros niveau 1 dans le niveau 4). Les niveaux 1 à 4 se rejouent librement, ce qui permet aux héros arrivés plus tard de rattraper l'XP (en plus de l'onglet Combination du lobby, où un héros sacrifié donne toute son XP, plus un petit bonus, à un autre héros).
 - Niveau 5 (fin de chapitre) : chaque héros n'a qu'un seul essai contre le champion. Le changement de classe se gagne héros par héros : une deuxième équipe peut faire le niveau 5 à son tour, et un héros trop fort ne peut pas tuer le champion à répétition pendant que les autres attendent.
 - Changement de classe : double condition, le héros doit avoir atteint le niveau X (X = 4 pour le moment, à revoir avec l'équilibrage de l'XP) et avoir participé au combat contre le champion de fin de chapitre. Seuls les héros qui ont participé y ont droit.
 - Choix proposés : des classes accessibles avec peu de stats (pour ne bloquer personne qui a eu de mauvaises stats de départ) et des classes aux conditions plus dures (pour récompenser les joueurs qui investissent leurs points de façon créative).
@@ -72,6 +72,7 @@ Le lobby est une zone hors combat pour gérer l'équipement des personnages, cho
 4. Un lobby simple (interface HTML) : choisir les personnages et le niveau, puis lancer. Les niveaux définissent des cases de départ au lieu de héros précis.
 5. L'expérience et la montée de niveau, qui préparent le choix de classe au niveau X.
 6. L'équipement, qui modifie les stats, géré dans le lobby.
+7. Des onglets dans le lobby : Heroes (liste et invocation), Combination (transfert d'XP, qui remplace la suppression de héros) et Inventory (objets non équipés).
 
 L'univers du jeu est dans la Bible de l'univers, la référence unique partagée avec les autres projets : https://claude.ai/artifact/5DQAoGp56bztgddjvBzBYv (lien aussi dans `Univers.md`).
 
