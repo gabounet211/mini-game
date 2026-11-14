@@ -2,16 +2,23 @@ import { Character, createHero } from "./character"
 import { applyClassChange, canChangeClass, characterClasses, classChangeOffers } from "./characterClass"
 import { levels } from "./gltf"
 import { deriveAttributes, Stats } from "./stats"
-import { experienceToNextLevel } from "./rewards"
+import { addExperience, experienceToNextLevel, sacrificeExperience, sacrificeValue, transferExperience } from "./rewards"
 import { equipmentBonuses, equippedStats, itemName, items, itemSlots, ItemSlot } from "./items"
 import { SaveData, writeSave } from "./save"
+
+type LobbyTab = "heroes" | "combination" | "inventory"
+
+const tabs: [LobbyTab, string][] = [["heroes", "Heroes"], ["combination", "Combination"], ["inventory", "Inventory"]]
 
 export class Lobby {
     private element = document.createElement('div')
     private details = document.createElement('div')
     private team = new Set<Character>()
     private levelKey: string
-    private confirmingDelete: Character | undefined
+    private sacrifice: Character | undefined
+    private receiver: Character | undefined
+    private confirmingTransfer = false
+    private tab: LobbyTab = "heroes"
 
     constructor(private save: SaveData, private onStart: (team: Character[], levelKey: string) => void) {
         const unlocked = levels.keys().slice(0, save.unlockedLevels)
@@ -19,7 +26,8 @@ export class Lobby {
         this.element.id = 'lobby'
         this.details.id = 'heroWindow'
         document.body.append(this.element, this.details)
-        for (const character of save.roster.filter(character => this.canBring(character)).slice(0, this.teamLimit()))
+        const lastTeam = save.roster.filter(character => save.lastTeam.includes(character.id))
+        for (const character of (lastTeam.length ? lastTeam : save.roster).filter(character => this.canBring(character)).slice(0, this.teamLimit()))
             this.team.add(character)
         this.render()
     }
@@ -58,6 +66,43 @@ export class Lobby {
         })
         levelRow.append(levelSelect)
 
+        const teamInfo = document.createElement('div')
+        teamInfo.textContent = 'Team: ' + this.team.size + '/' + this.teamLimit()
+
+        const tabRow = document.createElement('div')
+        tabRow.className = 'lobbyTabs'
+        for (const [key, label] of tabs) {
+            const tabButton = document.createElement('button')
+            tabButton.textContent = label
+            tabButton.classList.toggle('activeTab', key === this.tab)
+            tabButton.addEventListener('click', () => {
+                this.tab = key
+                this.render()
+            })
+            tabRow.append(tabButton)
+        }
+
+        const content = document.createElement('div')
+        content.className = 'lobbyContent'
+        content.append(...(this.tab === "heroes" ? this.renderHeroes() : this.tab === "combination" ? this.renderCombination() : this.renderInventory()))
+
+        const startButton = document.createElement('button')
+        startButton.className = 'startButton'
+        startButton.textContent = 'Start'
+        startButton.disabled = this.team.size === 0 || this.team.size > this.teamLimit()
+        startButton.addEventListener('click', () => {
+            this.element.remove()
+            this.details.remove()
+            const team = this.save.roster.filter(character => this.team.has(character))
+            this.save.lastTeam = team.map(character => character.id)
+            writeSave(this.save)
+            this.onStart(team, this.levelKey)
+        })
+
+        this.element.replaceChildren(title, levelRow, teamInfo, tabRow, content, startButton)
+    }
+
+    private renderHeroes() {
         const summonRow = document.createElement('div')
         summonRow.className = 'lobbyRow'
         summonRow.textContent = 'Summon tokens: ' + this.save.summons
@@ -67,27 +112,101 @@ export class Lobby {
         summonButton.addEventListener('click', () => this.summon())
         summonRow.append(summonButton)
 
-        const inventoryInfo = document.createElement('div')
-        inventoryInfo.textContent = 'Inventory: ' + (this.save.inventory.map(key => itemName(key)).join(', ') || 'empty')
-
-        const teamInfo = document.createElement('div')
-        teamInfo.textContent = 'Team: ' + this.team.size + '/' + this.teamLimit()
-
         const heroList = document.createElement('div')
         heroList.className = 'heroList'
         heroList.append(...this.save.roster.map(character => this.createHeroRow(character)))
+        return [summonRow, heroList]
+    }
 
-        const startButton = document.createElement('button')
-        startButton.className = 'startButton'
-        startButton.textContent = 'Start'
-        startButton.disabled = this.team.size === 0 || this.team.size > this.teamLimit()
-        startButton.addEventListener('click', () => {
-            this.element.remove()
-            this.details.remove()
-            this.onStart(this.save.roster.filter(character => this.team.has(character)), this.levelKey)
+    private renderCombination() {
+        const intro = document.createElement('div')
+        intro.className = 'heroDetails'
+        intro.textContent = 'Sacrifice a hero to give all its experience (+' + sacrificeExperience + ' bonus) to another hero. Its equipment returns to the inventory.'
+
+        const sacrificeRow = this.createHeroSelect('Sacrifice', this.sacrifice, this.receiver, character => this.sacrifice = character)
+        const receiverRow = this.createHeroSelect('Receive', this.receiver, this.sacrifice, character => this.receiver = character)
+
+        const preview = document.createElement('div')
+        const sacrifice = this.sacrifice
+        const receiver = this.receiver
+        if (sacrifice && receiver) {
+            const amount = sacrificeValue(sacrifice)
+            const result = { ...receiver }
+            addExperience(result, amount)
+            preview.textContent = this.heroLabel(receiver) + ': +' + amount + ' XP' + (result.level > receiver.level ? ' (Level ' + receiver.level + ' → ' + result.level + ')' : '')
+        }
+
+        const combineButton = document.createElement('button')
+        combineButton.className = 'startButton'
+        combineButton.textContent = this.confirmingTransfer ? 'Confirm' : 'Combine'
+        combineButton.disabled = !sacrifice || !receiver
+        combineButton.addEventListener('click', () => {
+            if (!sacrifice || !receiver)
+                return
+            if (!this.confirmingTransfer) {
+                this.confirmingTransfer = true
+            } else {
+                transferExperience(this.save, sacrifice, receiver)
+                this.team.delete(sacrifice)
+                this.sacrifice = undefined
+                this.confirmingTransfer = false
+                this.showDetails(undefined)
+                writeSave(this.save)
+            }
+            this.render()
         })
+        return [intro, sacrificeRow, receiverRow, preview, combineButton]
+    }
 
-        this.element.replaceChildren(title, levelRow, summonRow, inventoryInfo, teamInfo, heroList, startButton)
+    private createHeroSelect(label: string, current: Character | undefined, other: Character | undefined, onChange: (character: Character | undefined) => void) {
+        const row = document.createElement('label')
+        row.className = 'lobbyRow'
+        row.textContent = label
+        const select = document.createElement('select')
+        for (const character of [undefined, ...this.save.roster.filter(character => character !== other)]) {
+            const option = document.createElement('option')
+            option.value = character?.id ?? ''
+            option.textContent = character ? this.heroLabel(character) : '-'
+            option.selected = character === current
+            select.append(option)
+        }
+        select.addEventListener('change', () => {
+            onChange(this.save.roster.find(character => character.id === select.value))
+            this.confirmingTransfer = false
+            this.render()
+        })
+        row.append(select)
+        return row
+    }
+
+    private heroLabel(character: Character) {
+        const characterClass = character.characterClass ? characterClasses[character.characterClass] : undefined
+        return (characterClass?.name ?? character.entity) + ' (' + character.rarity + ') - Level ' + character.level
+    }
+
+    private renderInventory() {
+        const counts = new Map<string, number>()
+        for (const key of this.save.inventory)
+            counts.set(key, (counts.get(key) ?? 0) + 1)
+        const list = document.createElement('div')
+        list.className = 'heroList'
+        if (!counts.size)
+            list.textContent = 'No unused items.'
+        for (const [key, count] of counts) {
+            const row = document.createElement('div')
+            row.className = 'heroRow'
+            const info = document.createElement('div')
+            info.className = 'heroInfo'
+            const name = document.createElement('div')
+            name.textContent = itemName(key) + (count > 1 ? ' ×' + count : '')
+            const details = document.createElement('div')
+            details.className = 'heroDetails'
+            details.textContent = items[key] ? this.formatName(items[key].slot) + ' · ' + this.formatBonuses(key) : 'Class change item'
+            info.append(name, details)
+            row.append(info)
+            list.append(row)
+        }
+        return [list]
     }
 
     private createHeroRow(character: Character) {
@@ -106,12 +225,11 @@ export class Lobby {
             this.render()
         })
 
-        const characterClass = character.characterClass ? characterClasses[character.characterClass] : undefined
         const attributes = deriveAttributes(equippedStats(character))
         const info = document.createElement('div')
         info.className = 'heroInfo'
         const name = document.createElement('div')
-        name.textContent = (characterClass?.name ?? character.entity) + ' (' + character.rarity + ') - Level ' + character.level
+        name.textContent = this.heroLabel(character)
         const details = document.createElement('div')
         details.className = 'heroDetails'
         details.textContent = 'HP ' + attributes.maxHealt + ' · AP ' + attributes.maxActionPoints + ' · Ms ' + attributes.moveRange
@@ -122,28 +240,7 @@ export class Lobby {
         info.append(name, details)
         info.addEventListener('click', () => this.showDetails(character))
 
-        const deleteButton = document.createElement('button')
-        deleteButton.textContent = this.confirmingDelete === character ? 'Confirm' : 'Delete'
-        deleteButton.disabled = this.save.roster.length <= 1
-        deleteButton.addEventListener('click', () => {
-            if (this.confirmingDelete !== character) {
-                this.confirmingDelete = character
-            } else {
-                for (const slot of itemSlots) {
-                    const item = character.equipment[slot]
-                    if (item)
-                        this.save.inventory.push(item)
-                }
-                this.save.roster.splice(this.save.roster.indexOf(character), 1)
-                this.showDetails(undefined)
-                this.team.delete(character)
-                this.confirmingDelete = undefined
-                writeSave(this.save)
-            }
-            this.render()
-        })
-
-        row.append(checkbox, info, deleteButton)
+        row.append(checkbox, info)
         return row
     }
 

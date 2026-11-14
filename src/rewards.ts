@@ -1,8 +1,8 @@
 import { Character } from "./character"
 import { characterClasses } from "./characterClass"
 import { Piece } from "./piece"
-import { loadSave, writeSave } from "./save"
-import { items, randomItem, itemName } from "./items"
+import { loadSave, SaveData, writeSave } from "./save"
+import { items, randomItem, itemName, itemSlots } from "./items"
 import { levels } from "./gltf"
 
 export const killExperience = 6
@@ -11,6 +11,7 @@ export const championExperience = 10
 export const statPointsPerLevel = 2
 export const summonRewardChance = 0.25
 export const lootChance = 0.5
+export const sacrificeExperience = 5
 
 export function experienceToNextLevel(level: number) {
     return 10 * level
@@ -26,6 +27,29 @@ export function addExperience(character: Character, amount: number) {
         levelsGained++
     }
     return levelsGained
+}
+
+export function totalExperience(character: Character) {
+    let total = character.experience
+    for (let level = 1; level < character.level; level++)
+        total += experienceToNextLevel(level)
+    return total
+}
+
+export function sacrificeValue(character: Character) {
+    return totalExperience(character) + sacrificeExperience
+}
+
+export function transferExperience(save: SaveData, from: Character, to: Character) {
+    if (from === to || !save.roster.includes(from) || !save.roster.includes(to))
+        return 0
+    for (const slot of itemSlots) {
+        const item = from.equipment[slot]
+        if (item)
+            save.inventory.push(item)
+    }
+    save.roster.splice(save.roster.indexOf(from), 1)
+    return addExperience(to, sacrificeValue(from))
 }
 
 function recordFinale(character: Character, levelKey: string, won: boolean) {

@@ -9,6 +9,7 @@ export interface SaveData {
     summons: number,
     inventory: string[],
     unlockedLevels: number,
+    lastTeam: string[],
 }
 
 export function loadSave(): SaveData {
@@ -23,12 +24,12 @@ export function loadSave(): SaveData {
                 championsDefeated: character.championsDefeated ?? [],
                 classChanges: character.classChanges ?? [],
             }))
-            return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [], unlockedLevels: data.unlockedLevels ?? 1 }
+            return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [], unlockedLevels: data.unlockedLevels ?? 1, lastTeam: data.lastTeam ?? [] }
         }
     } catch (error) {
         console.warn("Save could not be loaded", error)
     }
-    return { roster: [], summons: 0, inventory: [], unlockedLevels: 1 }
+    return { roster: [], summons: 0, inventory: [], unlockedLevels: 1, lastTeam: [] }
 }
 
 export function loadOrCreateSave(): SaveData {

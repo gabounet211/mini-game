@@ -23,6 +23,7 @@ describe("save", () => {
         const save = loadSave()
         expect(save.summons).toBe(0)
         expect(save.inventory).toEqual([])
+        expect(save.lastTeam).toEqual([])
         expect(save.roster[0]).toMatchObject({ statPoints: 0, finaleAttempts: [], championsDefeated: [], classChanges: [] })
         expect(save.roster[0].id).toBeTruthy()
     })
@@ -30,8 +31,10 @@ describe("save", () => {
     it("can be written and cleared", () => {
         const save = loadOrCreateSave()
         save.summons = 3
+        save.lastTeam = [save.roster[1].id]
         writeSave(save)
         expect(loadSave().summons).toBe(3)
+        expect(loadSave().lastTeam).toEqual([save.roster[1].id])
         clearSave()
         expect(loadSave().roster).toEqual([])
     })
