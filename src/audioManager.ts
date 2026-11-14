@@ -1,4 +1,4 @@
-import { Audio, AudioListener, AudioLoader, Object3D } from 'three';
+import { Audio, AudioListener, Object3D } from 'three';
 
 export type VolumeKind = 'main' | 'sfx' | 'music'
 
@@ -11,12 +11,16 @@ export class AudioManager {
 
     private listener = new AudioListener()
     private music = new Audio(this.listener)
+    private musicElement = document.createElement('audio')
     private loaded = false
     private started = false
 
     constructor(camera: Object3D, music = defaultMusic) {
         camera.add(this.listener)
         this.loadVolumes()
+        this.musicElement.loop = true
+        this.music.setMediaElementSource(this.musicElement)
+        this.applyVolumes()
         this.loadMusic(music)
 
         for (const type of ['pointerdown', 'keydown'])
@@ -24,16 +28,15 @@ export class AudioManager {
     }
 
     private loadMusic(file: string) {
-        new AudioLoader().load(file, (buffer) => {
-            this.music.setBuffer(buffer)
-            this.music.setLoop(true)
+        this.musicElement.oncanplay = () => {
             this.loaded = true
-            this.applyVolumes()
             this.tryPlay()
-        }, undefined, () => {
+        }
+        this.musicElement.onerror = () => {
             if (file !== defaultMusic)
                 this.loadMusic(defaultMusic)
-        })
+        }
+        this.musicElement.src = file
     }
 
     setVolume(kind: VolumeKind, value: number) {
@@ -91,7 +94,7 @@ export class AudioManager {
     }
 
     private tryPlay() {
-        if (this.started && this.loaded && !this.music.isPlaying)
-            this.music.play()
+        if (this.started && this.loaded && this.musicElement.paused)
+            this.musicElement.play().catch(error => console.warn("Music could not be played", error))
     }
 }
