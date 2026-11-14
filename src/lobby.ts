@@ -26,7 +26,8 @@ export class Lobby {
         this.element.id = 'lobby'
         this.details.id = 'heroWindow'
         document.body.append(this.element, this.details)
-        for (const character of save.roster.filter(character => this.canBring(character)).slice(0, this.teamLimit()))
+        const lastTeam = save.roster.filter(character => save.lastTeam.includes(character.id))
+        for (const character of (lastTeam.length ? lastTeam : save.roster).filter(character => this.canBring(character)).slice(0, this.teamLimit()))
             this.team.add(character)
         this.render()
     }
@@ -92,7 +93,10 @@ export class Lobby {
         startButton.addEventListener('click', () => {
             this.element.remove()
             this.details.remove()
-            this.onStart(this.save.roster.filter(character => this.team.has(character)), this.levelKey)
+            const team = this.save.roster.filter(character => this.team.has(character))
+            this.save.lastTeam = team.map(character => character.id)
+            writeSave(this.save)
+            this.onStart(team, this.levelKey)
         })
 
         this.element.replaceChildren(title, levelRow, teamInfo, tabRow, content, startButton)
