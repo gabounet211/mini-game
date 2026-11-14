@@ -7,6 +7,7 @@ export interface Level<M extends Record<string, Group>, E extends Record<string,
     title: string,
     chapter: string,
     finale?: boolean,
+    music?: string,
     map: keyof M,
     startCells: [x: number, y: number][]
     teamSize: number

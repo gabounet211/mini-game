@@ -1,8 +1,9 @@
-import { Audio, AudioListener, AudioLoader, Object3D } from 'three';
+import { Audio, AudioListener, Object3D } from 'three';
 
 export type VolumeKind = 'main' | 'sfx' | 'music'
 
 const musicGain = 0.1
+const defaultMusic = 'music_test.mp3'
 const volumesKey = "miniGameVolumes"
 
 export class AudioManager {
@@ -10,23 +11,32 @@ export class AudioManager {
 
     private listener = new AudioListener()
     private music = new Audio(this.listener)
+    private musicElement = document.createElement('audio')
     private loaded = false
     private started = false
 
-    constructor(camera: Object3D) {
+    constructor(camera: Object3D, music = defaultMusic) {
         camera.add(this.listener)
         this.loadVolumes()
-
-        new AudioLoader().load('music_test.mp3', (buffer) => {
-            this.music.setBuffer(buffer)
-            this.music.setLoop(true)
-            this.loaded = true
-            this.applyVolumes()
-            this.tryPlay()
-        })
+        this.musicElement.loop = true
+        this.music.setMediaElementSource(this.musicElement)
+        this.applyVolumes()
+        this.loadMusic(music)
 
         for (const type of ['pointerdown', 'keydown'])
             document.addEventListener(type, () => this.start(), { once: true })
+    }
+
+    private loadMusic(file: string) {
+        this.musicElement.oncanplay = () => {
+            this.loaded = true
+            this.tryPlay()
+        }
+        this.musicElement.onerror = () => {
+            if (file !== defaultMusic)
+                this.loadMusic(defaultMusic)
+        }
+        this.musicElement.src = file
     }
 
     setVolume(kind: VolumeKind, value: number) {
@@ -84,7 +94,7 @@ export class AudioManager {
     }
 
     private tryPlay() {
-        if (this.started && this.loaded && !this.music.isPlaying)
-            this.music.play()
+        if (this.started && this.loaded && this.musicElement.paused)
+            this.musicElement.play().catch(error => console.warn("Music could not be played", error))
     }
 }

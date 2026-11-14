@@ -154,6 +154,7 @@ export const levels = new Levels({
 
 const startCells: [number, number][] = [[14, 2], [15, 2], [16, 2], [15, 1], [14, 1], [16, 1], [14, 0], [15, 0], [16, 0]]
 const teamSize = 4
+const championMusic = 'championMusic.mp3'
 
 levels.createLevel("level1", {
     title: "Chapter 1 - 1",
@@ -217,6 +218,7 @@ levels.createLevel("level5", {
     title: "Chapter 1 - 5 (Champion)",
     chapter: "chapter1",
     finale: true,
+    music: championMusic,
     map: "map1",
     startCells,
     teamSize,
@@ -293,6 +295,7 @@ levels.createLevel("level10", {
     title: "Chapter 2 - 5 (Marco)",
     chapter: "chapter2",
     finale: true,
+    music: championMusic,
     map: "map1",
     startCells,
     teamSize,
