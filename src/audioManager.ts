@@ -3,6 +3,7 @@ import { Audio, AudioListener, AudioLoader, Object3D } from 'three';
 export type VolumeKind = 'main' | 'sfx' | 'music'
 
 const musicGain = 0.1
+const defaultMusic = 'music_test.mp3'
 const volumesKey = "miniGameVolumes"
 
 export class AudioManager {
@@ -13,20 +14,26 @@ export class AudioManager {
     private loaded = false
     private started = false
 
-    constructor(camera: Object3D) {
+    constructor(camera: Object3D, music = defaultMusic) {
         camera.add(this.listener)
         this.loadVolumes()
+        this.loadMusic(music)
 
-        new AudioLoader().load('music_test.mp3', (buffer) => {
+        for (const type of ['pointerdown', 'keydown'])
+            document.addEventListener(type, () => this.start(), { once: true })
+    }
+
+    private loadMusic(file: string) {
+        new AudioLoader().load(file, (buffer) => {
             this.music.setBuffer(buffer)
             this.music.setLoop(true)
             this.loaded = true
             this.applyVolumes()
             this.tryPlay()
+        }, undefined, () => {
+            if (file !== defaultMusic)
+                this.loadMusic(defaultMusic)
         })
-
-        for (const type of ['pointerdown', 'keydown'])
-            document.addEventListener(type, () => this.start(), { once: true })
     }
 
     setVolume(kind: VolumeKind, value: number) {

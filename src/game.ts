@@ -5,6 +5,7 @@ import { Selector } from "./selector";
 import { GameLogic } from "./gamelogic";
 import { AudioManager } from "./audioManager";
 import { Character } from "./character";
+import { levels } from "./gltf";
 
 
 
@@ -38,7 +39,7 @@ export class Game {
             1000
         );
         this.cameraControle = new CameraControle(this.camera, new Vector3(), new Vector3())
-        this.audio = new AudioManager(this.camera)
+        this.audio = new AudioManager(this.camera, levels.getLevel(levelKey).music)
 
         this.light = new AmbientLight(Color.NAMES.white, 1);
         this.scene.add(this.light)
