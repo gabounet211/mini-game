@@ -17,7 +17,6 @@ export interface PieceConfig {
 
     rarity: Rarity,
     characterClass?: string,
-    attackRange: number,
     actions ?: Action[],
     behavior ?: AiBehavior,
     animations ?: AnimationClip[],
@@ -37,7 +36,6 @@ export class Piece {
     maxHealt: number
     maxActionPoints: number
     moveRange: number
-    attackRange: number
     actions: Action[]
     name: string
     inspiresAllies: boolean
@@ -63,7 +61,6 @@ export class Piece {
         this.maxActionPoints = attributes.maxActionPoints
         this.moveRange = attributes.moveRange
         const characterClass = character.characterClass ? characterClasses[character.characterClass] : undefined
-        this.attackRange = characterClass?.attackRange ?? config.attackRange
         this.actions = characterClass?.actions ?? config.actions ?? []
         this.name = config.characterClass ? config.name : characterClass?.name ?? config.name
         this.inspiresAllies = !!characterClass?.inspiresAllies

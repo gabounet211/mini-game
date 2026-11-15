@@ -66,7 +66,6 @@ export const levels = new Levels({
     hero: {
         name: "Hero",
         rarity: "common",
-        attackRange: 1,
         ...heroModel,
         actions: [basicAttack],
     },
@@ -74,32 +73,28 @@ export const levels = new Levels({
         name: "Young Goblin",
         rarity: "common",
         behavior: goblinBehavior,
-        actions: [physicalAttack("goblinStab", 1)],
-        attackRange: 1,
+        actions: [physicalAttack("goblinStab", 1, 1)],
         ...goblinModel,
     },
     goblinWarrior: {
         name: "Goblin Warrior",
         rarity: "rare",
         behavior: goblinBehavior,
-        actions: [physicalAttack("goblinSlash", 1)],
-        attackRange: 1,
+        actions: [physicalAttack("goblinSlash", 1, 1)],
         ...goblinAdultModel,
     },
     goblinArcher: {
         name: "Goblin Archer",
         rarity: "rare",
         behavior: goblinBehavior,
-        actions: [physicalAttack("goblinShot", 1)],
-        attackRange: 4,
+        actions: [physicalAttack("goblinShot", 1, 4)],
         ...goblinAdultModel,
     },
     goblinChief: {
         name: "Goblin Chief",
         rarity: "legendary",
         behavior: goblinChiefBehavior,
-        actions: [magicalAttack("hexBolt", 2), physicalAttack("staffStrike", 1)],
-        attackRange: 3,
+        actions: [magicalAttack("hexBolt", 2, 3), physicalAttack("staffStrike", 1, 3)],
         ...goblinChiefModel,
     },
     banditBrawler: {
@@ -107,7 +102,6 @@ export const levels = new Levels({
         rarity: "rare",
         characterClass: "brawler",
         behavior: banditBehavior,
-        attackRange: 1,
         ...banditModel,
     },
     banditMercenary: {
@@ -115,7 +109,6 @@ export const levels = new Levels({
         rarity: "rare",
         characterClass: "mercenary",
         behavior: banditBehavior,
-        attackRange: 1,
         ...banditModel,
     },
     banditScout: {
@@ -123,7 +116,6 @@ export const levels = new Levels({
         rarity: "rare",
         characterClass: "scout",
         behavior: banditBehavior,
-        attackRange: 3,
         ...banditModel,
     },
     banditApprentice: {
@@ -131,7 +123,6 @@ export const levels = new Levels({
         rarity: "rare",
         characterClass: "apprentice",
         behavior: banditApprenticeBehavior,
-        attackRange: 3,
         ...banditModel,
     },
     banditBerserker: {
@@ -139,7 +130,6 @@ export const levels = new Levels({
         rarity: "legendary",
         characterClass: "berserker",
         behavior: banditBehavior,
-        attackRange: 1,
         ...banditLeaderModel,
     },
     marco: {
@@ -147,7 +137,6 @@ export const levels = new Levels({
         rarity: "legendary",
         characterClass: "warlord",
         behavior: marcoBehavior,
-        attackRange: 1,
         ...banditLeaderModel,
     },
 })

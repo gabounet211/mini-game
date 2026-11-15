@@ -34,11 +34,16 @@ export function nearestFirstInitiative(piece: Piece, game: Game) {
     }))
 }
 
+export function mainAttack(piece: Piece) {
+    return piece.actions.find(action => action.needsTarget && action.targets !== "ally")
+}
+
 export function canAttackFrom(piece: Piece, from: Vector2, target: Piece, game: Game) {
     const grid = game.gameLogic.grid
     const targetPos = grid.getPosition(target)
-    return !!targetPos
-        && Grid.manathanDistance(from, targetPos) <= piece.attackRange
+    const action = mainAttack(piece)
+    return !!targetPos && !!action
+        && Grid.manathanDistance(from, targetPos) <= action.range
         && grid.canSee(from, targetPos)
 }
 
@@ -159,7 +164,7 @@ export function approachTarget(piece: Piece, target: Piece, game: Game) {
 
 async function attackWhilePossible(piece: Piece, steps: AiSteps, game: Game) {
     const grid = game.gameLogic.grid
-    const action = piece.actions.find(element => element.needsTarget && element.targets !== "ally")
+    const action = mainAttack(piece)
     const from = grid.getPosition(piece)
     if (!action || !from)
         return
