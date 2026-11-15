@@ -7,11 +7,40 @@ export interface Action{
     name : string
     cost : number
     range : number
+    concentration? : number
+    cooldown? : number
     needsTarget? : boolean
     targets? : "enemy" | "ally"
 }
 
+export type ActionCosts = Pick<Action, "concentration" | "cooldown">
+
 export const moraleBonus = 1
+export const concentrationRegen = 2
+
+export function canUse(piece: Piece, action: Action) {
+    return piece.actionPoints >= action.cost
+        && piece.concentration >= (action.concentration ?? 0)
+        && !piece.cooldowns.get(action)
+}
+
+export function describeAction(action: Action) {
+    return [
+        action.cost + ' AP',
+        ...(action.concentration ? [action.concentration + ' concentration'] : []),
+        'range ' + action.range,
+        ...(action.cooldown ? ['cooldown ' + action.cooldown] : []),
+    ].join(' · ')
+}
+
+export function spendAction(piece: Piece, action: Action) {
+    piece.actionPoints -= action.cost
+    piece.concentration -= action.concentration ?? 0
+    if (action.cooldown) {
+        piece.cooldowns.set(action, action.cooldown)
+        piece.usedThisTurn.add(action)
+    }
+}
 
 export function allyBonus(game: Game, user: Piece) {
     const grid = game?.gameLogic?.grid
@@ -21,8 +50,9 @@ export function allyBonus(game: Game, user: Piece) {
     return inspired ? moraleBonus : 0
 }
 
-export function physicalAttack(name: string, cost: number, range: number): Action {
+export function physicalAttack(name: string, cost: number, range: number, costs: ActionCosts = {}): Action {
     return {
+        ...costs,
         name,
         cost,
         range,
@@ -35,8 +65,9 @@ export function physicalAttack(name: string, cost: number, range: number): Actio
     }
 }
 
-export function magicalAttack(name: string, cost: number, range: number): Action {
+export function magicalAttack(name: string, cost: number, range: number, costs: ActionCosts = {}): Action {
     return {
+        ...costs,
         name,
         cost,
         range,
@@ -49,10 +80,27 @@ export function magicalAttack(name: string, cost: number, range: number): Action
     }
 }
 
+export function hybridAttack(name: string, cost: number, range: number, costs: ActionCosts = {}): Action {
+    return {
+        ...costs,
+        name,
+        cost,
+        range,
+        needsTarget: true,
+        action(game, target, user) {
+            if (!target || !user)
+                return
+            target.takeDamage(1 + Math.floor(user.stats.strength / 2) + allyBonus(game, user), "physical", user)
+            target.takeDamage(2 + user.stats.intelligence, "magic", user)
+        },
+    }
+}
+
 export const drainDuration = 2
 
-export function willpowerDrain(name: string, cost: number, range: number): Action {
+export function willpowerDrain(name: string, cost: number, range: number, costs: ActionCosts = {}): Action {
     return {
+        ...costs,
         name,
         cost,
         range,
@@ -65,8 +113,9 @@ export function willpowerDrain(name: string, cost: number, range: number): Actio
     }
 }
 
-export function healing(name: string, cost: number, range: number): Action {
+export function healing(name: string, cost: number, range: number, costs: ActionCosts = {}): Action {
     return {
+        ...costs,
         name,
         cost,
         range,

@@ -1,4 +1,4 @@
-import { Action } from "./action"
+import { Action, canUse, describeAction, spendAction } from "./action"
 import { Game } from "./game"
 import { VolumeKind } from "./audioManager"
 import { Piece } from "./piece"
@@ -97,7 +97,7 @@ export class Ui {
             this.createSection('Attributes', [...(piece.drainTurns ? [['Willpower drained', '-' + piece.willpowerDrain + ' (' + piece.drainTurns + ' turns)'] as [string, string]] : []), ['Level', piece.character.level], ['Talent', piece.character.talent ? this.formatName(piece.character.talent) : '-'], ['Ms', piece.movePoints + ' / ' + piece.moveRange]]),
             this.createSection('Stats', Object.entries(piece.stats).map(([name, value]) => [this.formatName(name), value])),
             this.createSection('Equipment', [['Weapon', items[piece.character.equipment.weapon ?? '']?.name ?? '-'], ['Armor', items[piece.character.equipment.armor ?? '']?.name ?? '-'], ['Jewelry', items[piece.character.equipment.jewelry ?? '']?.name ?? '-']]),
-            this.createSection('Actions', [...(piece.inspiresAllies ? [['Inspire allies', '+1 damage'] as [string, string]] : []), ...piece.actions.map(action => [this.formatName(action.name), action.cost + ' AP · range ' + action.range] as [string, string])]),
+            this.createSection('Actions', [...(piece.inspiresAllies ? [['Inspire allies', '+1 damage'] as [string, string]] : []), ...piece.actions.map(action => [this.formatName(action.name), describeAction(action)] as [string, string])]),
         )
     }
 
@@ -130,7 +130,11 @@ export class Ui {
             return
         }
         this.setText(this.sheetHealth, 'HP: ' + piece.healt + '/' + piece.maxHealt)
-        this.setText(this.sheetPoints, 'AP: ' + piece.actionPoints + '/' + piece.maxActionPoints)
+        this.setText(this.sheetPoints, this.pointsText(piece))
+    }
+
+    private pointsText(piece: Piece) {
+        return 'AP: ' + piece.actionPoints + '/' + piece.maxActionPoints + (piece.usesConcentration ? ' · Concentration: ' + piece.concentration + '/' + piece.maxConcentration : '')
     }
 
     private setText(element: HTMLElement, text: string) {
@@ -253,26 +257,28 @@ export class Ui {
         const health = document.createElement('span')
         health.textContent = 'HP: ' + piece.healt + '/' + piece.maxHealt
         const points = document.createElement('span')
-        points.textContent = 'AP: ' + piece.actionPoints + '/' + piece.maxActionPoints
+        points.textContent = this.pointsText(piece)
         this.actionButtons.append(health, points)
 
         for (let index = 0; index < actions.length; index++) {
             const element = actions[index];
 
             const attackBouton = document.createElement('button');
-            attackBouton.textContent = this.formatName(element.name) + ' (' + element.cost + ')';
-            attackBouton.disabled = piece.actionPoints < element.cost
+            const cooldown = piece.cooldowns.get(element)
+            attackBouton.textContent = this.formatName(element.name) + ' (' + element.cost + (element.concentration ? ', ' + element.concentration + 'C' : '') + ')' + (cooldown ? ' · ' + cooldown + 't' : '');
+            attackBouton.title = describeAction(element)
+            attackBouton.disabled = !canUse(piece, element)
             this.actionButtons.append(attackBouton);
             this.actionButtonsByAction.set(element, attackBouton)
             attackBouton.addEventListener('click', () =>{
-                if (piece.actionPoints < element.cost)
+                if (!canUse(piece, element))
                     return
                 if (element.needsTarget) {
                     this.game.selector.startTargeting(element)
                     return
                 }
                 element.action(this.game, undefined, piece)
-                piece.actionPoints -= element.cost
+                spendAction(piece, element)
                 this.game.gameLogic.grid.removeDead()
                 if (piece.healt <= 0)
                     this.game.selector.unselect()

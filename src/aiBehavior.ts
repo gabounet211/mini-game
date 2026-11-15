@@ -2,6 +2,9 @@ import { Vector2 } from "three";
 import { Game } from "./game";
 import { Grid } from "./grid";
 import { Piece } from "./piece";
+import { canUse, spendAction } from "./action";
+
+const maxAttacksPerTurn = 10
 
 export interface AiBehavior {
     takeTurn(piece: Piece, game: Game): Promise<void>
@@ -34,16 +37,21 @@ export function nearestFirstInitiative(piece: Piece, game: Game) {
     }))
 }
 
-export function mainAttack(piece: Piece) {
-    return piece.actions.find(action => action.needsTarget && action.targets !== "ally")
+export function attackActions(piece: Piece) {
+    return piece.actions
+        .filter(action => action.needsTarget && action.targets !== "ally" && canUse(piece, action))
+        .sort((a, b) => b.cost - a.cost || b.range - a.range)
 }
 
-export function canAttackFrom(piece: Piece, from: Vector2, target: Piece, game: Game) {
+export function attackRange(piece: Piece) {
+    return Math.max(0, ...attackActions(piece).map(action => action.range))
+}
+
+export function canAttackFrom(piece: Piece, from: Vector2, target: Piece, game: Game, range = attackRange(piece)) {
     const grid = game.gameLogic.grid
     const targetPos = grid.getPosition(target)
-    const action = mainAttack(piece)
-    return !!targetPos && !!action
-        && Grid.manathanDistance(from, targetPos) <= action.range
+    return !!targetPos && range > 0
+        && Grid.manathanDistance(from, targetPos) <= range
         && grid.canSee(from, targetPos)
 }
 
@@ -164,19 +172,18 @@ export function approachTarget(piece: Piece, target: Piece, game: Game) {
 
 async function attackWhilePossible(piece: Piece, steps: AiSteps, game: Game) {
     const grid = game.gameLogic.grid
-    const action = mainAttack(piece)
     const from = grid.getPosition(piece)
-    if (!action || !from)
+    if (!from)
         return
-
-    for (let attacks = 0; attacks < piece.maxActionPoints && piece.actionPoints >= action.cost; attacks++) {
-        const reachable = grid.getPieces(!piece.player).filter(candidate => canAttackFrom(piece, from, candidate, game))
-        const target = steps.chooseTarget(piece, reachable, game)
-        if (!target)
+    for (let attacks = 0; attacks < maxAttacksPerTurn; attacks++) {
+        const choice = attackActions(piece)
+            .map(action => ({ action, target: steps.chooseTarget(piece, grid.getPieces(!piece.player).filter(candidate => canAttackFrom(piece, from, candidate, game, action.range)), game) }))
+            .find(choice => choice.target)
+        if (!choice?.target)
             return
-        action.action(game, target, piece)
-        piece.attack(target.obj.position)
-        piece.actionPoints -= action.cost
+        choice.action.action(game, choice.target, piece)
+        piece.attack(choice.target.obj.position)
+        spendAction(piece, choice.action)
         grid.removeDead()
         await piece.wait()
     }
