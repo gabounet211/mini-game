@@ -1,5 +1,5 @@
 import { Character, createHero } from "./character"
-import { applyClassChange, canChangeClass, characterClasses, classChangeOffers } from "./characterClass"
+import { applyClassChange, canChangeClass, characterClasses, classChangeOffers, closestClasses, missingStats } from "./characterClass"
 import { levels } from "./gltf"
 import { deriveAttributes, Stats } from "./stats"
 import { addExperience, experienceToNextLevel, sacrificeExperience, sacrificeValue, transferExperience } from "./rewards"
@@ -275,13 +275,19 @@ export class Lobby {
         const offers = classChangeOffers(character, this.save.inventory)
         if (!offers.length) {
             const text = document.createElement('div')
-            text.textContent = character.rarity === "legendary" ? 'A special item is needed to change class.' : 'No class available.'
+            text.textContent = character.rarity === "legendary" ? 'A special item is needed to change class.' : 'No class available yet. Closest:'
             section.append(text)
+            for (const key of closestClasses(character)) {
+                const row = document.createElement('div')
+                row.className = 'heroDetails'
+                row.textContent = characterClasses[key].name + ': ' + missingStats(character, key).map(([stat, value]) => '+' + value + ' ' + this.formatName(stat)).join(', ')
+                section.append(row)
+            }
         }
         for (const key of offers) {
             const characterClass = characterClasses[key]
             const button = document.createElement('button')
-            const minimums = Object.entries(characterClass.requirement?.minimums ?? {}).map(([stat, value]) => this.formatName(stat) + ' ' + value)
+            const minimums = Object.entries(characterClass.minimums ?? {}).map(([stat, value]) => this.formatName(stat) + ' ' + value)
             button.textContent = 'Become ' + characterClass.name + (minimums.length ? ' (' + minimums.join(', ') + ')' : '')
             button.addEventListener('click', () => {
                 if (!applyClassChange(character, key, this.save.inventory))

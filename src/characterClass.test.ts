@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { Character, createHero } from "./character"
-import { applyClassChange, canChangeClass, characterClasses, classChangeOffers } from "./characterClass"
+import { applyClassChange, canChangeClass, characterClasses, classChangeOffers, closestClasses, missingStats } from "./characterClass"
 import { Stats } from "./stats"
 
 function hero(characterClass: string, rarity: Character["rarity"], stats: Partial<Stats>): Character {
@@ -18,7 +18,7 @@ describe("createHero", () => {
             const character = createHero("hero")
             const characterClass = characterClasses[character.characterClass!]
             expect(characterClass.starting).toBe(true)
-            expect(characterClass.tier).toBe({ common: 1, rare: 2, legendary: 3 }[character.rarity])
+            expect(characterClass.tier).toBe({ common: 1, uncommon: 2, rare: 3, legendary: 4 }[character.rarity])
         }
     })
 })
@@ -36,24 +36,29 @@ describe("canChangeClass", () => {
 })
 
 describe("classChangeOffers", () => {
-    it("offers the easy class of the highest stat", () => {
-        expect(classChangeOffers(hero("lumberjack", "common", { strength: 8 }), [])).toEqual(["soldier"])
+    it("offers a class once all its minimums are met", () => {
+        expect(classChangeOffers(hero("lumberjack", "common", { strength: 5, resistance: 4 }), [])).toEqual(["soldier"])
+        expect(classChangeOffers(hero("lumberjack", "common", { strength: 5, resistance: 3 }), [])).toEqual([])
     })
 
-    it("adds the demanding class when its minimum is met", () => {
-        const offers = classChangeOffers(hero("lumberjack", "common", { intelligence: 8, strength: 6 }), [])
-        expect(offers).toContain("mageblade")
-        expect(offers).toContain("apprentice")
+    it("offers every class whose minimums are met", () => {
+        const offers = classChangeOffers(hero("apprentice", "uncommon", { intelligence: 7, knowledge: 6, strength: 6, dexterity: 4 }), [])
+        expect(offers).toEqual(["scholar", "mageblade"])
     })
 
-    it("never offers more than 3 classes", () => {
-        const offers = classChangeOffers(hero("farmer", "common", { strength: 5, resistance: 5, constitution: 5, willpower: 5 }), [])
-        expect(offers.length).toBeLessThanOrEqual(3)
-        expect(offers.length).toBeGreaterThan(0)
+    it("shows the closest classes and the missing stats", () => {
+        const character = hero("lumberjack", "common", { strength: 3, resistance: 4 })
+        expect(closestClasses(character)[0]).toBe("soldier")
+        expect(missingStats(character, "soldier")).toEqual([["strength", 2]])
     })
 
-    it("stops commons at tier 3", () => {
-        expect(classChangeOffers(hero("knight", "common", { resistance: 9 }), [])).toEqual([])
+    it("stops commons at the rare tier", () => {
+        expect(classChangeOffers(hero("guard", "common", { resistance: 9 }), [])).toEqual([])
+        expect(closestClasses(hero("guard", "common", { resistance: 9 }))).toEqual([])
+    })
+
+    it("lets rares reach the legendary tier", () => {
+        expect(classChangeOffers(hero("guard", "rare", { resistance: 8, strength: 6 }), [])).toEqual(["knight"])
     })
 
     it("needs the class item for legendaries", () => {
@@ -64,9 +69,8 @@ describe("classChangeOffers", () => {
 
 describe("bard and skald", () => {
     it("always offers Skald to a bard", () => {
-        const offers = classChangeOffers(hero("bard", "rare", { strength: 9 }), [])
-        expect(offers[0]).toBe("skald")
-        expect(offers).toContain("berserker")
+        expect(classChangeOffers(hero("bard", "uncommon", {}), [])).toEqual(["skald"])
+        expect(classChangeOffers(hero("bard", "uncommon", { strength: 7, dexterity: 5, constitution: 4 }), [])).toEqual(["skald", "mercenary"])
     })
 })
 

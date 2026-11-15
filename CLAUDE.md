@@ -24,15 +24,20 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 ### Système de classes
 
 - La classe de départ dépend de la rareté et explique, dans le lore, ce que le personnage faisait avant le jeu (et donc ses stats). Paliers :
-  - palier 1 (commun) : métiers de villageois (fermier, bûcheron, chasseur…) ;
-  - palier 2 (rare) : classes spécialisées (soldat, apprenti, soigneur…) ;
-  - palier 3 (légendaire) : classes au gameplay plus unique (berserker, élémentaliste, cleric…) ;
-  - palier 4 et plus : évolutions avancées.
+  - palier 1 (commun, 24 points de stats) : métiers de villageois (Farmer, Lumberjack, Hunter) ;
+  - palier 2 (peu commun, 28 points) : classes qu'on retrouve un peu partout dans l'univers (Soldier, Apprentice, Bard, Scout, Tracker) ;
+  - palier 3 (rare, 32 points) : classes spécialisées, souvent liées à une nation (Healer, Guard, Brawler, Scholar et leurs variantes exigeantes) ;
+  - palier 4 (légendaire, 40 points) : classes au gameplay plus unique (Berserker, Elementalist, Cleric…) ;
+  - palier 5 : évolutions des légendaires (Ravager, Archmage, Saint).
+- Chances d'invocation : 50 % commun, 28 % peu commun, 15 % rare, 7 % légendaire.
+- Le palier peu commun sépare aussi des classes qui n'auront pas le même niveau de puissance quand elles auront leurs capacités propres.
 - La classe oriente le tirage des stats (préférences par classe). Les classes communes ont une chance d'avoir un talent caché : une stat « hors norme » (ex. un bûcheron intelligent), qui ouvre des évolutions différentes.
 - Chaque classe a ses actions, avec leur propre nom. Pour le moment elles fonctionnent comme les attaques actuelles ; on ajoutera des effets propres quand la liste d'actions sera plus grande.
 - À chaque niveau, le joueur répartit lui-même ses points de stats.
-- Au niveau X (puis à d'autres paliers), de nouvelles classes sont proposées selon la stat la plus haute et des minimums dans d'autres stats (ex. intelligence la plus haute → classes magiques ; avec une force au-dessus d'un seuil → mageblade).
-- Un héros commun peut monter jusqu'au palier des classes légendaires de départ (palier 3, plafond à revoir). Un légendaire commence à ce palier et a donc accès plus tôt aux classes uniques.
+- Au niveau X (puis à d'autres paliers), toutes les classes du palier suivant dont le héros atteint les statistiques minimums sont proposées (ex. Soldier : force 5 et résistance 4). Les classes faciles demandent 2 stats, les classes complexes des valeurs plus élevées ou 3 à 4 stats. Ça propose plus de classes et permet plus de diversité.
+- Plafond : un commun peut monter au plus jusqu'au palier rare (palier 3), un peu commun ou un rare jusqu'au palier légendaire (palier 4). Avec un seul changement de classe pour le moment, un commun s'arrête au palier 2. Un légendaire commence au palier 4 et a donc accès plus tôt aux classes uniques.
+- Les seuils sont pensés pour qu'un héros atteigne au moins une classe en plaçant ses 6 points de stats des niveaux 2 à 4 (vérifié par simulation). S'il n'atteint aucune classe, le lobby montre les 3 classes les plus proches et les stats qui manquent ; il peut continuer à monter de niveau pour les atteindre. D'autres classes répandues seront ajoutées.
+- À ajouter : une classe plus commune avant le Healer.
 - Lien avec les nations : certaines classes sont plus présentes dans certaines nations (plus de chevaliers dans la nation bleue, etc.), mais les classes communes et certaines rares existent dans plusieurs nations, pour ne pas priver un joueur d'un type de classe. À approfondir plus tard.
 
 ### Chapitres et changement de classe
@@ -45,9 +50,10 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 - Légendaires : leur changement de classe passe par un objet spécifique (ex. un cleric avec un objet sacré devient un saint).
 - Défaite au niveau 5 : les héros emmenés ne peuvent pas refaire le niveau et perdent leur chance de changer de classe pour ce chapitre. La fin du chapitre suivant leur donnera une nouvelle chance. Il faut donc gagner contre le champion.
 - Objet légendaire : le champion laisse obligatoirement tomber l'objet de changement de classe si un héros légendaire participe au combat. Le légendaire doit aussi remplir les deux autres conditions (niveau X et victoire contre le champion).
-- Liste des classes validée pour une première version testable (noms en anglais, seuils à faire tester). Chaque branche correspond à la stat la plus haute, avec une classe facile et une classe exigeante (minimum dans une autre stat) :
-  - palier 2 (pour les communs) : Soldier / Mercenary, Guard / Shieldbearer, Brawler / Warden, Healer / Exorcist, Scholar / Alchemist, Apprentice / Mageblade, Scout / Duelist, Tracker / Sharpshooter ;
-  - palier 3 (pour les rares) : Berserker / Warlord, Knight / Paladin, Juggernaut / Gladiator, Cleric / Inquisitor, Sage / Runesmith, Elementalist / Spellblade, Ranger / Assassin, Marksman / Beastmaster.
+- Liste des classes validée pour une première version testable (noms en anglais, seuils à faire tester dans `minimums`, `src/characterClass.ts`). Seuils actuels : palier 2 environ 5 et 4 ; palier 3 6 et 5 (faciles) ou 7, 5 et 4 (exigeantes) ; palier 4 8 et 6 (faciles) ou 9, 7 et 5, parfois 4 stats (exigeantes) :
+  - palier 2 (pour les communs) : Soldier, Apprentice, Bard, Scout, Tracker ;
+  - palier 3 (pour les peu communs) : Mercenary, Guard / Shieldbearer, Brawler / Warden, Healer / Exorcist, Scholar / Alchemist, Mageblade, Duelist, Sharpshooter, et le Skald pour le Bard ;
+  - palier 4 (pour les rares) : Berserker / Warlord, Knight / Paladin, Juggernaut / Gladiator, Cleric / Inquisitor, Sage / Runesmith, Elementalist / Spellblade, Ranger / Assassin, Marksman / Beastmaster.
 - Des classes et des conditions pourront être ajoutées ou retirées plus tard.
 
 ### Chapitres prévus et ennemis
@@ -60,7 +66,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
   - Les bandits utilisent les classes des héros : Brawler, Mercenary et Scout de rareté rare pour les troupes, un Berserker fidèle (mini-boss du niveau 2-4), et Marco avec deux Apprentice au niveau 2-5.
   - Combat plus ordonné : les bandits les plus proches des héros jouent en premier. Le berserker fonce sur la cible la plus proche. Marco va au corps à corps, mais joue après ses troupes. Les apprentis restent derrière Marco et jouent en dernier.
 - Pas de deuxième changement de classe pour le moment (le système est à repenser) : un héros ne change de classe qu'une fois. Battre le champion du chapitre 2 donne quand même leur chance aux héros qui ne l'ont pas encore eue.
-- Bard (classe de départ rare) et Skald (évolution du Bard, toujours proposée à un Bard). Seul le Skald a la capacité unique : pour le moment +1 dégât sur les attaques des alliés tant qu'un Skald est en vie (ne se cumule pas, ne s'applique pas à lui-même). L'action dissonantChord du Bard ne fait pas de dégâts : elle réduit la volonté de la cible de (volonté du Bard ÷ 3, au moins 1) pendant 2 tours de la cible, sans cumul (relancer remet seulement la durée à 2).
+- Bard (classe de départ peu commune, palier 2) et Skald (évolution du Bard au palier 3, toujours proposée à un Bard). Seul le Skald a la capacité unique : pour le moment +1 dégât sur les attaques des alliés tant qu'un Skald est en vie (ne se cumule pas, ne s'applique pas à lui-même). L'action dissonantChord du Bard ne fait pas de dégâts : elle réduit la volonté de la cible de (volonté du Bard ÷ 3, au moins 1) pendant 2 tours de la cible, sans cumul (relancer remet seulement la durée à 2).
 - L'histoire de chaque classe (ce qu'elle faisait avant le jeu et sa nation) est dans la Bible de l'univers, onglet Classes (lien dans `Univers.md`).
 
 ### Plan du lobby
