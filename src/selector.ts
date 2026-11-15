@@ -184,25 +184,32 @@ export class Selector {
         if (this.selectedMov)
             this.showRange(this.selectedMov, Color.NAMES.aquamarine, 0)
 
-        this.selectedAttack = this.gameLogic.grid.attackFill(this.selectedPos, piece.attackRange);
-        this.attackBlocks = this.showRange(this.selectedAttack, Color.NAMES.red, 0.001)
+        this.showAttackRange(Math.max(0, ...piece.actions.map(action => action.range)), Color.NAMES.red)
+    }
+
+    private showAttackRange(range: number, color: number) {
+        if (!this.selected)
+            return
+        this.block.remove(...this.attackBlocks)
+        this.selectedAttack = this.gameLogic.grid.attackFill(this.selectedPos, range);
+        this.attackBlocks = this.showRange(this.selectedAttack, color, 0.001)
+    }
+
+    private resetAttackRange() {
+        if (this.selected)
+            this.showAttackRange(Math.max(0, ...this.selected.actions.map(action => action.range)), Color.NAMES.red)
     }
 
     startTargeting(action: Action) {
         if (this.targetingAction === action) {
             this.targetingAction = undefined
-            this.setAttackColor(Color.NAMES.red)
+            this.resetAttackRange()
             this.ui.setTargeting(undefined)
             return
         }
         this.targetingAction = action
-        this.setAttackColor(action.targets === "ally" ? Color.NAMES.limegreen : Color.NAMES.red)
+        this.showAttackRange(action.range, action.targets === "ally" ? Color.NAMES.limegreen : Color.NAMES.red)
         this.ui.setTargeting(action)
-    }
-
-    private setAttackColor(color: number) {
-        for (const block of this.attackBlocks)
-            block.material.color.set(color)
     }
 
     private target() {
@@ -210,12 +217,12 @@ export class Selector {
         const action = this.targetingAction
         const target = this.hoveredCase
         this.targetingAction = undefined
-        this.setAttackColor(Color.NAMES.red)
+        this.resetAttackRange()
         this.ui.setTargeting(undefined)
         const wantsAlly = action?.targets === "ally"
         if (!piece || !action || !(target instanceof Piece) || (target.player === piece.player) !== wantsAlly)
             return
-        const inRange = Grid.manathanDistance(this.selectedPos, this.grid_pos) <= piece.attackRange && this.selectedAttack?.get(this.grid_pos)
+        const inRange = Grid.manathanDistance(this.selectedPos, this.grid_pos) <= action.range && this.selectedAttack?.get(this.grid_pos)
         if (!inRange && !(wantsAlly && target === piece))
             return
 

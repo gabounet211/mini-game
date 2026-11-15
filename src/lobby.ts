@@ -259,10 +259,10 @@ export class Lobby {
         this.details.replaceChildren(
             title,
             this.createSection('Progress', [['Level', character.level], ['Experience', character.experience + '/' + experienceToNextLevel(character.level)], ['Stat points', character.statPoints], ['Talent', character.talent ? this.formatName(character.talent) : '-']]),
-            this.createSection('Attributes', [['HP', attributes.maxHealt], ['AP', attributes.maxActionPoints], ['Ms', attributes.moveRange], ['Range', characterClass?.attackRange ?? '-']]),
+            this.createSection('Attributes', [['HP', attributes.maxHealt], ['AP', attributes.maxActionPoints], ['Ms', attributes.moveRange]]),
             this.createStatsSection(character),
             this.createEquipmentSection(character),
-            this.createSection('Actions', [...(characterClass?.inspiresAllies ? [['Inspire allies', '+1 damage'] as [string, string]] : []), ...(characterClass?.actions ?? []).map(action => [this.formatName(action.name), action.cost + ' AP'] as [string, string])]),
+            this.createSection('Actions', [...(characterClass?.inspiresAllies ? [['Inspire allies', '+1 damage'] as [string, string]] : []), ...(characterClass?.actions ?? []).map(action => [this.formatName(action.name), action.cost + ' AP · range ' + action.range] as [string, string])]),
             ...this.createClassChangeSection(character),
             closeButton,
         )

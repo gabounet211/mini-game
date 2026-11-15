@@ -6,7 +6,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 
 - Jeu au tour par tour sur un échiquier (TypeScript, Three.js, Vite).
 - Site de test : la version de `main` est publiée automatiquement sur https://gabounet211.github.io/mini-game/ à chaque fusion (GitHub Pages). Chaque push lance aussi la vérification (types, construction, tests Vitest).
-- Portée d'attaque (`attackRange`) : elle n'a jamais été utilisée. Je veux qu'elle tienne compte de certains types d'objets bloquants (on ne peut pas passer par-dessus), sur le même principe que le déplacement des unités.
+- Portée : chaque action a sa propre portée (`range`), et non plus la classe. Elle tient compte des objets qui bloquent la vue (on ne peut pas tirer par-dessus).
 - Système de tour : à intégrer dans le jeu. Tour camp par camp : tous les personnages d'un camp jouent dans l'ordre voulu, puis le tour passe à l'autre camp. Pendant son tour, un personnage a un déplacement gratuit égal à son Ms, qu'il peut fractionner au cours du tour (ex. Ms 5 : 2 cases, une action, puis 3 cases) et des actions qui coûtent des points d'action (PA). Les PA sont une valeur unique à chaque personnage (les personnages vont devenir des personnages à statistiques et classe aléatoires) et reviennent au maximum à chaque tour.
 - Placement : avant le premier tour, le joueur place ses héros dans la zone de départ du niveau (`startCells`, un carré de 3x3 pour le moment). La zone peut être plus grande que l'équipe : `teamSize` fixe le nombre de héros.
 - Ordre de tour des ennemis : il dépend du comportement de leur race (les gobelins jouent dans un ordre au hasard, comme une bande désorganisée). On ne peut pas traverser les cases de ses alliés : c'est voulu, pour la profondeur stratégique.
@@ -32,7 +32,13 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 - Chances d'invocation : 50 % commun, 28 % peu commun, 15 % rare, 7 % légendaire.
 - Le palier peu commun sépare aussi des classes qui n'auront pas le même niveau de puissance quand elles auront leurs capacités propres.
 - La classe oriente le tirage des stats (préférences par classe). Les classes communes ont une chance d'avoir un talent caché : une stat « hors norme » (ex. un bûcheron intelligent), qui ouvre des évolutions différentes.
-- Chaque classe a ses actions, avec leur propre nom. Pour le moment elles fonctionnent comme les attaques actuelles ; on ajoutera des effets propres quand la liste d'actions sera plus grande.
+- Chaque classe a ses actions, avec leur propre nom. Règles décidées (détail classe par classe dans le doc « Actions des classes », https://claude.ai/artifact/5ct4Y4Gi5NwxqUydJ1CAYd) :
+  - 2 actions au palier 1, 3 au palier 2, 4 à 5 aux paliers supérieurs ;
+  - en changeant de classe, le héros change toutes ses actions ;
+  - les actions de base n'ont pas de temps de recharge, les actions plus puissantes en ont un ;
+  - les classes magiques (DPS magiques, healers, soutiens magiques) utilisent une ressource appelée concentration ;
+  - rôles : Tank, Healer, Soutien magique, DPS magique, DPS physique ;
+  - à venir : effets qui durent quelques tours et zones d'effet.
 - À chaque niveau, le joueur répartit lui-même ses points de stats.
 - Au niveau X (puis à d'autres paliers), toutes les classes du palier suivant dont le héros atteint les statistiques minimums sont proposées (ex. Soldier : force 5 et résistance 4). Les classes faciles demandent 2 stats, les classes complexes des valeurs plus élevées ou 3 à 4 stats. Ça propose plus de classes et permet plus de diversité.
 - Plafond : un commun peut monter au plus jusqu'au palier rare (palier 3), un peu commun ou un rare jusqu'au palier légendaire (palier 4). Avec un seul changement de classe pour le moment, un commun s'arrête au palier 2. Un légendaire commence au palier 4 et a donc accès plus tôt aux classes uniques.

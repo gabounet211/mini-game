@@ -6,6 +6,7 @@ export interface Action{
     action(game: Game, target?: Piece, user?: Piece) : void
     name : string
     cost : number
+    range : number
     needsTarget? : boolean
     targets? : "enemy" | "ally"
 }
@@ -20,10 +21,11 @@ export function allyBonus(game: Game, user: Piece) {
     return inspired ? moraleBonus : 0
 }
 
-export function physicalAttack(name: string, cost: number): Action {
+export function physicalAttack(name: string, cost: number, range: number): Action {
     return {
         name,
         cost,
+        range,
         needsTarget: true,
         action(game, target, user) {
             if (!target || !user)
@@ -33,10 +35,11 @@ export function physicalAttack(name: string, cost: number): Action {
     }
 }
 
-export function magicalAttack(name: string, cost: number): Action {
+export function magicalAttack(name: string, cost: number, range: number): Action {
     return {
         name,
         cost,
+        range,
         needsTarget: true,
         action(game, target, user) {
             if (!target || !user)
@@ -48,10 +51,11 @@ export function magicalAttack(name: string, cost: number): Action {
 
 export const drainDuration = 2
 
-export function willpowerDrain(name: string, cost: number): Action {
+export function willpowerDrain(name: string, cost: number, range: number): Action {
     return {
         name,
         cost,
+        range,
         needsTarget: true,
         action(_game, target, user) {
             if (!target || !user)
@@ -61,10 +65,11 @@ export function willpowerDrain(name: string, cost: number): Action {
     }
 }
 
-export function healing(name: string, cost: number): Action {
+export function healing(name: string, cost: number, range: number): Action {
     return {
         name,
         cost,
+        range,
         needsTarget: true,
         targets: "ally",
         action(_game, target, user) {
@@ -75,5 +80,5 @@ export function healing(name: string, cost: number): Action {
     }
 }
 
-export const basicAttack = physicalAttack("basicAttack", 1)
-export const magicAttack = magicalAttack("magicAttack", 2)
+export const basicAttack = physicalAttack("basicAttack", 1, 1)
+export const magicAttack = magicalAttack("magicAttack", 2, 3)

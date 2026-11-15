@@ -5,6 +5,7 @@ import { Piece, PieceConfig } from "./piece"
 import { createCharacter } from "./character"
 import { delayedInitiative, nearestFirstInitiative, stayBehind, stayBehindAllies, weakestInRange } from "./aiBehavior"
 import { Game } from "./game"
+import { physicalAttack } from "./action"
 
 function setup(size: number, pieces: [x: number, y: number, piece: Piece][]) {
     const grid = Object.create(Grid.prototype) as Grid
@@ -19,7 +20,7 @@ function setup(size: number, pieces: [x: number, y: number, piece: Piece][]) {
 }
 
 function piece(player: boolean, attackRange: number, dexterity = 4, name = "test") {
-    const config: PieceConfig = { obj: new Object3D(), name, offset: 0, rarity: "common", attackRange, actions: [] }
+    const config: PieceConfig = { obj: new Object3D(), name, offset: 0, rarity: "common", actions: [physicalAttack("test", 1, attackRange)] }
     const character = createCharacter("test", "common")
     character.stats = { strength: 2, resistance: 1, constitution: 5, willpower: 3, knowledge: 1, intelligence: 1, dexterity, perception: 1 }
     return new Piece(config, character, player)
