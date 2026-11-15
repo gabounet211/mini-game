@@ -184,7 +184,8 @@ export class Selector {
         if (this.selectedMov)
             this.showRange(this.selectedMov, Color.NAMES.aquamarine, 0)
 
-        this.showAttackRange(Math.max(0, ...piece.actions.map(action => action.range)), Color.NAMES.red)
+        this.attackBlocks = []
+        this.selectedAttack = undefined
     }
 
     private showAttackRange(range: number, color: number) {
@@ -195,15 +196,16 @@ export class Selector {
         this.attackBlocks = this.showRange(this.selectedAttack, color, 0.001)
     }
 
-    private resetAttackRange() {
-        if (this.selected)
-            this.showAttackRange(Math.max(0, ...this.selected.actions.map(action => action.range)), Color.NAMES.red)
+    private hideAttackRange() {
+        this.block.remove(...this.attackBlocks)
+        this.attackBlocks = []
+        this.selectedAttack = undefined
     }
 
     startTargeting(action: Action) {
         if (this.targetingAction === action) {
             this.targetingAction = undefined
-            this.resetAttackRange()
+            this.hideAttackRange()
             this.ui.setTargeting(undefined)
             return
         }
@@ -216,13 +218,13 @@ export class Selector {
         const piece = this.selected
         const action = this.targetingAction
         const target = this.hoveredCase
+        const inRange = !!action && Grid.manathanDistance(this.selectedPos, this.grid_pos) <= action.range && this.selectedAttack?.get(this.grid_pos)
         this.targetingAction = undefined
-        this.resetAttackRange()
+        this.hideAttackRange()
         this.ui.setTargeting(undefined)
         const wantsAlly = action?.targets === "ally"
         if (!piece || !action || !(target instanceof Piece) || (target.player === piece.player) !== wantsAlly)
             return
-        const inRange = Grid.manathanDistance(this.selectedPos, this.grid_pos) <= action.range && this.selectedAttack?.get(this.grid_pos)
         if (!inRange && !(wantsAlly && target === piece))
             return
 
