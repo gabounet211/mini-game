@@ -18,7 +18,7 @@ describe("createHero", () => {
             const character = createHero("hero")
             const characterClass = characterClasses[character.characterClass!]
             expect(characterClass.starting).toBe(true)
-            expect(characterClass.tier).toBe({ common: 1, rare: 2, legendary: 3 }[character.rarity])
+            expect(characterClass.tier).toBe({ common: 1, uncommon: 2, rare: 3, legendary: 4 }[character.rarity])
         }
     })
 })
@@ -41,9 +41,8 @@ describe("classChangeOffers", () => {
     })
 
     it("adds the demanding class when its minimum is met", () => {
-        const offers = classChangeOffers(hero("lumberjack", "common", { intelligence: 8, strength: 6 }), [])
+        const offers = classChangeOffers(hero("apprentice", "uncommon", { intelligence: 8, strength: 6 }), [])
         expect(offers).toContain("mageblade")
-        expect(offers).toContain("apprentice")
     })
 
     it("never offers more than 3 classes", () => {
@@ -52,8 +51,17 @@ describe("classChangeOffers", () => {
         expect(offers.length).toBeGreaterThan(0)
     })
 
-    it("stops commons at tier 3", () => {
-        expect(classChangeOffers(hero("knight", "common", { resistance: 9 }), [])).toEqual([])
+    it("stops commons at the rare tier", () => {
+        expect(classChangeOffers(hero("guard", "common", { resistance: 9 }), [])).toEqual([])
+    })
+
+    it("lets rares reach the legendary tier", () => {
+        expect(classChangeOffers(hero("guard", "rare", { resistance: 9 }), [])).toEqual(["knight"])
+    })
+
+    it("offers the closest classes when no class matches the highest stat", () => {
+        const offers = classChangeOffers(hero("farmer", "common", { constitution: 9, strength: 6, dexterity: 4 }), [])
+        expect(offers).toEqual(["soldier", "scout", "apprentice"])
     })
 
     it("needs the class item for legendaries", () => {
@@ -64,9 +72,9 @@ describe("classChangeOffers", () => {
 
 describe("bard and skald", () => {
     it("always offers Skald to a bard", () => {
-        const offers = classChangeOffers(hero("bard", "rare", { strength: 9 }), [])
+        const offers = classChangeOffers(hero("bard", "uncommon", { strength: 9, dexterity: 5 }), [])
         expect(offers[0]).toBe("skald")
-        expect(offers).toContain("berserker")
+        expect(offers).toContain("mercenary")
     })
 })
 

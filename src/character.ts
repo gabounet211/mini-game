@@ -28,9 +28,10 @@ export function createId() {
 }
 
 export const rarityChances: Record<Rarity, number> = {
-    common: 0.6,
-    rare: 0.3,
-    legendary: 0.1,
+    common: 0.5,
+    uncommon: 0.28,
+    rare: 0.15,
+    legendary: 0.07,
 }
 
 export function rollRarity(random = Math.random): Rarity {

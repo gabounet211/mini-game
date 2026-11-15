@@ -9,10 +9,11 @@ export interface Stats {
     perception: number,
 }
 
-export type Rarity = "common" | "rare" | "legendary"
+export type Rarity = "common" | "uncommon" | "rare" | "legendary"
 
 export const rarityBudget: Record<Rarity, number> = {
     common: 24,
+    uncommon: 28,
     rare: 32,
     legendary: 40,
 }
