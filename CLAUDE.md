@@ -37,7 +37,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
   - en changeant de classe, le héros change toutes ses actions ;
   - les actions de base n'ont pas de temps de recharge, les actions plus puissantes en ont un ;
   - les classes magiques (DPS magiques, healers, soutiens magiques) utilisent une ressource appelée concentration ;
-  - rôles : Tank, Healer, Soutien magique, DPS magique, DPS physique ;
+  - rôles : Tank, Healer, Soutien magique, DPS magique, DPS physique ; le Paladin (tank) utilise aussi la concentration pour soigner ; un rôle de soutien physique est envisagé, encore à définir ;
   - à venir : effets qui durent quelques tours et zones d'effet.
 - À chaque niveau, le joueur répartit lui-même ses points de stats.
 - Au niveau X (puis à d'autres paliers), toutes les classes du palier suivant dont le héros atteint les statistiques minimums sont proposées (ex. Soldier : force 5 et résistance 4). Les classes faciles demandent 2 stats, les classes complexes des valeurs plus élevées ou 3 à 4 stats. Ça propose plus de classes et permet plus de diversité.
