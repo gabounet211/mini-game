@@ -9,7 +9,7 @@ export interface CharacterClass {
     actions: Action[],
     statWeights: StatWeights,
     starting?: boolean,
-    requirement?: { highest: keyof Stats, minimums?: Partial<Stats> },
+    minimums?: Partial<Stats>,
     evolvesFrom?: string,
     requiredItem?: string,
     inspiresAllies?: boolean,
@@ -19,42 +19,42 @@ export const characterClasses: Record<string, CharacterClass> = {
     farmer: { name: "Farmer", tier: 1, starting: true, attackRange: 1, actions: [physicalAttack("pitchforkStrike", 1)], statWeights: { constitution: 3, resistance: 2 } },
     lumberjack: { name: "Lumberjack", tier: 1, starting: true, attackRange: 1, actions: [physicalAttack("axeChop", 1)], statWeights: { strength: 3, constitution: 2 } },
     hunter: { name: "Hunter", tier: 1, starting: true, attackRange: 3, actions: [physicalAttack("slingShot", 1)], statWeights: { dexterity: 3, perception: 2 } },
-    soldier: { name: "Soldier", tier: 2, starting: true, attackRange: 1, actions: [physicalAttack("swordStrike", 1)], statWeights: { strength: 3, resistance: 3 }, requirement: { highest: "strength" } },
-    apprentice: { name: "Apprentice", tier: 2, starting: true, attackRange: 3, actions: [physicalAttack("staffStrike", 1), magicalAttack("arcaneBolt", 2)], statWeights: { intelligence: 3, knowledge: 3 }, requirement: { highest: "intelligence" } },
-    healer: { name: "Healer", tier: 3, starting: true, attackRange: 2, actions: [physicalAttack("staffStrike", 1), magicalAttack("lightRay", 2), healing("healingTouch", 2)], statWeights: { willpower: 3, intelligence: 2 }, requirement: { highest: "willpower" } },
-    bard: { name: "Bard", tier: 2, starting: true, attackRange: 2, actions: [physicalAttack("rapierStrike", 1), willpowerDrain("dissonantChord", 2)], statWeights: { willpower: 3, dexterity: 2 }, requirement: { highest: "willpower" } },
-    berserker: { name: "Berserker", tier: 4, starting: true, attackRange: 1, actions: [physicalAttack("frenzyStrike", 1)], statWeights: { strength: 4, constitution: 3 }, requirement: { highest: "strength" } },
-    elementalist: { name: "Elementalist", tier: 4, starting: true, attackRange: 4, actions: [physicalAttack("staffStrike", 1), magicalAttack("elementalBlast", 2)], statWeights: { intelligence: 4, knowledge: 2 }, requirement: { highest: "intelligence" } },
-    cleric: { name: "Cleric", tier: 4, starting: true, attackRange: 3, actions: [physicalAttack("maceStrike", 1), magicalAttack("smite", 2), healing("divineHealing", 2)], statWeights: { willpower: 3, intelligence: 3 }, requirement: { highest: "willpower" } },
+    soldier: { name: "Soldier", tier: 2, starting: true, attackRange: 1, actions: [physicalAttack("swordStrike", 1)], statWeights: { strength: 3, resistance: 3 }, minimums: { strength: 5, resistance: 4 } },
+    apprentice: { name: "Apprentice", tier: 2, starting: true, attackRange: 3, actions: [physicalAttack("staffStrike", 1), magicalAttack("arcaneBolt", 2)], statWeights: { intelligence: 3, knowledge: 3 }, minimums: { intelligence: 5, knowledge: 4 } },
+    healer: { name: "Healer", tier: 3, starting: true, attackRange: 2, actions: [physicalAttack("staffStrike", 1), magicalAttack("lightRay", 2), healing("healingTouch", 2)], statWeights: { willpower: 3, intelligence: 2 }, minimums: { willpower: 6, intelligence: 5 } },
+    bard: { name: "Bard", tier: 2, starting: true, attackRange: 2, actions: [physicalAttack("rapierStrike", 1), willpowerDrain("dissonantChord", 2)], statWeights: { willpower: 3, dexterity: 2 }, minimums: { willpower: 5, dexterity: 4 } },
+    berserker: { name: "Berserker", tier: 4, starting: true, attackRange: 1, actions: [physicalAttack("frenzyStrike", 1)], statWeights: { strength: 4, constitution: 3 }, minimums: { strength: 8, constitution: 6 } },
+    elementalist: { name: "Elementalist", tier: 4, starting: true, attackRange: 4, actions: [physicalAttack("staffStrike", 1), magicalAttack("elementalBlast", 2)], statWeights: { intelligence: 4, knowledge: 2 }, minimums: { intelligence: 8, willpower: 6 } },
+    cleric: { name: "Cleric", tier: 4, starting: true, attackRange: 3, actions: [physicalAttack("maceStrike", 1), magicalAttack("smite", 2), healing("divineHealing", 2)], statWeights: { willpower: 3, intelligence: 3 }, minimums: { willpower: 8, knowledge: 6 } },
 
-    guard: { name: "Guard", tier: 3, starting: true, attackRange: 1, actions: [physicalAttack("shieldBash", 1)], statWeights: { resistance: 3, constitution: 2 }, requirement: { highest: "resistance" } },
-    brawler: { name: "Brawler", tier: 3, starting: true, attackRange: 1, actions: [physicalAttack("haymaker", 1)], statWeights: { constitution: 3, strength: 2 }, requirement: { highest: "constitution" } },
-    scholar: { name: "Scholar", tier: 3, starting: true, attackRange: 3, actions: [physicalAttack("bookSmack", 1), magicalAttack("arcaneSpark", 2)], statWeights: { knowledge: 3, intelligence: 2 }, requirement: { highest: "knowledge" } },
-    scout: { name: "Scout", tier: 2, starting: true, attackRange: 3, actions: [physicalAttack("knifeThrow", 1)], statWeights: { dexterity: 3, perception: 2 }, requirement: { highest: "dexterity" } },
-    tracker: { name: "Tracker", tier: 2, starting: true, attackRange: 4, actions: [physicalAttack("aimedShot", 1)], statWeights: { perception: 3, dexterity: 2 }, requirement: { highest: "perception" } },
-    mercenary: { name: "Mercenary", tier: 3, attackRange: 1, actions: [physicalAttack("bladeStrike", 1)], statWeights: {}, requirement: { highest: "strength", minimums: { dexterity: 5 } } },
-    shieldbearer: { name: "Shieldbearer", tier: 3, attackRange: 1, actions: [physicalAttack("shieldSlam", 1)], statWeights: {}, requirement: { highest: "resistance", minimums: { constitution: 6 } } },
-    warden: { name: "Warden", tier: 3, attackRange: 1, actions: [physicalAttack("wardenStrike", 1)], statWeights: {}, requirement: { highest: "constitution", minimums: { resistance: 5 } } },
-    exorcist: { name: "Exorcist", tier: 3, attackRange: 3, actions: [physicalAttack("staffStrike", 1), magicalAttack("banish", 2)], statWeights: {}, requirement: { highest: "willpower", minimums: { intelligence: 5 } } },
-    alchemist: { name: "Alchemist", tier: 3, attackRange: 3, actions: [physicalAttack("flaskThrow", 1), magicalAttack("acidSplash", 2)], statWeights: {}, requirement: { highest: "knowledge", minimums: { dexterity: 5 } } },
-    mageblade: { name: "Mageblade", tier: 3, attackRange: 2, actions: [physicalAttack("arcaneSlash", 1), magicalAttack("spellStrike", 2)], statWeights: {}, requirement: { highest: "intelligence", minimums: { strength: 6 } } },
-    duelist: { name: "Duelist", tier: 3, attackRange: 1, actions: [physicalAttack("riposte", 1)], statWeights: {}, requirement: { highest: "dexterity", minimums: { strength: 5 } } },
-    sharpshooter: { name: "Sharpshooter", tier: 3, attackRange: 5, actions: [physicalAttack("piercingShot", 1)], statWeights: {}, requirement: { highest: "perception", minimums: { dexterity: 6 } } },
+    guard: { name: "Guard", tier: 3, starting: true, attackRange: 1, actions: [physicalAttack("shieldBash", 1)], statWeights: { resistance: 3, constitution: 2 }, minimums: { resistance: 6, constitution: 5 } },
+    brawler: { name: "Brawler", tier: 3, starting: true, attackRange: 1, actions: [physicalAttack("haymaker", 1)], statWeights: { constitution: 3, strength: 2 }, minimums: { constitution: 6, strength: 5 } },
+    scholar: { name: "Scholar", tier: 3, starting: true, attackRange: 3, actions: [physicalAttack("bookSmack", 1), magicalAttack("arcaneSpark", 2)], statWeights: { knowledge: 3, intelligence: 2 }, minimums: { knowledge: 6, intelligence: 5 } },
+    scout: { name: "Scout", tier: 2, starting: true, attackRange: 3, actions: [physicalAttack("knifeThrow", 1)], statWeights: { dexterity: 3, perception: 2 }, minimums: { dexterity: 5, constitution: 4 } },
+    tracker: { name: "Tracker", tier: 2, starting: true, attackRange: 4, actions: [physicalAttack("aimedShot", 1)], statWeights: { perception: 3, dexterity: 2 }, minimums: { perception: 5, dexterity: 4 } },
+    mercenary: { name: "Mercenary", tier: 3, attackRange: 1, actions: [physicalAttack("bladeStrike", 1)], statWeights: {}, minimums: { strength: 7, dexterity: 5, constitution: 4 } },
+    shieldbearer: { name: "Shieldbearer", tier: 3, attackRange: 1, actions: [physicalAttack("shieldSlam", 1)], statWeights: {}, minimums: { resistance: 7, constitution: 6, strength: 4 } },
+    warden: { name: "Warden", tier: 3, attackRange: 1, actions: [physicalAttack("wardenStrike", 1)], statWeights: {}, minimums: { constitution: 7, resistance: 5, perception: 4 } },
+    exorcist: { name: "Exorcist", tier: 3, attackRange: 3, actions: [physicalAttack("staffStrike", 1), magicalAttack("banish", 2)], statWeights: {}, minimums: { willpower: 7, intelligence: 5, knowledge: 4 } },
+    alchemist: { name: "Alchemist", tier: 3, attackRange: 3, actions: [physicalAttack("flaskThrow", 1), magicalAttack("acidSplash", 2)], statWeights: {}, minimums: { knowledge: 7, dexterity: 5, intelligence: 4 } },
+    mageblade: { name: "Mageblade", tier: 3, attackRange: 2, actions: [physicalAttack("arcaneSlash", 1), magicalAttack("spellStrike", 2)], statWeights: {}, minimums: { intelligence: 7, strength: 6, dexterity: 4 } },
+    duelist: { name: "Duelist", tier: 3, attackRange: 1, actions: [physicalAttack("riposte", 1)], statWeights: {}, minimums: { dexterity: 7, strength: 5, perception: 4 } },
+    sharpshooter: { name: "Sharpshooter", tier: 3, attackRange: 5, actions: [physicalAttack("piercingShot", 1)], statWeights: {}, minimums: { perception: 7, dexterity: 6, strength: 4 } },
 
     skald: { name: "Skald", tier: 3, attackRange: 2, actions: [physicalAttack("axeStrike", 1), magicalAttack("warChant", 2)], statWeights: {}, evolvesFrom: "bard", inspiresAllies: true },
-    knight: { name: "Knight", tier: 4, attackRange: 1, actions: [physicalAttack("lanceStrike", 1)], statWeights: {}, requirement: { highest: "resistance" } },
-    juggernaut: { name: "Juggernaut", tier: 4, attackRange: 1, actions: [physicalAttack("crush", 1)], statWeights: {}, requirement: { highest: "constitution" } },
-    sage: { name: "Sage", tier: 4, attackRange: 4, actions: [physicalAttack("staffStrike", 1), magicalAttack("mindBlast", 2), healing("restore", 2)], statWeights: {}, requirement: { highest: "knowledge" } },
-    ranger: { name: "Ranger", tier: 4, attackRange: 4, actions: [physicalAttack("longShot", 1)], statWeights: {}, requirement: { highest: "dexterity" } },
-    marksman: { name: "Marksman", tier: 4, attackRange: 5, actions: [physicalAttack("snipe", 1)], statWeights: {}, requirement: { highest: "perception" } },
-    warlord: { name: "Warlord", tier: 4, attackRange: 1, actions: [physicalAttack("warStrike", 1)], statWeights: {}, requirement: { highest: "strength", minimums: { willpower: 7 } } },
-    paladin: { name: "Paladin", tier: 4, attackRange: 2, actions: [physicalAttack("holyStrike", 1), healing("layOnHands", 2)], statWeights: {}, requirement: { highest: "resistance", minimums: { willpower: 7 } } },
-    gladiator: { name: "Gladiator", tier: 4, attackRange: 1, actions: [physicalAttack("gladiusStrike", 1)], statWeights: {}, requirement: { highest: "constitution", minimums: { strength: 7 } } },
-    inquisitor: { name: "Inquisitor", tier: 4, attackRange: 2, actions: [physicalAttack("maceStrike", 1), magicalAttack("judgment", 2)], statWeights: {}, requirement: { highest: "willpower", minimums: { strength: 7 } } },
-    runesmith: { name: "Runesmith", tier: 4, attackRange: 2, actions: [physicalAttack("runeHammer", 1), magicalAttack("runeBlast", 2)], statWeights: {}, requirement: { highest: "knowledge", minimums: { strength: 6 } } },
-    spellblade: { name: "Spellblade", tier: 4, attackRange: 2, actions: [physicalAttack("spellSlash", 1), magicalAttack("arcaneBurst", 2)], statWeights: {}, requirement: { highest: "intelligence", minimums: { dexterity: 7 } } },
-    assassin: { name: "Assassin", tier: 4, attackRange: 1, actions: [physicalAttack("backstab", 1)], statWeights: {}, requirement: { highest: "dexterity", minimums: { perception: 7 } } },
-    beastmaster: { name: "Beastmaster", tier: 4, attackRange: 3, actions: [physicalAttack("beastClaw", 1)], statWeights: {}, requirement: { highest: "perception", minimums: { willpower: 6 } } },
+    knight: { name: "Knight", tier: 4, attackRange: 1, actions: [physicalAttack("lanceStrike", 1)], statWeights: {}, minimums: { resistance: 8, strength: 6 } },
+    juggernaut: { name: "Juggernaut", tier: 4, attackRange: 1, actions: [physicalAttack("crush", 1)], statWeights: {}, minimums: { constitution: 8, resistance: 6 } },
+    sage: { name: "Sage", tier: 4, attackRange: 4, actions: [physicalAttack("staffStrike", 1), magicalAttack("mindBlast", 2), healing("restore", 2)], statWeights: {}, minimums: { knowledge: 8, intelligence: 6 } },
+    ranger: { name: "Ranger", tier: 4, attackRange: 4, actions: [physicalAttack("longShot", 1)], statWeights: {}, minimums: { dexterity: 8, perception: 6 } },
+    marksman: { name: "Marksman", tier: 4, attackRange: 5, actions: [physicalAttack("snipe", 1)], statWeights: {}, minimums: { perception: 8, dexterity: 6 } },
+    warlord: { name: "Warlord", tier: 4, attackRange: 1, actions: [physicalAttack("warStrike", 1)], statWeights: {}, minimums: { strength: 9, willpower: 7, constitution: 5 } },
+    paladin: { name: "Paladin", tier: 4, attackRange: 2, actions: [physicalAttack("holyStrike", 1), healing("layOnHands", 2)], statWeights: {}, minimums: { resistance: 8, willpower: 7, constitution: 5, strength: 5 } },
+    gladiator: { name: "Gladiator", tier: 4, attackRange: 1, actions: [physicalAttack("gladiusStrike", 1)], statWeights: {}, minimums: { constitution: 9, strength: 7, dexterity: 5 } },
+    inquisitor: { name: "Inquisitor", tier: 4, attackRange: 2, actions: [physicalAttack("maceStrike", 1), magicalAttack("judgment", 2)], statWeights: {}, minimums: { willpower: 9, strength: 7, intelligence: 5 } },
+    runesmith: { name: "Runesmith", tier: 4, attackRange: 2, actions: [physicalAttack("runeHammer", 1), magicalAttack("runeBlast", 2)], statWeights: {}, minimums: { knowledge: 9, strength: 6, intelligence: 6 } },
+    spellblade: { name: "Spellblade", tier: 4, attackRange: 2, actions: [physicalAttack("spellSlash", 1), magicalAttack("arcaneBurst", 2)], statWeights: {}, minimums: { intelligence: 9, dexterity: 7, strength: 5 } },
+    assassin: { name: "Assassin", tier: 4, attackRange: 1, actions: [physicalAttack("backstab", 1)], statWeights: {}, minimums: { dexterity: 9, perception: 7, strength: 5 } },
+    beastmaster: { name: "Beastmaster", tier: 4, attackRange: 3, actions: [physicalAttack("beastClaw", 1)], statWeights: {}, minimums: { perception: 8, willpower: 7, constitution: 5, dexterity: 5 } },
 
     ravager: { name: "Ravager", tier: 5, attackRange: 1, actions: [physicalAttack("ravage", 1)], statWeights: {}, evolvesFrom: "berserker", requiredItem: "bloodTotem" },
     archmage: { name: "Archmage", tier: 5, attackRange: 5, actions: [physicalAttack("staffStrike", 1), magicalAttack("meteor", 2)], statWeights: {}, evolvesFrom: "elementalist", requiredItem: "elementalCore" },
@@ -98,20 +98,26 @@ export function classChangeOffers(character: Character, inventory: string[]) {
     const tier = current.tier + 1
     if (tier > rarityTierCap[character.rarity])
         return []
-    const highest = Math.max(...Object.values(character.stats))
-    const eligible = keys.filter(key => {
-        const requirement = characterClasses[key].requirement
-        return characterClasses[key].tier === tier && !!requirement
-            && character.stats[requirement.highest] === highest
-            && Object.entries(requirement.minimums ?? {}).every(([stat, value]) => character.stats[stat as keyof Stats] >= value)
-    })
     const path = keys.filter(key => characterClasses[key].tier === tier && characterClasses[key].evolvesFrom === character.characterClass && !characterClasses[key].requiredItem)
-    const hard = eligible.filter(key => characterClasses[key].requirement?.minimums)
-    const easy = eligible.filter(key => !characterClasses[key].requirement?.minimums)
-    const fallback = eligible.length ? [] : keys
-        .filter(key => characterClasses[key].tier === tier && characterClasses[key].requirement && !characterClasses[key].requirement?.minimums)
-        .sort((a, b) => character.stats[characterClasses[b].requirement!.highest] - character.stats[characterClasses[a].requirement!.highest])
-    return [...new Set([...path, ...hard.slice(0, 2), ...easy, ...fallback])].slice(0, 3)
+    const eligible = keys.filter(key => characterClasses[key].tier === tier && characterClasses[key].minimums && missingStats(character, key).length === 0)
+    return [...new Set([...path, ...eligible])]
+}
+
+export function missingStats(character: Character, classKey: string) {
+    return Object.entries(characterClasses[classKey].minimums ?? {})
+        .filter(([stat, value]) => character.stats[stat as keyof Stats] < value)
+        .map(([stat, value]) => [stat, value - character.stats[stat as keyof Stats]] as [keyof Stats, number])
+}
+
+export function closestClasses(character: Character, count = 3) {
+    const current = character.characterClass ? characterClasses[character.characterClass] : undefined
+    if (!current || character.rarity === "legendary" || current.tier + 1 > rarityTierCap[character.rarity])
+        return []
+    const missing = (key: string) => missingStats(character, key).reduce((sum, [, value]) => sum + value, 0)
+    return Object.keys(characterClasses)
+        .filter(key => characterClasses[key].tier === current.tier + 1 && characterClasses[key].minimums)
+        .sort((a, b) => missing(a) - missing(b))
+        .slice(0, count)
 }
 
 export function applyClassChange(character: Character, classKey: string, inventory: string[]) {
