@@ -6,6 +6,7 @@ const raycaster = new Raycaster
 export class Grid {
     readonly gridsize: number;
     private cells: Record<string, true | undefined | Piece> = {};
+    private seeThrough = new Set<string>();
     private planes: Object3D[]
     private dying: Piece[] = []
     public readonly scene: Group = new Group();
@@ -23,11 +24,11 @@ export class Grid {
                 vec1.set(x - this.gridsize / 2 + .5, 1.1, y - this.gridsize / 2 + .5)
                 raycaster.set(vec1, vec2)
                 const result = raycaster.intersectObjects(map.children)
-                const hit = result.some(el => {
-                    return !el.object.userData['Plane']
-                })
-                if (!hit)
+                const hits = result.filter(el => !el.object.userData['Plane'])
+                if (!hits.length)
                     this.cells[x + ',' + y] = true
+                else if (hits.every(el => el.object.userData['LowObstacle']))
+                    this.seeThrough.add(x + ',' + y)
             }
         }
     }
@@ -237,7 +238,7 @@ export class Grid {
     private isViewBlocked(from: Vector2, to: Vector2) {
         for (let x = Math.min(from.x, to.x); x <= Math.max(from.x, to.x); x++) {
             for (let y = Math.min(from.y, to.y); y <= Math.max(from.y, to.y); y++) {
-                if (this.cells[x + ',' + y] === undefined && this.segmentCrossesCell(from, to, x, y))
+                if (this.cells[x + ',' + y] === undefined && !this.seeThrough.has(x + ',' + y) && this.segmentCrossesCell(from, to, x, y))
                     return true;
             }
         }

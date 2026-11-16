@@ -3,14 +3,14 @@ import { Object3D, Vector2 } from "three"
 import { Piece } from "./piece"
 import { Grid } from "./grid"
 
-function createGrid(size: number, walls: string[]) {
+function createGrid(size: number, walls: string[], lowObstacles: string[] = []) {
     const grid = Object.create(Grid.prototype) as Grid
     const cells: Record<string, true | undefined> = {}
     for (let x = 0; x < size; x++)
         for (let y = 0; y < size; y++)
             if (!walls.includes(x + ',' + y))
                 cells[x + ',' + y] = true
-    Object.assign(grid, { cells })
+    Object.assign(grid, { cells, seeThrough: new Set(lowObstacles) })
     return grid
 }
 
@@ -67,5 +67,11 @@ describe("canSee", () => {
         const grid = createGrid(7, ['3,3'])
         expect(grid.canSee(new Vector2(1, 3), new Vector2(5, 3))).toBe(false)
         expect(grid.canSee(new Vector2(1, 1), new Vector2(5, 1))).toBe(true)
+    })
+
+    it("is not blocked by a low obstacle, which still blocks movement", () => {
+        const grid = createGrid(7, ['3,3'], ['3,3'])
+        expect(grid.canSee(new Vector2(1, 3), new Vector2(5, 3))).toBe(true)
+        expect(grid.isFree(new Vector2(3, 3))).toBe(false)
     })
 })
