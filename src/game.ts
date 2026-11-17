@@ -52,6 +52,7 @@ export class Game {
         this.scene.add(this.selector.obj)
         this.scene.add(this.selector.block)
         this.scene.add(this.selector.placementZone)
+        this.scene.add(this.selector.areaPreview)
         if (this.gameLogic.state === "Placement") {
             this.ui.setEndTurnLabel('Start battle')
             this.ui.showBanner('Place your heroes')
