@@ -1,6 +1,9 @@
 import { Game } from "./game"
 import { Piece } from "./piece"
 import { EffectKind, StatusEffect } from "./effect"
+import { forceMove, inLine, MoveKind } from "./movement"
+import { Grid } from "./grid"
+import { Vector2 } from "three"
 
 
 export interface Action{
@@ -11,7 +14,8 @@ export interface Action{
     concentration? : number
     cooldown? : number
     needsTarget? : boolean
-    targets? : "enemy" | "ally"
+    targets? : "enemy" | "ally" | "any"
+    line? : boolean
 }
 
 export type ActionCosts = Pick<Action, "concentration" | "cooldown">
@@ -25,11 +29,16 @@ export function canUse(piece: Piece, action: Action) {
         && !piece.cooldowns.get(action)
 }
 
+export function canTarget(action: Action, from: Vector2, to: Vector2) {
+    return Grid.manathanDistance(from, to) <= action.range && (!action.line || inLine(from, to))
+}
+
 export function describeAction(action: Action) {
     return [
         action.cost + ' AP',
         ...(action.concentration ? [action.concentration + ' concentration'] : []),
         action.range ? 'range ' + action.range : 'self',
+        ...(action.line ? ['straight line'] : []),
         ...(action.cooldown ? ['cooldown ' + action.cooldown] : []),
     ].join(' · ')
 }
@@ -136,6 +145,41 @@ export function statusAction(name: string, cost: number, range: number, costs: A
             if (!user)
                 return
             applyEffect(targets === "self" ? user : target ?? user, user, effect)
+        },
+    }
+}
+
+export interface MoveSpec {
+    kind: MoveKind
+    cells?: number
+    damage?: boolean
+    effect?: EffectSpec
+    line?: boolean
+    targets?: "enemy" | "any"
+}
+
+export function moveAction(name: string, cost: number, range: number, costs: ActionCosts, spec: MoveSpec): Action {
+    return {
+        ...costs,
+        name,
+        cost,
+        range,
+        line: spec.line,
+        needsTarget: true,
+        targets: spec.targets ?? "enemy",
+        action(game, target, user) {
+            const grid = game?.gameLogic?.grid
+            if (!target || !user || !grid)
+                return
+            const movesUser = spec.kind === "dash" || spec.kind === "jump"
+            if (movesUser)
+                forceMove(grid, spec.kind, user, target, spec.cells)
+            if (spec.damage)
+                target.takeDamage(physicalDamage(game, user), "physical", user)
+            const shielded = target.player !== user.player && target.hasEffect("immune")
+            if (spec.kind === "retreat" || (!movesUser && !shielded && target.healt > 0))
+                forceMove(grid, spec.kind, user, target, spec.cells)
+            applyEffect(target, user, spec.effect)
         },
     }
 }
