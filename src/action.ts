@@ -1,5 +1,6 @@
 import { Game } from "./game"
 import { Piece } from "./piece"
+import { DamageKind } from "./stats"
 import { EffectKind, StatusEffect } from "./effect"
 import { forceMove, inLine, MoveKind } from "./movement"
 import { Grid } from "./grid"
@@ -33,6 +34,15 @@ export const critRoll = { next: () => Math.random() }
 
 export function critChance(user: Piece, action?: Action) {
     return user.stats.perception * critPerPerception + (action?.bonusCrit ?? 0)
+}
+
+export function dealDamage(game: Game, target: Piece, amount: number, kind: DamageKind, user: Piece) {
+    target.takeDamage(amount, kind, user)
+    const grid = game?.gameLogic?.grid
+    const from = grid?.getPosition(user)
+    const to = grid?.getPosition(target)
+    if (from && to && Grid.manathanDistance(from, to) <= 1 && target.player !== user.player && target.healt > 0 && user.healt > 0 && target.hasEffect("riposte"))
+        user.takeDamage(1 + Math.floor(target.stats.strength / 2), "physical", target, false)
 }
 
 export function rollDamage(amount: number, user: Piece, action?: Action) {
@@ -113,7 +123,7 @@ export function physicalAttack(name: string, cost: number, range: number, costs:
         action(game, target, user) {
             if (!target || !user)
                 return
-            target.takeDamage(rollDamage(physicalDamage(game, user), user, this), "physical", user)
+            dealDamage(game, target, rollDamage(physicalDamage(game, user), user, this), "physical", user)
             applyEffect(target, user, effect)
         },
     }
@@ -129,7 +139,7 @@ export function magicalAttack(name: string, cost: number, range: number, costs: 
         action(game, target, user) {
             if (!target || !user)
                 return
-            target.takeDamage(rollDamage(magicDamage(game, user), user, this), "magic", user)
+            dealDamage(game, target, rollDamage(magicDamage(game, user), user, this), "magic", user)
             applyEffect(target, user, effect)
         },
     }
@@ -145,8 +155,8 @@ export function hybridAttack(name: string, cost: number, range: number, costs: A
         action(game, target, user) {
             if (!target || !user)
                 return
-            target.takeDamage(rollDamage(physicalDamage(game, user), user, this), "physical", user)
-            target.takeDamage(rollDamage(2 + user.stats.intelligence, user, this), "magic", user)
+            dealDamage(game, target, rollDamage(physicalDamage(game, user), user, this), "physical", user)
+            dealDamage(game, target, rollDamage(2 + user.stats.intelligence, user, this), "magic", user)
         },
     }
 }
@@ -193,7 +203,7 @@ export function moveAction(name: string, cost: number, range: number, costs: Act
             if (movesUser)
                 forceMove(grid, spec.kind, user, target, spec.cells)
             if (spec.damage)
-                target.takeDamage(rollDamage(physicalDamage(game, user), user, this), "physical", user)
+                dealDamage(game, target, rollDamage(physicalDamage(game, user), user, this), "physical", user)
             const shielded = target.player !== user.player && target.hasEffect("immune")
             if (spec.kind === "retreat" || (!movesUser && !shielded && target.healt > 0))
                 forceMove(grid, spec.kind, user, target, spec.cells)
@@ -231,9 +241,9 @@ export function areaAction(name: string, cost: number, range: number, costs: Act
                 if (piece === user || (!spec.friendlyFire && piece.player === user.player))
                     continue
                 if (spec.damage === "physical")
-                    piece.takeDamage(rollDamage(physicalDamage(game, user), user, this), "physical", user)
+                    dealDamage(game, piece, rollDamage(physicalDamage(game, user), user, this), "physical", user)
                 else if (spec.damage === "magic")
-                    piece.takeDamage(rollDamage(magicDamage(game, user), user, this), "magic", user)
+                    dealDamage(game, piece, rollDamage(magicDamage(game, user), user, this), "magic", user)
                 applyEffect(piece, user, spec.effect)
             }
         },

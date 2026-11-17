@@ -254,7 +254,5 @@ export class Piece {
         }
         this.lastAttacker = attacker
         this.healt -= Math.max(1, amount - damageReduction(this.stats, kind))
-        if (direct && attacker && attacker.player !== this.player && attacker.healt > 0 && this.healt > 0 && this.hasEffect("riposte"))
-            attacker.takeDamage(1 + Math.floor(this.stats.strength / 2), "physical", this, false)
     }
 }

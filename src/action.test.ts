@@ -245,13 +245,17 @@ describe("critical hits and reactions", () => {
         expect(guard.healt).toBe(guardBefore - 3)
     })
 
-    it("hits back the attacker while riposte is active", () => {
+    it("hits back a melee attacker while riposte is active, but not a ranged one", () => {
         const duelist = piece(true)
-        const enemy = piece(false)
+        const melee = piece(false)
+        const archer = piece(false)
+        const game = setup([[2, 2, duelist], [2, 3, melee], [2, 5, archer]])
         duelist.addEffect({ kind: "riposte", amount: 0, turns: 1 }, false)
-        const before = enemy.healt
-        physicalAttack("strike", 1, 1).action(setup([]), duelist, enemy)
-        expect(before - enemy.healt).toBe(3)
+        const meleeBefore = melee.healt, archerBefore = archer.healt
+        physicalAttack("strike", 1, 1).action(game, duelist, melee)
+        physicalAttack("shot", 1, 3).action(game, duelist, archer)
+        expect(meleeBefore - melee.healt).toBe(3)
+        expect(archer.healt).toBe(archerBefore)
     })
 
     it("taunts the enemies around the caster", () => {
