@@ -221,9 +221,9 @@ export class Piece {
         this.movePoints = stunned || this.hasEffect("root") ? 0 : Math.max(0, this.moveRange - this.effectAmount("slow"))
         this.concentration = Math.min(this.maxConcentration, this.concentration + concentrationRegen)
         if (this.hasEffect("burn"))
-            this.takeDamage(burnDamage, "magic", this.lastAttacker)
+            this.takeDamage(burnDamage, "magic", this.lastAttacker, false)
         if (this.hasEffect("poison"))
-            this.takeDamage(poisonDamage, "pure", this.lastAttacker)
+            this.takeDamage(poisonDamage, "pure", this.lastAttacker, false)
     }
 
     endOwnTurn() {
@@ -246,7 +246,12 @@ export class Piece {
         this.healt = Math.min(this.maxHealt, this.healt + amount)
     }
 
-    takeDamage(amount: number, kind: DamageKind, attacker?: Piece) {
+    takeDamage(amount: number, kind: DamageKind, attacker?: Piece, direct = true) {
+        const protector = direct ? this.effects.find(effect => effect.kind === "protected")?.source : undefined
+        if (protector && protector !== this && protector.healt > 0) {
+            protector.takeDamage(amount, kind, attacker, false)
+            return
+        }
         this.lastAttacker = attacker
         this.healt -= Math.max(1, amount - damageReduction(this.stats, kind))
     }

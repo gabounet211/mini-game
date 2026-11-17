@@ -1,9 +1,9 @@
-import { describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
 import { Object3D } from "three"
 import { Grid } from "./grid"
 import { Piece, PieceConfig } from "./piece"
 import { createCharacter } from "./character"
-import { allyBonus, canUse, cure, hybridAttack, magicalAttack, physicalAttack, spendAction, statusAction, willpowerDrain } from "./action"
+import { allyBonus, canUse, critRoll, cure, hybridAttack, magicalAttack, physicalAttack, spendAction, statusAction, tauntAction, willpowerDrain } from "./action"
 import { Game } from "./game"
 
 function piece(player: boolean, characterClass?: string) {
@@ -25,6 +25,10 @@ function setup(pieces: [x: number, y: number, piece: Piece][]) {
     Object.assign(grid, { cells })
     return { gameLogic: { grid } } as unknown as Game
 }
+
+beforeEach(() => {
+    critRoll.next = () => 1
+})
 
 describe("allyBonus", () => {
     it("adds 1 damage to allies of a living skald", () => {
@@ -210,5 +214,57 @@ describe("concentration and cooldowns", () => {
         const before = enemy.healt
         hybridAttack("spellStrike", 2, 1).action(setup([]), enemy, user)
         expect(before - enemy.healt).toBe(3 + 3)
+    })
+})
+
+describe("critical hits and reactions", () => {
+    it("doubles the damage on a critical hit, more likely with perception and headShot", () => {
+        const user = piece(true)
+        const enemy = piece(false)
+        critRoll.next = () => 0.02
+        let before = enemy.healt
+        physicalAttack("strike", 1, 1).action(setup([]), enemy, user)
+        expect(before - enemy.healt).toBe(6)
+        critRoll.next = () => 0.2
+        before = enemy.healt
+        physicalAttack("strike", 1, 1).action(setup([]), enemy, user)
+        expect(before - enemy.healt).toBe(3)
+        before = enemy.healt
+        physicalAttack("headShot", 3, 5, { bonusDamage: 2, bonusCrit: 0.3 }).action(setup([]), enemy, user)
+        expect(before - enemy.healt).toBe(10)
+    })
+
+    it("makes the protector take the damage instead of the protected ally", () => {
+        const guard = piece(true)
+        const ally = piece(true)
+        const enemy = piece(false)
+        statusAction("protect", 3, 2, {}, "ally", user => ({ kind: "protected", amount: 0, turns: 1, source: user })).action(setup([]), ally, guard)
+        const allyBefore = ally.healt, guardBefore = guard.healt
+        physicalAttack("strike", 1, 1).action(setup([]), ally, enemy)
+        expect(ally.healt).toBe(allyBefore)
+        expect(guard.healt).toBe(guardBefore - 3)
+    })
+
+    it("hits back a melee attacker while riposte is active, but not a ranged one", () => {
+        const duelist = piece(true)
+        const melee = piece(false)
+        const archer = piece(false)
+        const game = setup([[2, 2, duelist], [2, 3, melee], [2, 5, archer]])
+        duelist.addEffect({ kind: "riposte", amount: 0, turns: 1 }, false)
+        const meleeBefore = melee.healt, archerBefore = archer.healt
+        physicalAttack("strike", 1, 1).action(game, duelist, melee)
+        physicalAttack("shot", 1, 3).action(game, duelist, archer)
+        expect(meleeBefore - melee.healt).toBe(3)
+        expect(archer.healt).toBe(archerBefore)
+    })
+
+    it("taunts the enemies around the caster", () => {
+        const guard = piece(true)
+        const near = piece(false)
+        const far = piece(false)
+        const game = setup([[0, 0, guard], [2, 1, near], [5, 5, far]])
+        tauntAction("taunt", 2, 3, {}, 2).action(game, undefined, guard)
+        expect(near.effects[0]).toMatchObject({ kind: "taunt", source: guard, turns: 2 })
+        expect(far.hasEffect("taunt")).toBe(false)
     })
 })

@@ -1,5 +1,6 @@
 import { Game } from "./game"
 import { Piece } from "./piece"
+import { DamageKind } from "./stats"
 import { EffectKind, StatusEffect } from "./effect"
 import { forceMove, inLine, MoveKind } from "./movement"
 import { Grid } from "./grid"
@@ -14,6 +15,8 @@ export interface Action{
     range : number
     concentration? : number
     cooldown? : number
+    bonusDamage? : number
+    bonusCrit? : number
     needsTarget? : boolean
     targets? : "enemy" | "ally" | "any"
     line? : boolean
@@ -21,10 +24,31 @@ export interface Action{
     friendlyFire? : boolean
 }
 
-export type ActionCosts = Pick<Action, "concentration" | "cooldown">
+export type ActionCosts = Pick<Action, "concentration" | "cooldown" | "bonusDamage" | "bonusCrit">
 
 export const moraleBonus = 1
 export const concentrationRegen = 2
+export const critPerPerception = 0.03
+export const critMultiplier = 2
+export const critRoll = { next: () => Math.random() }
+
+export function critChance(user: Piece, action?: Action) {
+    return user.stats.perception * critPerPerception + (action?.bonusCrit ?? 0)
+}
+
+export function dealDamage(game: Game, target: Piece, amount: number, kind: DamageKind, user: Piece) {
+    target.takeDamage(amount, kind, user)
+    const grid = game?.gameLogic?.grid
+    const from = grid?.getPosition(user)
+    const to = grid?.getPosition(target)
+    if (from && to && Grid.manathanDistance(from, to) <= 1 && target.player !== user.player && target.healt > 0 && user.healt > 0 && target.hasEffect("riposte"))
+        user.takeDamage(1 + Math.floor(target.stats.strength / 2), "physical", target, false)
+}
+
+export function rollDamage(amount: number, user: Piece, action?: Action) {
+    const total = amount + (action?.bonusDamage ?? 0)
+    return critRoll.next() < critChance(user, action) ? total * critMultiplier : total
+}
 
 export function canUse(piece: Piece, action: Action) {
     return piece.actionPoints >= action.cost
@@ -99,7 +123,7 @@ export function physicalAttack(name: string, cost: number, range: number, costs:
         action(game, target, user) {
             if (!target || !user)
                 return
-            target.takeDamage(physicalDamage(game, user), "physical", user)
+            dealDamage(game, target, rollDamage(physicalDamage(game, user), user, this), "physical", user)
             applyEffect(target, user, effect)
         },
     }
@@ -115,7 +139,7 @@ export function magicalAttack(name: string, cost: number, range: number, costs: 
         action(game, target, user) {
             if (!target || !user)
                 return
-            target.takeDamage(magicDamage(game, user), "magic", user)
+            dealDamage(game, target, rollDamage(magicDamage(game, user), user, this), "magic", user)
             applyEffect(target, user, effect)
         },
     }
@@ -131,8 +155,8 @@ export function hybridAttack(name: string, cost: number, range: number, costs: A
         action(game, target, user) {
             if (!target || !user)
                 return
-            target.takeDamage(physicalDamage(game, user), "physical", user)
-            target.takeDamage(2 + user.stats.intelligence, "magic", user)
+            dealDamage(game, target, rollDamage(physicalDamage(game, user), user, this), "physical", user)
+            dealDamage(game, target, rollDamage(2 + user.stats.intelligence, user, this), "magic", user)
         },
     }
 }
@@ -179,7 +203,7 @@ export function moveAction(name: string, cost: number, range: number, costs: Act
             if (movesUser)
                 forceMove(grid, spec.kind, user, target, spec.cells)
             if (spec.damage)
-                target.takeDamage(physicalDamage(game, user), "physical", user)
+                dealDamage(game, target, rollDamage(physicalDamage(game, user), user, this), "physical", user)
             const shielded = target.player !== user.player && target.hasEffect("immune")
             if (spec.kind === "retreat" || (!movesUser && !shielded && target.healt > 0))
                 forceMove(grid, spec.kind, user, target, spec.cells)
@@ -217,9 +241,9 @@ export function areaAction(name: string, cost: number, range: number, costs: Act
                 if (piece === user || (!spec.friendlyFire && piece.player === user.player))
                     continue
                 if (spec.damage === "physical")
-                    piece.takeDamage(physicalDamage(game, user), "physical", user)
+                    dealDamage(game, piece, rollDamage(physicalDamage(game, user), user, this), "physical", user)
                 else if (spec.damage === "magic")
-                    piece.takeDamage(magicDamage(game, user), "magic", user)
+                    dealDamage(game, piece, rollDamage(magicDamage(game, user), user, this), "magic", user)
                 applyEffect(piece, user, spec.effect)
             }
         },
@@ -239,6 +263,25 @@ export function groundZoneAction(name: string, cost: number, costs: ActionCosts,
             if (!user || !logic || !center)
                 return
             logic.addGroundZone({ cells: areaCells({ kind: "radius", size }, center, center), player: user.player, effect, turns })
+        },
+    }
+}
+
+export function tauntAction(name: string, cost: number, range: number, costs: ActionCosts, turns: number): Action {
+    return {
+        ...costs,
+        name,
+        cost,
+        range: 0,
+        area: { kind: "radius", size: range },
+        action(game, _target, user) {
+            const grid = game?.gameLogic?.grid
+            const center = user && grid?.getPosition(user)
+            if (!user || !grid || !center)
+                return
+            for (const piece of piecesInArea(grid, areaCells({ kind: "radius", size: range }, center, center)))
+                if (piece.player !== user.player)
+                    piece.addEffect({ kind: "taunt", amount: 0, turns, source: user }, true)
         },
     }
 }

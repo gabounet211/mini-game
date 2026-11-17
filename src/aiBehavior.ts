@@ -194,7 +194,9 @@ export function createBehavior(steps: AiSteps): AiBehavior {
         initiative: steps.initiative ?? (() => 0),
         async takeTurn(piece, game) {
             const grid = game.gameLogic.grid
-            const target = steps.chooseTarget(piece, grid.getPieces(!piece.player), game)
+            const taunter = piece.effects.find(effect => effect.kind === "taunt" && effect.source && effect.source.healt > 0)?.source
+            const turnSteps: AiSteps = taunter ? { ...steps, chooseTarget: (_piece, candidates) => candidates.includes(taunter) ? taunter : undefined } : steps
+            const target = taunter ?? steps.chooseTarget(piece, grid.getPieces(!piece.player), game)
             if (!target)
                 return
 
@@ -205,7 +207,7 @@ export function createBehavior(steps: AiSteps): AiBehavior {
                 await piece.wait()
             }
 
-            await attackWhilePossible(piece, steps, game)
+            await attackWhilePossible(piece, turnSteps, game)
         },
     }
 }
