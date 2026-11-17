@@ -6,7 +6,7 @@ import { createCharacter } from "./character"
 import { areaCells } from "./area"
 import { areaAction } from "./action"
 import { Game } from "./game"
-import { applyGroundZones } from "./groundZone"
+import { applyGroundZones, GroundZone } from "./groundZone"
 
 const at = (x: number, y: number) => new Vector2(x, y)
 const keys = (cells: Vector2[]) => cells.map(cell => cell.x + ',' + cell.y).sort()
@@ -62,7 +62,7 @@ describe("applyGroundZones", () => {
         const enemy = piece(false), outside = piece(false), ally = piece(true)
         const game = setup([[1, 1, enemy], [6, 6, outside], [1, 2, ally]])
         const grid = game.gameLogic.grid
-        let zones = [{ cells: areaCells({ kind: "radius", size: 2 }, at(1, 1), at(1, 1)), player: true, effect: { kind: "slow" as const, amount: 1, turns: 1 }, turns: 2 }]
+        let zones: GroundZone[] = [{ cells: areaCells({ kind: "radius", size: 2 }, at(1, 1), at(1, 1)), player: true, effect: { kind: "slow", amount: 1, turns: 1 }, turns: 2 }]
         zones = applyGroundZones(zones, grid, true)
         expect(ally.hasEffect("slow")).toBe(false)
         zones = applyGroundZones(zones, grid, false)
