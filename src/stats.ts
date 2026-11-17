@@ -33,7 +33,7 @@ export function rollStats(budget: number, weights: StatWeights = {}, random = Ma
     return stats
 }
 
-export type DamageKind = "physical" | "magic"
+export type DamageKind = "physical" | "magic" | "pure"
 
 export function damageReduction(stats: Stats, kind: DamageKind) {
     return kind === "physical" ? Math.floor(stats.resistance / 3) : 0

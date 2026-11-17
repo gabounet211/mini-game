@@ -3,7 +3,7 @@ import { Object3D } from "three"
 import { Grid } from "./grid"
 import { Piece, PieceConfig } from "./piece"
 import { createCharacter } from "./character"
-import { allyBonus, canUse, hybridAttack, magicalAttack, physicalAttack, spendAction, willpowerDrain } from "./action"
+import { allyBonus, canUse, cure, hybridAttack, magicalAttack, physicalAttack, spendAction, statusAction, willpowerDrain } from "./action"
 import { Game } from "./game"
 
 function piece(player: boolean, characterClass?: string) {
@@ -69,10 +69,15 @@ describe("willpowerDrain", () => {
         return bard
     }
 
-    it("lowers the target's willpower by the bard's willpower / 3, and its AP with it", () => {
+    function enemyWith(willpower: number) {
         const enemy = piece(false)
-        enemy.stats.willpower = 9
-        enemy.drainWillpower(0, 0)
+        enemy.baseStats.willpower = willpower
+        enemy.refreshStats()
+        return enemy
+    }
+
+    it("lowers the target's willpower by the bard's willpower / 3, and its AP with it", () => {
+        const enemy = enemyWith(9)
         const maxBefore = enemy.maxActionPoints
         willpowerDrain("dissonantChord", 2, 2).action(setup([]), enemy, bardWith(9))
         expect(enemy.stats.willpower).toBe(6)
@@ -80,26 +85,24 @@ describe("willpowerDrain", () => {
     })
 
     it("lasts 2 of the target's turns, then restores everything", () => {
-        const enemy = piece(false)
-        enemy.stats.willpower = 9
+        const enemy = enemyWith(9)
         willpowerDrain("dissonantChord", 2, 2).action(setup([]), enemy, bardWith(6))
         expect(enemy.stats.willpower).toBe(7)
         enemy.endOwnTurn()
         expect(enemy.stats.willpower).toBe(7)
         enemy.endOwnTurn()
         expect(enemy.stats.willpower).toBe(9)
-        expect(enemy.drainTurns).toBe(0)
+        expect(enemy.effects).toEqual([])
     })
 
     it("does not stack: casting again only refreshes the duration", () => {
-        const enemy = piece(false)
-        enemy.stats.willpower = 9
+        const enemy = enemyWith(9)
         const chord = willpowerDrain("dissonantChord", 2, 2)
         chord.action(setup([]), enemy, bardWith(6))
         enemy.endOwnTurn()
         chord.action(setup([]), enemy, bardWith(6))
         expect(enemy.stats.willpower).toBe(7)
-        expect(enemy.drainTurns).toBe(2)
+        expect(enemy.effects[0].turns).toBe(2)
     })
 
     it("deals no damage and drains at least 1", () => {
@@ -107,7 +110,73 @@ describe("willpowerDrain", () => {
         const before = enemy.healt
         willpowerDrain("dissonantChord", 2, 2).action(setup([]), enemy, bardWith(1))
         expect(enemy.healt).toBe(before)
-        expect(enemy.willpowerDrain).toBe(1)
+        expect(enemy.effectAmount("willpowerDown")).toBe(1)
+    })
+})
+
+describe("status effects", () => {
+    it("stuns the target for its next turn", () => {
+        const fighter = piece(true)
+        const enemy = piece(false)
+        physicalAttack("bash", 2, 1, {}, () => ({ kind: "stun", amount: 0, turns: 1 })).action(setup([]), enemy, fighter)
+        enemy.startOwnTurn(0)
+        expect(enemy.actionPoints).toBe(0)
+        expect(enemy.movePoints).toBe(0)
+        enemy.endOwnTurn()
+        enemy.startOwnTurn(0)
+        expect(enemy.actionPoints).toBe(enemy.maxActionPoints)
+    })
+
+    it("burns for 2 magic damage and poisons for 1 damage that ignores resistance", () => {
+        const enemy = piece(false)
+        enemy.baseStats.resistance = 9
+        enemy.refreshStats()
+        enemy.addEffect({ kind: "burn", amount: 0, turns: 2 }, true)
+        enemy.addEffect({ kind: "poison", amount: 0, turns: 2 }, true)
+        const before = enemy.healt
+        enemy.startOwnTurn(0)
+        expect(before - enemy.healt).toBe(3)
+    })
+
+    it("slows and roots movement", () => {
+        const enemy = piece(false)
+        enemy.addEffect({ kind: "slow", amount: 1, turns: 1 }, true)
+        enemy.startOwnTurn(0)
+        expect(enemy.movePoints).toBe(enemy.moveRange - 1)
+        enemy.addEffect({ kind: "root", amount: 0, turns: 1 }, true)
+        enemy.startOwnTurn(0)
+        expect(enemy.movePoints).toBe(0)
+    })
+
+    it("keeps a buff cast on the caster's own turn through the next enemy turn", () => {
+        const guard = piece(true)
+        const guardUp = statusAction("guardUp", 2, 0, {}, "self", () => ({ kind: "resistanceUp", amount: 2, turns: 1 }))
+        guardUp.action(setup([]), undefined, guard)
+        expect(guard.stats.resistance).toBe(3)
+        guard.endOwnTurn()
+        expect(guard.stats.resistance).toBe(3)
+        guard.endOwnTurn()
+        expect(guard.stats.resistance).toBe(1)
+    })
+
+    it("lets an immune hero ignore hostile effects, and cure removes harmful ones", () => {
+        const duelist = piece(true)
+        duelist.addEffect({ kind: "immune", amount: 0, turns: 1 }, false)
+        expect(duelist.addEffect({ kind: "stun", amount: 0, turns: 1 }, true)).toBe(false)
+        const ally = piece(true)
+        ally.addEffect({ kind: "poison", amount: 0, turns: 2 }, true)
+        ally.addEffect({ kind: "damageUp", amount: 1, turns: 2 }, false)
+        cure("cureTouch", 2, 2).action(setup([]), ally, piece(true))
+        expect(ally.effects.map(effect => effect.kind)).toEqual(["damageUp"])
+    })
+
+    it("adds damageUp to the user's attacks", () => {
+        const fighter = piece(true)
+        const enemy = piece(false)
+        fighter.addEffect({ kind: "damageUp", amount: 1, turns: 2 }, false)
+        const before = enemy.healt
+        physicalAttack("strike", 1, 1).action(setup([]), enemy, fighter)
+        expect(before - enemy.healt).toBe(1 + 2 + 1)
     })
 })
 

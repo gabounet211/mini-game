@@ -5,6 +5,7 @@ import { DamageKind, damageReduction, deriveAttributes, Rarity, Stats } from "./
 import { Character } from "./character";
 import { characterClasses } from "./characterClass";
 import { equippedStats } from "./items";
+import { burnDamage, effectStatChanges, EffectKind, harmfulEffects, poisonDamage, StatusEffect } from "./effect";
 
 const walkSpeed = 1.5
 const walkAnimationSpeed = 2
@@ -38,6 +39,8 @@ export class Piece {
     usedThisTurn = new Set<Action>()
 
     stats: Stats
+    baseStats: Stats
+    effects: StatusEffect[] = []
     maxHealt: number
     maxActionPoints: number
     moveRange: number
@@ -46,8 +49,6 @@ export class Piece {
     inspiresAllies: boolean
 
     kills = 0
-    willpowerDrain = 0
-    drainTurns = 0
     lastAttacker: Piece | undefined
 
     private currentHealt: number
@@ -60,7 +61,8 @@ export class Piece {
 
     constructor(public config: PieceConfig, public character: Character, public player = false) {
         this.obj = config.obj.clone();
-        this.stats = equippedStats(character)
+        this.baseStats = equippedStats(character)
+        this.stats = { ...this.baseStats }
         const attributes = deriveAttributes(this.stats)
         this.maxHealt = attributes.maxHealt
         this.maxActionPoints = attributes.maxActionPoints
@@ -183,12 +185,45 @@ export class Piece {
         }
     }
 
-    drainWillpower(amount: number, turns: number) {
-        this.restoreWillpower()
-        this.willpowerDrain = Math.min(amount, this.stats.willpower)
-        this.drainTurns = turns
-        this.stats.willpower -= this.willpowerDrain
+    hasEffect(kind: EffectKind) {
+        return this.effects.some(effect => effect.kind === kind)
+    }
+
+    effectAmount(kind: EffectKind) {
+        return this.effects.filter(effect => effect.kind === kind).reduce((sum, effect) => sum + effect.amount, 0)
+    }
+
+    addEffect(effect: StatusEffect, hostile: boolean) {
+        if (hostile && this.hasEffect("immune"))
+            return false
+        this.effects = this.effects.filter(other => other.kind !== effect.kind)
+        this.effects.push(effect)
+        this.refreshStats()
+        return true
+    }
+
+    cureEffects() {
+        this.effects = this.effects.filter(effect => !harmfulEffects.includes(effect.kind))
+        this.refreshStats()
+    }
+
+    refreshStats() {
+        const changes = effectStatChanges(this.effects)
+        this.stats = { ...this.baseStats }
+        for (const [stat, value] of Object.entries(changes) as [keyof Stats, number][])
+            this.stats[stat] = Math.max(0, this.stats[stat] + value)
         this.maxActionPoints = deriveAttributes(this.stats).maxActionPoints
+    }
+
+    startOwnTurn(concentrationRegen: number) {
+        const stunned = this.hasEffect("stun")
+        this.actionPoints = stunned ? 0 : this.maxActionPoints
+        this.movePoints = stunned || this.hasEffect("root") ? 0 : Math.max(0, this.moveRange - this.effectAmount("slow"))
+        this.concentration = Math.min(this.maxConcentration, this.concentration + concentrationRegen)
+        if (this.hasEffect("burn"))
+            this.takeDamage(burnDamage, "magic", this.lastAttacker)
+        if (this.hasEffect("poison"))
+            this.takeDamage(poisonDamage, "pure", this.lastAttacker)
     }
 
     endOwnTurn() {
@@ -197,15 +232,14 @@ export class Piece {
                 this.cooldowns.set(action, Math.max(0, turns - 1))
         }
         this.usedThisTurn.clear()
-        if (this.drainTurns > 0 && --this.drainTurns === 0)
-            this.restoreWillpower()
-    }
-
-    private restoreWillpower() {
-        this.stats.willpower += this.willpowerDrain
-        this.willpowerDrain = 0
-        this.drainTurns = 0
-        this.maxActionPoints = deriveAttributes(this.stats).maxActionPoints
+        for (const effect of this.effects) {
+            if (effect.fresh)
+                effect.fresh = false
+            else
+                effect.turns--
+        }
+        this.effects = this.effects.filter(effect => effect.turns > 0)
+        this.refreshStats()
     }
 
     heal(amount: number) {

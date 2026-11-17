@@ -91,10 +91,8 @@ export class GameLogic {
         for (const piece of this.grid.getPieces(this.state === "PlayerTurn"))
             piece.endOwnTurn()
         this.state = this.state === "PlayerTurn" ? "AiTurn" : "PlayerTurn"
-        for (const piece of this.grid.getPieces(this.state === "PlayerTurn")) {
-            piece.movePoints = piece.moveRange
-            piece.actionPoints = piece.maxActionPoints
-            piece.concentration = Math.min(piece.maxConcentration, piece.concentration + concentrationRegen)
-        }
+        for (const piece of this.grid.getPieces(this.state === "PlayerTurn"))
+            piece.startOwnTurn(concentrationRegen)
+        this.grid.removeDead()
     }
 }
