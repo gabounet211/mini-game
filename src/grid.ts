@@ -196,13 +196,13 @@ export class Grid {
         this.scene.add(dot);
     }
 
-    attackFill(start: Vector2, attackRange: number) {
+    attackFill(start: Vector2, attackRange: number, line = false) {
         const resultGrid = new SmallGrid<boolean>(attackRange, false, start);
         const target = new Vector2();
 
         for (let x = -attackRange; x <= attackRange; x++) {
             for (let y = -attackRange; y <= attackRange; y++) {
-                if ((x === 0 && y === 0) || Math.abs(x) + Math.abs(y) > attackRange)
+                if ((x === 0 && y === 0) || Math.abs(x) + Math.abs(y) > attackRange || (line && x !== 0 && y !== 0))
                     continue;
                 target.set(start.x + x, start.y + y);
                 if (!this.isViewBlocked(start, target))

@@ -1,7 +1,7 @@
 import { BufferAttribute, BufferGeometry, Color, Group, Line, LineBasicMaterial, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, Vector2, Vector3 } from "three";
 import { Grid, SmallGrid } from "./grid";
 import { Piece } from "./piece";
-import { Action, canUse, spendAction } from "./action";
+import { Action, canTarget, canUse, spendAction } from "./action";
 import { CameraControle } from "./cameraControle";
 import { Ui } from "./ui";
 import { GameLogic } from "./gamelogic";
@@ -188,11 +188,11 @@ export class Selector {
         this.selectedAttack = undefined
     }
 
-    private showAttackRange(range: number, color: number) {
+    private showAttackRange(action: Action, color: number) {
         if (!this.selected)
             return
         this.block.remove(...this.attackBlocks)
-        this.selectedAttack = this.gameLogic.grid.attackFill(this.selectedPos, range);
+        this.selectedAttack = this.gameLogic.grid.attackFill(this.selectedPos, action.range, action.line);
         this.attackBlocks = this.showRange(this.selectedAttack, color, 0.001)
     }
 
@@ -210,7 +210,7 @@ export class Selector {
             return
         }
         this.targetingAction = action
-        this.showAttackRange(action.range, action.targets === "ally" ? Color.NAMES.limegreen : Color.NAMES.red)
+        this.showAttackRange(action, action.targets === "ally" ? Color.NAMES.limegreen : Color.NAMES.red)
         this.ui.setTargeting(action)
     }
 
@@ -218,12 +218,14 @@ export class Selector {
         const piece = this.selected
         const action = this.targetingAction
         const target = this.hoveredCase
-        const inRange = !!action && Grid.manathanDistance(this.selectedPos, this.grid_pos) <= action.range && this.selectedAttack?.get(this.grid_pos)
+        const inRange = !!action && canTarget(action, this.selectedPos, this.grid_pos) && this.selectedAttack?.get(this.grid_pos)
         this.targetingAction = undefined
         this.hideAttackRange()
         this.ui.setTargeting(undefined)
         const wantsAlly = action?.targets === "ally"
-        if (!piece || !action || !(target instanceof Piece) || (target.player === piece.player) !== wantsAlly)
+        if (!piece || !action || !(target instanceof Piece))
+            return
+        if (action.targets === "any" ? target === piece : (target.player === piece.player) !== wantsAlly)
             return
         if (!inRange && !(wantsAlly && target === piece))
             return
@@ -234,7 +236,11 @@ export class Selector {
         piece.attack(target.obj.position)
         spendAction(piece, action)
         this.gameLogic.grid.removeDead()
-        this.ui.setActions(piece.actions)
+        const position = this.gameLogic.grid.getPosition(piece)
+        if (position && !position.equals(this.selectedPos))
+            this.select(piece, position)
+        else
+            this.ui.setActions(piece.actions)
     }
 
     private showRange(range: SmallGrid<boolean>, color: number, height: number) {

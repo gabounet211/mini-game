@@ -2,7 +2,7 @@ import { Vector2 } from "three";
 import { Game } from "./game";
 import { Grid } from "./grid";
 import { Piece } from "./piece";
-import { canUse, spendAction } from "./action";
+import { canTarget, canUse, spendAction } from "./action";
 
 const maxAttacksPerTurn = 10
 
@@ -39,7 +39,7 @@ export function nearestFirstInitiative(piece: Piece, game: Game) {
 
 export function attackActions(piece: Piece) {
     return piece.actions
-        .filter(action => action.needsTarget && action.targets !== "ally" && canUse(piece, action))
+        .filter(action => action.needsTarget && (action.targets ?? "enemy") === "enemy" && canUse(piece, action))
         .sort((a, b) => b.cost - a.cost || b.range - a.range)
 }
 
@@ -172,12 +172,12 @@ export function approachTarget(piece: Piece, target: Piece, game: Game) {
 
 async function attackWhilePossible(piece: Piece, steps: AiSteps, game: Game) {
     const grid = game.gameLogic.grid
-    const from = grid.getPosition(piece)
-    if (!from)
-        return
     for (let attacks = 0; attacks < maxAttacksPerTurn; attacks++) {
+        const from = grid.getPosition(piece)
+        if (!from)
+            return
         const choice = attackActions(piece)
-            .map(action => ({ action, target: steps.chooseTarget(piece, grid.getPieces(!piece.player).filter(candidate => canAttackFrom(piece, from, candidate, game, action.range)), game) }))
+            .map(action => ({ action, target: steps.chooseTarget(piece, grid.getPieces(!piece.player).filter(candidate => canAttackFrom(piece, from, candidate, game, action.range) && canTarget(action, from, grid.getPosition(candidate)!)), game) }))
             .find(choice => choice.target)
         if (!choice?.target)
             return
