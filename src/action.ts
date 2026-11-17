@@ -226,6 +226,23 @@ export function areaAction(name: string, cost: number, range: number, costs: Act
     }
 }
 
+export function groundZoneAction(name: string, cost: number, costs: ActionCosts, size: number, turns: number, effect: StatusEffect): Action {
+    return {
+        ...costs,
+        name,
+        cost,
+        range: 0,
+        area: { kind: "radius", size },
+        action(game, _target, user) {
+            const logic = game?.gameLogic
+            const center = user && logic?.grid.getPosition(user)
+            if (!user || !logic || !center)
+                return
+            logic.addGroundZone({ cells: areaCells({ kind: "radius", size }, center, center), player: user.player, effect, turns })
+        },
+    }
+}
+
 export const drainDuration = 2
 
 export function willpowerDrain(name: string, cost: number, range: number, costs: ActionCosts = {}): Action {

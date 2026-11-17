@@ -6,6 +6,7 @@ import { createCharacter } from "./character"
 import { areaCells } from "./area"
 import { areaAction } from "./action"
 import { Game } from "./game"
+import { applyGroundZones } from "./groundZone"
 
 const at = (x: number, y: number) => new Vector2(x, y)
 const keys = (cells: Vector2[]) => cells.map(cell => cell.x + ',' + cell.y).sort()
@@ -53,5 +54,22 @@ describe("areaAction", () => {
         expect(ally.healt).toBe(hpAlly)
         areaAction("bulletShower", 3, 3, {}, { shape: { kind: "square", size: 2 }, damage: "physical", friendlyFire: true }).action(game, undefined, user, at(3, 3))
         expect(ally.healt).toBeLessThan(hpAlly)
+    })
+})
+
+describe("applyGroundZones", () => {
+    it("slows enemies standing in the zone at the start of their turns, for the zone's duration", () => {
+        const enemy = piece(false), outside = piece(false), ally = piece(true)
+        const game = setup([[1, 1, enemy], [6, 6, outside], [1, 2, ally]])
+        const grid = game.gameLogic.grid
+        let zones = [{ cells: areaCells({ kind: "radius", size: 2 }, at(1, 1), at(1, 1)), player: true, effect: { kind: "slow" as const, amount: 1, turns: 1 }, turns: 2 }]
+        zones = applyGroundZones(zones, grid, true)
+        expect(ally.hasEffect("slow")).toBe(false)
+        zones = applyGroundZones(zones, grid, false)
+        expect(enemy.hasEffect("slow")).toBe(true)
+        expect(outside.hasEffect("slow")).toBe(false)
+        expect(zones).toHaveLength(1)
+        zones = applyGroundZones(zones, grid, false)
+        expect(zones).toHaveLength(0)
     })
 })

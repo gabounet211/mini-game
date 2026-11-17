@@ -1,7 +1,8 @@
 import { Game } from "./game";
 import { Grid } from "./grid";
 import { levels } from './gltf';
-import { Scene, Vector2, Vector3 } from "three";
+import { Group, Scene, Vector2, Vector3 } from "three";
+import { applyGroundZones, drawGroundZones, GroundZone } from "./groundZone";
 import { Selector } from "./selector";
 import { CameraControle } from "./cameraControle";
 import { Character, createCharacter } from "./character";
@@ -29,6 +30,8 @@ export class GameLogic {
     heroes: Piece[] = []
     rewards: string[] = []
     levelKey: string
+    groundZones: GroundZone[] = []
+    zoneGroup = new Group()
 
 
     constructor(
@@ -38,6 +41,7 @@ export class GameLogic {
         levelKey: string,
     ) {
         this.levelKey = levelKey
+        scene.add(this.zoneGroup)
         const desLevel1 = levels.getLevel(levelKey)
         this.grid = new Grid(levels.maps[desLevel1.map])
         this.victory = desLevel1.victory ?? allEnemiesDefeated
@@ -85,12 +89,19 @@ export class GameLogic {
         }
     }
 
+    addGroundZone(zone: GroundZone) {
+        this.groundZones.push(zone)
+        drawGroundZones(this.zoneGroup, this.groundZones, this.grid)
+    }
+
     endTurn() {
         if (this.state !== "PlayerTurn" && this.state !== "AiTurn")
             return
         for (const piece of this.grid.getPieces(this.state === "PlayerTurn"))
             piece.endOwnTurn()
         this.state = this.state === "PlayerTurn" ? "AiTurn" : "PlayerTurn"
+        this.groundZones = applyGroundZones(this.groundZones, this.grid, this.state === "PlayerTurn")
+        drawGroundZones(this.zoneGroup, this.groundZones, this.grid)
         for (const piece of this.grid.getPieces(this.state === "PlayerTurn"))
             piece.startOwnTurn(concentrationRegen)
         this.grid.removeDead()
