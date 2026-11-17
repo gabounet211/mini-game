@@ -2,6 +2,7 @@ import { BufferAttribute, BufferGeometry, Color, Group, Line, LineBasicMaterial,
 import { Grid, SmallGrid } from "./grid";
 import { Piece } from "./piece";
 import { Action, canTarget, canUse, spendAction } from "./action";
+import { areaCells } from "./area";
 import { CameraControle } from "./cameraControle";
 import { Ui } from "./ui";
 import { GameLogic } from "./gamelogic";
@@ -21,6 +22,8 @@ export class Selector {
     )
 
     placementZone = new Group()
+    areaPreview = new Group()
+    private previewKey = ''
 
     movementGrid = new Line(
         new BufferGeometry(),
@@ -104,6 +107,29 @@ export class Selector {
         this.obj.visible = true
 
         this.obj.position.set(this.world_pos.x, 0.01, this.world_pos.z)
+        this.updateAreaPreview()
+    }
+
+    private updateAreaPreview() {
+        const action = this.targetingAction
+        const visible = !!action?.area && !!this.selected && !!this.selectedAttack?.get(this.grid_pos)
+        const key = visible ? this.grid_pos.x + ',' + this.grid_pos.y : ''
+        if (key === this.previewKey)
+            return
+        this.previewKey = key
+        this.areaPreview.clear()
+        if (!visible || !action?.area)
+            return
+        for (const cell of areaCells(action.area, this.selectedPos, this.grid_pos)) {
+            const pos = this.gameLogic.grid.gridToWorldPos(cell.clone())
+            const block = new Mesh(
+                new PlaneGeometry(0.9, 0.9),
+                new MeshBasicMaterial({ color: Color.NAMES.orange, opacity: 0.6, transparent: true })
+            )
+            block.rotateX(-Math.PI / 2)
+            block.position.set(pos.x, .012, pos.y)
+            this.areaPreview.add(block)
+        }
     }
 
     private placementClick() {
@@ -222,18 +248,26 @@ export class Selector {
         this.targetingAction = undefined
         this.hideAttackRange()
         this.ui.setTargeting(undefined)
+        this.areaPreview.clear()
         const wantsAlly = action?.targets === "ally"
-        if (!piece || !action || !(target instanceof Piece))
+        if (!piece || !action)
             return
-        if (action.targets === "any" ? target === piece : (target.player === piece.player) !== wantsAlly)
-            return
-        if (!inRange && !(wantsAlly && target === piece))
-            return
+        if (action.area) {
+            if (!inRange)
+                return
+        } else {
+            if (!(target instanceof Piece))
+                return
+            if (action.targets === "any" ? target === piece : (target.player === piece.player) !== wantsAlly)
+                return
+            if (!inRange && !(wantsAlly && target === piece))
+                return
+        }
 
         if (!canUse(piece, action))
             return
-        action.action(this.ui.game, target, piece)
-        piece.attack(target.obj.position)
+        action.action(this.ui.game, target instanceof Piece ? target : undefined, piece, this.grid_pos.clone())
+        piece.attack(new Vector3(this.world_pos.x, piece.obj.position.y, this.world_pos.z))
         spendAction(piece, action)
         this.gameLogic.grid.removeDead()
         const position = this.gameLogic.grid.getPosition(piece)

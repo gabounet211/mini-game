@@ -3,11 +3,12 @@ import { Piece } from "./piece"
 import { EffectKind, StatusEffect } from "./effect"
 import { forceMove, inLine, MoveKind } from "./movement"
 import { Grid } from "./grid"
+import { AreaShape, areaCells, piecesInArea } from "./area"
 import { Vector2 } from "three"
 
 
 export interface Action{
-    action(game: Game, target?: Piece, user?: Piece) : void
+    action(game: Game, target?: Piece, user?: Piece, cell?: Vector2) : void
     name : string
     cost : number
     range : number
@@ -16,6 +17,8 @@ export interface Action{
     needsTarget? : boolean
     targets? : "enemy" | "ally" | "any"
     line? : boolean
+    area? : AreaShape
+    friendlyFire? : boolean
 }
 
 export type ActionCosts = Pick<Action, "concentration" | "cooldown">
@@ -39,6 +42,7 @@ export function describeAction(action: Action) {
         ...(action.concentration ? [action.concentration + ' concentration'] : []),
         action.range ? 'range ' + action.range : 'self',
         ...(action.line ? ['straight line'] : []),
+        ...(action.area ? ['area'] : []),
         ...(action.cooldown ? ['cooldown ' + action.cooldown] : []),
     ].join(' · ')
 }
@@ -180,6 +184,61 @@ export function moveAction(name: string, cost: number, range: number, costs: Act
             if (spec.kind === "retreat" || (!movesUser && !shielded && target.healt > 0))
                 forceMove(grid, spec.kind, user, target, spec.cells)
             applyEffect(target, user, spec.effect)
+        },
+    }
+}
+
+export interface AreaSpec {
+    shape: AreaShape
+    damage?: "physical" | "magic"
+    effect?: EffectSpec
+    friendlyFire?: boolean
+}
+
+export function areaAction(name: string, cost: number, range: number, costs: ActionCosts, spec: AreaSpec): Action {
+    return {
+        ...costs,
+        name,
+        cost,
+        range,
+        area: spec.shape,
+        friendlyFire: spec.friendlyFire,
+        needsTarget: true,
+        targets: "enemy",
+        action(game, target, user, cell) {
+            const grid = game?.gameLogic?.grid
+            if (!user || !grid)
+                return
+            const from = grid.getPosition(user)
+            const center = cell ?? (target && grid.getPosition(target))
+            if (!from || !center)
+                return
+            for (const piece of piecesInArea(grid, areaCells(spec.shape, from, center))) {
+                if (piece === user || (!spec.friendlyFire && piece.player === user.player))
+                    continue
+                if (spec.damage === "physical")
+                    piece.takeDamage(physicalDamage(game, user), "physical", user)
+                else if (spec.damage === "magic")
+                    piece.takeDamage(magicDamage(game, user), "magic", user)
+                applyEffect(piece, user, spec.effect)
+            }
+        },
+    }
+}
+
+export function groundZoneAction(name: string, cost: number, costs: ActionCosts, size: number, turns: number, effect: StatusEffect): Action {
+    return {
+        ...costs,
+        name,
+        cost,
+        range: 0,
+        area: { kind: "radius", size },
+        action(game, _target, user) {
+            const logic = game?.gameLogic
+            const center = user && logic?.grid.getPosition(user)
+            if (!user || !logic || !center)
+                return
+            logic.addGroundZone({ cells: areaCells({ kind: "radius", size }, center, center), player: user.player, effect, turns })
         },
     }
 }

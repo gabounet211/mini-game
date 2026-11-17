@@ -57,6 +57,11 @@ export class Grid {
             piece.update(delta)
     }
 
+    pieceAt(pos: Vector2) {
+        const cell = this.cells[pos.x + ',' + pos.y]
+        return cell instanceof Piece ? cell : undefined
+    }
+
     isFree(pos: Vector2) {
         return this.cells[pos.x + ',' + pos.y] === true
     }
