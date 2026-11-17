@@ -5,6 +5,7 @@ import { deriveAttributes, Stats } from "./stats"
 import { addExperience, experienceToNextLevel, sacrificeExperience, sacrificeValue, transferExperience } from "./rewards"
 import { equipmentBonuses, equippedStats, itemName, items, itemSlots, ItemSlot } from "./items"
 import { SaveData, writeSave } from "./save"
+import { describeAction } from "./action"
 
 type LobbyTab = "heroes" | "combination" | "inventory"
 
@@ -259,10 +260,10 @@ export class Lobby {
         this.details.replaceChildren(
             title,
             this.createSection('Progress', [['Level', character.level], ['Experience', character.experience + '/' + experienceToNextLevel(character.level)], ['Stat points', character.statPoints], ['Talent', character.talent ? this.formatName(character.talent) : '-']]),
-            this.createSection('Attributes', [['HP', attributes.maxHealt], ['AP', attributes.maxActionPoints], ['Ms', attributes.moveRange]]),
+            this.createSection('Attributes', [['HP', attributes.maxHealt], ['AP', attributes.maxActionPoints], ['Ms', attributes.moveRange], ...((characterClass?.actions ?? []).some(action => action.concentration) ? [['Concentration', attributes.maxConcentration] as [string, number]] : [])]),
             this.createStatsSection(character),
             this.createEquipmentSection(character),
-            this.createSection('Actions', [...(characterClass?.inspiresAllies ? [['Inspire allies', '+1 damage'] as [string, string]] : []), ...(characterClass?.actions ?? []).map(action => [this.formatName(action.name), action.cost + ' AP · range ' + action.range] as [string, string])]),
+            this.createSection('Actions', [...(characterClass?.inspiresAllies ? [['Inspire allies', '+1 damage'] as [string, string]] : []), ...(characterClass?.actions ?? []).map(action => [this.formatName(action.name), describeAction(action)] as [string, string])]),
             ...this.createClassChangeSection(character),
             closeButton,
         )

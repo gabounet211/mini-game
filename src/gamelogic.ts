@@ -6,6 +6,7 @@ import { Selector } from "./selector";
 import { CameraControle } from "./cameraControle";
 import { Character, createCharacter } from "./character";
 import { Piece, PieceConfig } from "./piece";
+import { concentrationRegen } from "./action";
 import { grantDefeatResults, grantVictoryRewards } from "./rewards";
 import { allEnemiesDefeated, allHeroesDefeated, EndCondition } from "./endCondition";
 
@@ -93,6 +94,7 @@ export class GameLogic {
         for (const piece of this.grid.getPieces(this.state === "PlayerTurn")) {
             piece.movePoints = piece.moveRange
             piece.actionPoints = piece.maxActionPoints
+            piece.concentration = Math.min(piece.maxConcentration, piece.concentration + concentrationRegen)
         }
     }
 }

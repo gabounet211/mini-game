@@ -3,7 +3,7 @@ import { Object3D } from "three"
 import { Grid } from "./grid"
 import { Piece, PieceConfig } from "./piece"
 import { createCharacter } from "./character"
-import { allyBonus, physicalAttack, willpowerDrain } from "./action"
+import { allyBonus, canUse, hybridAttack, magicalAttack, physicalAttack, spendAction, willpowerDrain } from "./action"
 import { Game } from "./game"
 
 function piece(player: boolean, characterClass?: string) {
@@ -108,5 +108,38 @@ describe("willpowerDrain", () => {
         willpowerDrain("dissonantChord", 2, 2).action(setup([]), enemy, bardWith(1))
         expect(enemy.healt).toBe(before)
         expect(enemy.willpowerDrain).toBe(1)
+    })
+})
+
+describe("concentration and cooldowns", () => {
+    it("needs enough concentration and spends it", () => {
+        const mage = piece(true)
+        const bolt = magicalAttack("bolt", 1, 3, { concentration: 3 })
+        expect(mage.concentration).toBe(4)
+        expect(canUse(mage, bolt)).toBe(true)
+        spendAction(mage, bolt)
+        expect(mage.concentration).toBe(1)
+        expect(canUse(mage, bolt)).toBe(false)
+    })
+
+    it("blocks an action for its cooldown, counted in the user's own turns", () => {
+        const fighter = piece(true)
+        const bash = physicalAttack("bash", 1, 1, { cooldown: 2 })
+        spendAction(fighter, bash)
+        fighter.endOwnTurn()
+        fighter.actionPoints = fighter.maxActionPoints
+        expect(canUse(fighter, bash)).toBe(false)
+        fighter.endOwnTurn()
+        expect(canUse(fighter, bash)).toBe(false)
+        fighter.endOwnTurn()
+        expect(canUse(fighter, bash)).toBe(true)
+    })
+
+    it("deals physical and magic damage with a hybrid attack", () => {
+        const user = piece(true)
+        const enemy = piece(false)
+        const before = enemy.healt
+        hybridAttack("spellStrike", 2, 1).action(setup([]), enemy, user)
+        expect(before - enemy.healt).toBe(3 + 3)
     })
 })

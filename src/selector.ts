@@ -1,7 +1,7 @@
 import { BufferAttribute, BufferGeometry, Color, Group, Line, LineBasicMaterial, Mesh, MeshBasicMaterial, PerspectiveCamera, PlaneGeometry, Vector2, Vector3 } from "three";
 import { Grid, SmallGrid } from "./grid";
 import { Piece } from "./piece";
-import { Action } from "./action";
+import { Action, canUse, spendAction } from "./action";
 import { CameraControle } from "./cameraControle";
 import { Ui } from "./ui";
 import { GameLogic } from "./gamelogic";
@@ -228,9 +228,11 @@ export class Selector {
         if (!inRange && !(wantsAlly && target === piece))
             return
 
+        if (!canUse(piece, action))
+            return
         action.action(this.ui.game, target, piece)
         piece.attack(target.obj.position)
-        piece.actionPoints -= action.cost
+        spendAction(piece, action)
         this.gameLogic.grid.removeDead()
         this.ui.setActions(piece.actions)
     }

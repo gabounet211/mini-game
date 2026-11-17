@@ -38,7 +38,10 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
   - les actions de base n'ont pas de temps de recharge, les actions plus puissantes en ont un ;
   - les classes magiques (DPS magiques, healers, soutiens magiques) utilisent une ressource appelée concentration ;
   - rôles : Tank, Healer, Soutien magique, DPS magique, DPS physique ; le Paladin (tank) utilise aussi la concentration pour soigner ; un rôle de soutien physique est envisagé, encore à définir ;
-  - à venir : effets qui durent quelques tours et zones d'effet.
+  - concentration : maximum = 3 + savoir, +2 par tour (sans dépasser le maximum) ; un héros commence le combat au maximum ;
+  - recharge : « recharge N tours » = l'action est bloquée pendant les N tours suivants du héros ;
+  - décidé pour les prochaines briques : en feu = 2 dégâts magiques par tour, empoisonné = 1 dégât par tour qui ignore la résistance ; protect = le lanceur encaisse les dégâts à la place de la cible ; la perception augmente les chances de coup critique ; inspireChord et warChant augmentent la volonté de (volonté du lanceur ÷ 4, au moins 1) ;
+  - à venir, dans cet ordre : effets qui durent quelques tours, déplacements forcés, zones d'effet, réactions (taunt, protect, riposte) et coups critiques.
 - À chaque niveau, le joueur répartit lui-même ses points de stats.
 - Au niveau X (puis à d'autres paliers), toutes les classes du palier suivant dont le héros atteint les statistiques minimums sont proposées (ex. Soldier : force 5 et résistance 4). Les classes faciles demandent 2 stats, les classes complexes des valeurs plus élevées ou 3 à 4 stats. Ça propose plus de classes et permet plus de diversité.
 - Plafond : un commun peut monter au plus jusqu'au palier rare (palier 3), un peu commun ou un rare jusqu'au palier légendaire (palier 4). Avec un seul changement de classe pour le moment, un commun s'arrête au palier 2. Un légendaire commence au palier 4 et a donc accès plus tôt aux classes uniques.

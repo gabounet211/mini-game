@@ -31,6 +31,11 @@ export class Piece {
     
     movePoints: number
     actionPoints: number
+    concentration: number
+    maxConcentration: number
+    usesConcentration: boolean
+    cooldowns = new Map<Action, number>()
+    usedThisTurn = new Set<Action>()
 
     stats: Stats
     maxHealt: number
@@ -67,6 +72,9 @@ export class Piece {
         this.currentHealt = this.maxHealt
         this.actionPoints = this.maxActionPoints
         this.movePoints = this.moveRange
+        this.maxConcentration = attributes.maxConcentration
+        this.concentration = this.maxConcentration
+        this.usesConcentration = this.actions.some(action => action.concentration)
         this.offset = config.offset;
         if (!player)
             this.obj.rotation.y = Math.PI
@@ -184,6 +192,11 @@ export class Piece {
     }
 
     endOwnTurn() {
+        for (const [action, turns] of this.cooldowns) {
+            if (!this.usedThisTurn.has(action))
+                this.cooldowns.set(action, Math.max(0, turns - 1))
+        }
+        this.usedThisTurn.clear()
         if (this.drainTurns > 0 && --this.drainTurns === 0)
             this.restoreWillpower()
     }

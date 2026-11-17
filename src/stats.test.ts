@@ -24,8 +24,8 @@ describe("rollStats", () => {
 })
 
 describe("deriveAttributes", () => {
-    it("computes HP, AP and Ms from constitution, willpower and dexterity", () => {
-        const stats = { strength: 1, resistance: 1, constitution: 5, willpower: 6, knowledge: 1, intelligence: 1, dexterity: 4, perception: 1 }
-        expect(deriveAttributes(stats)).toEqual({ maxHealt: 16, maxActionPoints: 4, moveRange: 5 })
+    it("computes HP, AP, Ms and concentration from constitution, willpower, dexterity and knowledge", () => {
+        const stats = { strength: 1, resistance: 1, constitution: 5, willpower: 6, knowledge: 2, intelligence: 1, dexterity: 4, perception: 1 }
+        expect(deriveAttributes(stats)).toEqual({ maxHealt: 16, maxActionPoints: 4, moveRange: 5, maxConcentration: 5 })
     })
 })

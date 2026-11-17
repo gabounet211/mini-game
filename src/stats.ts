@@ -44,5 +44,6 @@ export function deriveAttributes(stats: Stats) {
         maxHealt: 6 + stats.constitution * 2,
         maxActionPoints: 2 + Math.floor(stats.willpower / 3),
         moveRange: 3 + Math.floor(stats.dexterity / 2),
+        maxConcentration: 3 + stats.knowledge,
     }
 }
