@@ -81,7 +81,7 @@ export const characterClasses: Record<string, CharacterClass> = {
     scout: { name: "Scout", tier: 2, starting: true, actions: [
         physicalAttack("knifeThrow", 1, 3),
         physicalAttack("knifeStrike", 1, 1),
-        byRank(rank => moveAction("jump", rank === 1 ? 2 : 1, 1, {}, { kind: "jump", targets: "any", damage: rank === 3 })),
+        byRank(rank => moveAction("jump", 2, 1, {}, { kind: "jump", targets: "any", damage: rank === 3 })),
         byRank(rank => physicalAttack("poisonedKnife", 2, rank === 1 ? 3 : 4, { cooldown: 2 }, effect("poison", rank === 3 ? 3 : 2))),
     ], statWeights: { dexterity: 3, perception: 2 }, minimums: { dexterity: 5, constitution: 4 } },
     tracker: { name: "Tracker", tier: 2, starting: true, actions: [
