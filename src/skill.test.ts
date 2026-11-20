@@ -5,7 +5,8 @@ import { applyClassChange } from "./characterClass"
 vi.mock("./gltf", () => ({ levels: { keys: () => [], getLevel: () => ({}) } }))
 
 const { addExperience } = await import("./rewards")
-import { equippedActions, learnSkill, rankUpSkill, skillAction, skillSlots, toggleEquipped } from "./skill"
+import { equippedActions, learnSkill, rankedAction, rankUpSkill, skillAction, skillSlots, toggleEquipped } from "./skill"
+import { physicalAttack } from "./action"
 
 function hero(characterClass: string, skillPoints = 0) {
     const character = createCharacter("hero", "rare", characterClass)
@@ -48,18 +49,17 @@ describe("skills", () => {
         expect(tracker.equippedSkills).toEqual(["aimedShot", "legShot", "knifeStrike"])
     })
 
-    it("ranks up for 1 then 2 points, adding damage and shortening the cooldown at rank 3", () => {
-        const sharpshooter = hero("sharpshooter", 3)
-        sharpshooter.skills.headShot = { rank: 1, from: "sharpshooter" }
-        expect(rankUpSkill(sharpshooter, "headShot")).toBe(true)
-        expect(sharpshooter.skillPoints).toBe(2)
-        expect(skillAction(sharpshooter, "headShot")!.bonusDamage).toBe(3)
-        expect(rankUpSkill(sharpshooter, "headShot")).toBe(true)
-        expect(sharpshooter.skillPoints).toBe(0)
-        const headShot = skillAction(sharpshooter, "headShot")!
-        expect(headShot.bonusDamage).toBe(4)
-        expect(headShot.cooldown).toBe(1)
-        expect(rankUpSkill(sharpshooter, "headShot")).toBe(false)
+    it("ranks up for 1 then 2 points, with generic bonuses when a skill has no rank versions", () => {
+        const duelist = hero("duelist", 3)
+        duelist.skills.rapierSweep = { rank: 1, from: "duelist" }
+        expect(rankUpSkill(duelist, "rapierSweep")).toBe(true)
+        expect(duelist.skillPoints).toBe(2)
+        expect(skillAction(duelist, "rapierSweep")!.bonusDamage).toBe(1)
+        expect(rankUpSkill(duelist, "rapierSweep")).toBe(true)
+        expect(duelist.skillPoints).toBe(0)
+        expect(skillAction(duelist, "rapierSweep")!.bonusDamage).toBe(2)
+        expect(rankUpSkill(duelist, "rapierSweep")).toBe(false)
+        expect(rankedAction(physicalAttack("strike", 1, 1, { cooldown: 2 }), 3).cooldown).toBe(1)
     })
 
     it("keeps skills on a class change, upgrading those the new class shares and swapping the basic attack", () => {
