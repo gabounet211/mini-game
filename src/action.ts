@@ -260,16 +260,18 @@ export function areaAction(name: string, cost: number, range: number, costs: Act
     }
 }
 
-export function groundZoneAction(name: string, cost: number, costs: ActionCosts, size: number, turns: number, effect: StatusEffect): Action {
+export function groundZoneAction(name: string, cost: number, costs: ActionCosts, size: number, turns: number, effect: StatusEffect, range = 0): Action {
     return {
         ...costs,
         name,
         cost,
-        range: 0,
+        range,
         area: { kind: "radius", size },
-        action(game, _target, user) {
+        needsTarget: range > 0,
+        targets: range > 0 ? "enemy" : undefined,
+        action(game, target, user, cell) {
             const logic = game?.gameLogic
-            const center = user && logic?.grid.getPosition(user)
+            const center = cell ?? (target && logic?.grid.getPosition(target)) ?? (user && logic?.grid.getPosition(user))
             if (!user || !logic || !center)
                 return
             logic.addGroundZone({ cells: areaCells({ kind: "radius", size }, center, center), player: user.player, effect, turns })
