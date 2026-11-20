@@ -37,7 +37,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
   - en changeant de classe, le héros garde ses compétences (voir Compétences plus bas) ;
   - les actions de base n'ont pas de temps de recharge, les actions plus puissantes en ont un ;
   - les classes magiques (DPS magiques, healers, soutiens magiques) utilisent une ressource appelée concentration ;
-  - rôles : Tank, Healer, Soutien magique, DPS magique, DPS physique ; le Paladin (tank) utilise aussi la concentration pour soigner ; un rôle de soutien physique est envisagé, encore à définir ;
+  - rôles : Tank, Healer, Soutien magique, DPS magique, DPS physique ; le Paladin (tank) utilise aussi la concentration pour soigner ; le Warlord est le premier essai de soutien physique (ordres et cris de guerre, sans concentration) ;
   - concentration : maximum = 3 + savoir, +2 par tour (sans dépasser le maximum) ; un héros commence le combat au maximum ;
   - recharge : « recharge N tours » = l'action est bloquée pendant les N tours suivants du héros ;
   - décidé pour les prochaines briques : en feu = 2 dégâts magiques par tour, empoisonné = 1 dégât par tour qui ignore la résistance ; protect = le lanceur encaisse les dégâts à la place de la cible ; la perception augmente les chances de coup critique ; inspireChord et warChant augmentent la volonté de (volonté du lanceur ÷ 4, au moins 1) ;
@@ -49,7 +49,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 - À chaque niveau, le joueur répartit lui-même ses points de stats.
 - Compétences (`src/skill.ts`, onglet Training du lobby) : les actions deviennent des compétences que chaque héros apprend, équipe et améliore.
   - un héros commence avec l'attaque de base de sa classe et sa première compétence ; il gagne 1 point de compétence par niveau (des ressources à farmer viendront plus tard) ;
-  - apprendre une compétence de sa classe coûte 1 point ; 3 rangs : rang 2 = 1 point (+1 dégât), rang 3 = 2 points (+2 dégâts et recharge -1) ; une compétence peut avoir ses propres versions de rang 2 et 3 (`withRanks`), qui remplacent alors ces bonus génériques ; le détail des compétences est dans l'onglet « Compétences » du doc « Actions des classes » (paliers 1 à 3 faits) ;
+  - apprendre une compétence de sa classe coûte 1 point ; 3 rangs : rang 2 = 1 point (+1 dégât), rang 3 = 2 points (+2 dégâts et recharge -1) ; une compétence peut avoir ses propres versions de rang 2 et 3 (`withRanks`), qui remplacent alors ces bonus génériques ; le détail des compétences est dans l'onglet « Compétences » du doc « Actions des classes » (paliers 1 à 5 faits ; au palier 5, la classe reprend les compétences du légendaire d'avant en plus fort et ajoute une compétence signature) ;
   - places équipées selon le palier (attaque de base comprise) : 2 au palier 1, 3 au palier 2, 4 au palier 3, 5 aux paliers 4 et 5 ;
   - au changement de classe, le héros garde ses compétences ; celles que la nouvelle classe possède aussi passent à sa version (ex. legShot du Tracker devient celui du Sharpshooter, au même rang) ; l'attaque de base de la nouvelle classe est apprise et remplace l'ancienne si elle était équipée ;
   - idée : les attaques de base viendront plus tard des armes (rapierStrike, etc.) ;
