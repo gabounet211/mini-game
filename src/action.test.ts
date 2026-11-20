@@ -3,7 +3,7 @@ import { Object3D } from "three"
 import { Grid } from "./grid"
 import { Piece, PieceConfig } from "./piece"
 import { createCharacter } from "./character"
-import { allyBonus, canUse, critRoll, cure, hybridAttack, magicalAttack, physicalAttack, spendAction, statusAction, tauntAction, willpowerDrain } from "./action"
+import { allyBonus, areaAction, canUse, critRoll, cure, healing, hybridAttack, magicalAttack, physicalAttack, spendAction, statusAction, tauntAction, willpowerDrain } from "./action"
 import { Game } from "./game"
 
 function piece(player: boolean, characterClass?: string) {
@@ -258,6 +258,16 @@ describe("critical hits and reactions", () => {
         expect(archer.healt).toBe(archerBefore)
     })
 
+    it("adds the riposte effect's amount to the counter", () => {
+        const gladiator = piece(true)
+        const melee = piece(false)
+        const game = setup([[2, 2, gladiator], [2, 3, melee]])
+        gladiator.addEffect({ kind: "riposte", amount: 1, turns: 1 }, false)
+        const before = melee.healt
+        physicalAttack("strike", 1, 1).action(game, gladiator, melee)
+        expect(before - melee.healt).toBe(4)
+    })
+
     it("taunts the enemies around the caster", () => {
         const guard = piece(true)
         const near = piece(false)
@@ -266,5 +276,32 @@ describe("critical hits and reactions", () => {
         tauntAction("taunt", 2, 3, {}, 2).action(game, undefined, guard)
         expect(near.effects[0]).toMatchObject({ kind: "taunt", source: guard, turns: 2 })
         expect(far.hasEffect("taunt")).toBe(false)
+    })
+})
+
+describe("legendary skill bricks", () => {
+    it("hits every enemy around the user with a self-centered area", () => {
+        const berserker = piece(true)
+        const ally = piece(true)
+        const near = piece(false)
+        const far = piece(false)
+        const game = setup([[2, 2, berserker], [2, 3, ally], [1, 2, near], [4, 4, far]])
+        const whirlwind = areaAction("whirlwind", 3, 0, {}, { shape: { kind: "radius", size: 1 }, damage: "physical" })
+        expect(whirlwind.needsTarget).toBe(false)
+        const allyBefore = ally.healt, nearBefore = near.healt, farBefore = far.healt
+        whirlwind.action(game, undefined, berserker)
+        expect(nearBefore - near.healt).toBe(3)
+        expect(ally.healt).toBe(allyBefore)
+        expect(far.healt).toBe(farBefore)
+    })
+
+    it("heals with a bonus and applies an effect to the ally", () => {
+        const saint = piece(true)
+        const ally = piece(true)
+        ally.healt -= 8
+        const before = ally.healt
+        healing("divineIntervention", 3, 4, {}, 1, () => ({ kind: "immune", amount: 0, turns: 2 })).action(setup([]), ally, saint)
+        expect(ally.healt - before).toBe(2 + 1 + 1)
+        expect(ally.hasEffect("immune")).toBe(true)
     })
 })

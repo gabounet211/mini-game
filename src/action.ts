@@ -43,7 +43,7 @@ export function dealDamage(game: Game, target: Piece, amount: number, kind: Dama
     const from = grid?.getPosition(user)
     const to = grid?.getPosition(target)
     if (from && to && Grid.manathanDistance(from, to) <= 1 && target.player !== user.player && target.healt > 0 && user.healt > 0 && target.hasEffect("riposte"))
-        user.takeDamage(1 + Math.floor(target.stats.strength / 2), "physical", target, false)
+        user.takeDamage(1 + Math.floor(target.stats.strength / 2) + target.effectAmount("riposte"), "physical", target, false)
 }
 
 export function rollDamage(amount: number, user: Piece, action?: Action) {
@@ -237,14 +237,14 @@ export function areaAction(name: string, cost: number, range: number, costs: Act
         range,
         area: spec.shape,
         friendlyFire: spec.friendlyFire,
-        needsTarget: true,
-        targets: "enemy",
+        needsTarget: range > 0,
+        targets: range > 0 ? "enemy" : undefined,
         action(game, target, user, cell) {
             const grid = game?.gameLogic?.grid
             if (!user || !grid)
                 return
             const from = grid.getPosition(user)
-            const center = cell ?? (target && grid.getPosition(target))
+            const center = cell ?? (target && grid.getPosition(target)) ?? from
             if (!from || !center)
                 return
             for (const piece of piecesInArea(grid, areaCells(spec.shape, from, center))) {
@@ -322,7 +322,7 @@ export function cure(name: string, cost: number, range: number, costs: ActionCos
     }
 }
 
-export function healing(name: string, cost: number, range: number, costs: ActionCosts = {}): Action {
+export function healing(name: string, cost: number, range: number, costs: ActionCosts = {}, bonus = 0, effect?: EffectSpec): Action {
     return {
         ...costs,
         name,
@@ -333,7 +333,8 @@ export function healing(name: string, cost: number, range: number, costs: Action
         action(_game, target, user) {
             if (!target || !user)
                 return
-            target.heal(2 + Math.floor(user.stats.willpower / 2))
+            target.heal(2 + bonus + Math.floor(user.stats.willpower / 2))
+            applyEffect(target, user, effect)
         },
     }
 }

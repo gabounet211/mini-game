@@ -94,6 +94,21 @@ export function toggleEquipped(character: Character, name: string) {
     }
 }
 
+export function pruneSkills(character: Character) {
+    for (const [name, known] of Object.entries(character.skills)) {
+        if (classActions(known.from).some(action => action.name === name))
+            continue
+        for (let rank = 2; rank <= known.rank; rank++)
+            character.skillPoints += rankCosts[rank]
+        character.skillPoints += learnCost
+        delete character.skills[name]
+    }
+    character.equippedSkills = character.equippedSkills.filter(name => character.skills[name])
+    const basic = classActions(character.characterClass)[0]?.name
+    if (!character.equippedSkills.length && basic && character.skills[basic])
+        character.equippedSkills.push(basic)
+}
+
 export function upgradeSkillsForClass(character: Character, previousClass?: string) {
     const actions = classActions(character.characterClass)
     for (const action of actions)

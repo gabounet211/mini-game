@@ -1,4 +1,4 @@
-import { initSkills, skillPointsPerLevel } from "./skill"
+import { initSkills, pruneSkills, skillPointsPerLevel } from "./skill"
 import { Character, createHero, createId } from "./character"
 
 const saveKey = "miniGameSave"
@@ -28,6 +28,8 @@ export function loadSave(): SaveData {
                 }
                 if (!character.skills)
                     initSkills(character, (character.level - 1) * skillPointsPerLevel)
+                else
+                    pruneSkills(character)
                 return character
             })
             return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [], unlockedLevels: data.unlockedLevels ?? 1, lastTeam: data.lastTeam ?? [] }

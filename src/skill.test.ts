@@ -5,7 +5,7 @@ import { applyClassChange } from "./characterClass"
 vi.mock("./gltf", () => ({ levels: { keys: () => [], getLevel: () => ({}) } }))
 
 const { addExperience } = await import("./rewards")
-import { equippedActions, learnSkill, rankedAction, rankUpSkill, skillAction, skillSlots, toggleEquipped } from "./skill"
+import { equippedActions, learnSkill, pruneSkills, rankedAction, rankUpSkill, skillAction, skillSlots, toggleEquipped } from "./skill"
 import { physicalAttack } from "./action"
 
 function hero(characterClass: string, skillPoints = 0) {
@@ -87,5 +87,31 @@ describe("skills", () => {
         learnSkill(hunter, "snare")
         rankUpSkill(hunter, "snare")
         expect(skillAction(hunter, "snare")!.range).toBe(4)
+    })
+
+    it("evolves a legendary's skills to the tier 5 versions at the same rank", () => {
+        const cleric = createCharacter("hero", "legendary", "cleric")
+        cleric.skillPoints = 2
+        learnSkill(cleric, "holyWard")
+        rankUpSkill(cleric, "holyWard")
+        cleric.level = 4
+        cleric.championsDefeated = ["chapter1"]
+        const inventory = ["holyRelic"]
+        expect(applyClassChange(cleric, "saint", inventory)).toBe(true)
+        expect(cleric.skills.holyWard).toEqual({ rank: 2, from: "saint" })
+        expect(skillAction(cleric, "holyWard")!.range).toBe(4)
+        expect(skillSlots(cleric)).toBe(5)
+        expect(inventory).toEqual([])
+    })
+
+    it("removes skills that no longer exist and gives their points back", () => {
+        const elementalist = createCharacter("hero", "legendary", "elementalist")
+        elementalist.skills = { staffStrike: { rank: 1, from: "elementalist" }, elementalBlast: { rank: 3, from: "elementalist" } }
+        elementalist.equippedSkills = ["staffStrike", "elementalBlast"]
+        elementalist.skillPoints = 0
+        pruneSkills(elementalist)
+        expect(Object.keys(elementalist.skills)).toEqual(["staffStrike"])
+        expect(elementalist.equippedSkills).toEqual(["staffStrike"])
+        expect(elementalist.skillPoints).toBe(1 + 1 + 2)
     })
 })
