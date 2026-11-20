@@ -1,4 +1,4 @@
-import { Action, areaAction, cure, groundZoneAction, tauntAction, effect, healing, hybridAttack, magicalAttack, moveAction, physicalAttack, statusAction, willpowerBoost, willpowerDrain } from "./action"
+import { Action, areaAction, cure, groundZoneAction, tauntAction, effect, healing, hybridAttack, magicalAttack, moveAction, physicalAttack, statusAction, willpowerBoost, willpowerDrain, withRanks } from "./action"
 import { Rarity, Stats, StatWeights } from "./stats"
 import { upgradeSkillsForClass } from "./skill"
 import { Character } from "./character"
@@ -16,9 +16,42 @@ export interface CharacterClass {
 }
 
 export const characterClasses: Record<string, CharacterClass> = {
-    farmer: { name: "Farmer", tier: 1, starting: true, actions: [physicalAttack("pitchforkStrike", 1, 1)], statWeights: { constitution: 3, resistance: 2 } },
-    lumberjack: { name: "Lumberjack", tier: 1, starting: true, actions: [physicalAttack("axeChop", 1, 1)], statWeights: { strength: 3, constitution: 2 } },
-    hunter: { name: "Hunter", tier: 1, starting: true, actions: [physicalAttack("slingShot", 1, 3)], statWeights: { dexterity: 3, perception: 2 } },
+    farmer: { name: "Farmer", tier: 1, starting: true, actions: [
+        physicalAttack("pitchforkStrike", 1, 1),
+        withRanks(statusAction("standFirm", 2, 0, { cooldown: 2 }, "self", effect("resistanceUp", 1, 2)),
+            statusAction("standFirm", 2, 0, { cooldown: 2 }, "self", effect("resistanceUp", 1, 3)),
+            statusAction("standFirm", 2, 0, { cooldown: 1 }, "self", effect("resistanceUp", 1, 3))),
+        withRanks(tauntAction("farmerShout", 2, 2, { cooldown: 3 }, 1),
+            tauntAction("farmerShout", 2, 3, { cooldown: 3 }, 1),
+            tauntAction("farmerShout", 2, 3, { cooldown: 3 }, 2)),
+        withRanks(moveAction("pitchforkShove", 2, 1, { cooldown: 1 }, { kind: "push", cells: 1, damage: true }),
+            moveAction("pitchforkShove", 2, 1, { cooldown: 1, bonusDamage: 1 }, { kind: "push", cells: 1, damage: true }),
+            moveAction("pitchforkShove", 2, 1, { cooldown: 1, bonusDamage: 1 }, { kind: "push", cells: 2, damage: true })),
+    ], statWeights: { constitution: 3, resistance: 2 } },
+    lumberjack: { name: "Lumberjack", tier: 1, starting: true, actions: [
+        physicalAttack("axeChop", 1, 1),
+        withRanks(physicalAttack("heavyChop", 2, 1, { cooldown: 1, bonusDamage: 2 }),
+            physicalAttack("heavyChop", 2, 1, { cooldown: 1, bonusDamage: 3 }),
+            physicalAttack("heavyChop", 2, 1, { cooldown: 1, bonusDamage: 4 })),
+        withRanks(areaAction("timberSwing", 3, 1, { cooldown: 2 }, { shape: { kind: "sweep" }, damage: "physical" }),
+            areaAction("timberSwing", 3, 1, { cooldown: 2, bonusDamage: 1 }, { shape: { kind: "sweep" }, damage: "physical" }),
+            areaAction("timberSwing", 3, 1, { cooldown: 1, bonusDamage: 1 }, { shape: { kind: "sweep" }, damage: "physical" })),
+        withRanks(physicalAttack("logThrow", 2, 2, { cooldown: 2 }, effect("slow", 1, 1)),
+            physicalAttack("logThrow", 2, 3, { cooldown: 2 }, effect("slow", 1, 1)),
+            physicalAttack("logThrow", 2, 3, { cooldown: 2 }, effect("slow", 1, 2))),
+    ], statWeights: { strength: 3, constitution: 2 } },
+    hunter: { name: "Hunter", tier: 1, starting: true, actions: [
+        physicalAttack("slingShot", 1, 3),
+        withRanks(physicalAttack("aimedStone", 2, 4, { cooldown: 1, bonusCrit: 0.2 }),
+            physicalAttack("aimedStone", 2, 4, { cooldown: 1, bonusCrit: 0.3 }),
+            physicalAttack("aimedStone", 2, 4, { bonusCrit: 0.3 })),
+        withRanks(statusAction("snare", 2, 3, { cooldown: 3 }, "enemy", effect("root", 1)),
+            statusAction("snare", 2, 4, { cooldown: 3 }, "enemy", effect("root", 1)),
+            statusAction("snare", 2, 4, { cooldown: 2 }, "enemy", effect("root", 1))),
+        withRanks(moveAction("skirmish", 2, 3, { cooldown: 2 }, { kind: "retreat", cells: 2, damage: true }),
+            moveAction("skirmish", 2, 3, { cooldown: 2, bonusDamage: 1 }, { kind: "retreat", cells: 2, damage: true }),
+            moveAction("skirmish", 2, 3, { cooldown: 2, bonusDamage: 1 }, { kind: "retreat", cells: 3, damage: true })),
+    ], statWeights: { dexterity: 3, perception: 2 } },
     soldier: { name: "Soldier", tier: 2, starting: true, actions: [physicalAttack("swordStrike", 1, 1), physicalAttack("pummelStrike", 3, 1, { cooldown: 2 }, effect("stun", 1)), statusAction("guardUp", 2, 0, {}, "self", effect("resistanceUp", 1, 2))], statWeights: { strength: 3, resistance: 3 }, minimums: { strength: 5, resistance: 4 } },
     apprentice: { name: "Apprentice", tier: 2, starting: true, actions: [physicalAttack("staffStrike", 1, 1), magicalAttack("arcaneBolt", 2, 3, { concentration: 1 }), magicalAttack("arcaneFire", 2, 3, { concentration: 2 }, effect("burn", 2))], statWeights: { intelligence: 3, knowledge: 3 }, minimums: { intelligence: 5, knowledge: 4 } },
     healer: { name: "Healer", tier: 3, starting: true, actions: [physicalAttack("staffStrike", 1, 1), magicalAttack("lightRay", 2, 2, { concentration: 1 }), healing("healingTouch", 2, 2, { concentration: 2 }), cure("cureTouch", 2, 2, { concentration: 2 })], statWeights: { willpower: 3, intelligence: 2 }, minimums: { willpower: 6, intelligence: 5 } },

@@ -22,6 +22,7 @@ export interface Action{
     line? : boolean
     area? : AreaShape
     friendlyFire? : boolean
+    ranks? : Action[]
 }
 
 export type ActionCosts = Pick<Action, "concentration" | "cooldown" | "bonusDamage" | "bonusCrit">
@@ -54,6 +55,11 @@ export function canUse(piece: Piece, action: Action) {
     return piece.actionPoints >= action.cost
         && piece.concentration >= (action.concentration ?? 0)
         && !piece.cooldowns.get(action)
+}
+
+export function withRanks(base: Action, rank2: Action, rank3: Action) {
+    base.ranks = [rank2, rank3]
+    return base
 }
 
 export function canTarget(action: Action, from: Vector2, to: Vector2) {

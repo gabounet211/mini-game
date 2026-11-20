@@ -75,4 +75,17 @@ describe("skills", () => {
         expect(skillAction(tracker, "legShot")!.cooldown).toBe(2)
         expect(equippedActions(tracker).map(action => action.name)).toEqual(["piercingShot", "knifeStrike", "legShot"])
     })
+
+    it("uses a skill's own rank versions when it has them", () => {
+        const farmer = hero("farmer", 3)
+        expect(Object.keys(farmer.skills)).toEqual(["pitchforkStrike", "standFirm"])
+        rankUpSkill(farmer, "standFirm")
+        expect(skillAction(farmer, "standFirm")!.cooldown).toBe(2)
+        rankUpSkill(farmer, "standFirm")
+        expect(skillAction(farmer, "standFirm")!.cooldown).toBe(1)
+        const hunter = hero("hunter", 3)
+        learnSkill(hunter, "snare")
+        rankUpSkill(hunter, "snare")
+        expect(skillAction(hunter, "snare")!.range).toBe(4)
+    })
 })

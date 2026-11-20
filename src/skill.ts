@@ -41,6 +41,9 @@ export function skillAction(character: Character, name: string) {
 export function rankedAction(action: Action, rank: number): Action {
     if (rank <= 1)
         return action
+    const specific = action.ranks?.[Math.min(rank, maxSkillRank) - 2]
+    if (specific)
+        return specific
     return {
         ...action,
         bonusDamage: (action.bonusDamage ?? 0) + rank - 1,
