@@ -1,4 +1,4 @@
-import { Action, areaAction, cure, groundZoneAction, tauntAction, effect, healing, hybridAttack, magicalAttack, moveAction, physicalAttack, statusAction, willpowerBoost, willpowerDrain, withRanks } from "./action"
+import { Action, areaAction, cure, groundZoneAction, tauntAction, effect, healing, hybridAttack, magicalAttack, moveAction, physicalAttack, statusAction, willpowerBoost, willpowerDrain, withRanks, byRank } from "./action"
 import { Rarity, Stats, StatWeights } from "./stats"
 import { upgradeSkillsForClass } from "./skill"
 import { Character } from "./character"
@@ -52,10 +52,25 @@ export const characterClasses: Record<string, CharacterClass> = {
             moveAction("skirmish", 2, 3, { cooldown: 2, bonusDamage: 1 }, { kind: "retreat", cells: 2, damage: true }),
             moveAction("skirmish", 2, 3, { cooldown: 2, bonusDamage: 1 }, { kind: "retreat", cells: 3, damage: true })),
     ], statWeights: { dexterity: 3, perception: 2 } },
-    soldier: { name: "Soldier", tier: 2, starting: true, actions: [physicalAttack("swordStrike", 1, 1), physicalAttack("pummelStrike", 3, 1, { cooldown: 2 }, effect("stun", 1)), statusAction("guardUp", 2, 0, {}, "self", effect("resistanceUp", 1, 2))], statWeights: { strength: 3, resistance: 3 }, minimums: { strength: 5, resistance: 4 } },
-    apprentice: { name: "Apprentice", tier: 2, starting: true, actions: [physicalAttack("staffStrike", 1, 1), magicalAttack("arcaneBolt", 2, 3, { concentration: 1 }), magicalAttack("arcaneFire", 2, 3, { concentration: 2 }, effect("burn", 2))], statWeights: { intelligence: 3, knowledge: 3 }, minimums: { intelligence: 5, knowledge: 4 } },
+    soldier: { name: "Soldier", tier: 2, starting: true, actions: [
+        physicalAttack("swordStrike", 1, 1),
+        byRank(rank => physicalAttack("pummelStrike", 3, 1, { cooldown: rank === 3 ? 1 : 2, bonusDamage: rank > 1 ? 1 : 0 }, effect("stun", 1))),
+        byRank(rank => statusAction("guardUp", 2, 0, {}, "self", effect("resistanceUp", rank === 3 ? 2 : 1, rank === 1 ? 2 : 3))),
+        byRank(rank => moveAction("lunge", 2, rank === 1 ? 2 : 3, { cooldown: rank === 3 ? 1 : 2 }, { kind: "dash", line: true, damage: true })),
+    ], statWeights: { strength: 3, resistance: 3 }, minimums: { strength: 5, resistance: 4 } },
+    apprentice: { name: "Apprentice", tier: 2, starting: true, actions: [
+        physicalAttack("staffStrike", 1, 1),
+        byRank(rank => magicalAttack("arcaneBolt", 2, rank === 3 ? 4 : 3, { concentration: 1, bonusDamage: rank > 1 ? 1 : 0 })),
+        byRank(rank => magicalAttack("arcaneFire", 2, 3, { concentration: 2, bonusDamage: rank > 1 ? 1 : 0 }, effect("burn", rank === 3 ? 3 : 2))),
+        byRank(rank => magicalAttack("frostBolt", 2, 3, { concentration: 2, cooldown: rank === 3 ? 1 : 2 }, effect("slow", 1, rank === 1 ? 1 : 2))),
+    ], statWeights: { intelligence: 3, knowledge: 3 }, minimums: { intelligence: 5, knowledge: 4 } },
     healer: { name: "Healer", tier: 3, starting: true, actions: [physicalAttack("staffStrike", 1, 1), magicalAttack("lightRay", 2, 2, { concentration: 1 }), healing("healingTouch", 2, 2, { concentration: 2 }), cure("cureTouch", 2, 2, { concentration: 2 })], statWeights: { willpower: 3, intelligence: 2 }, minimums: { willpower: 6, intelligence: 5 } },
-    bard: { name: "Bard", tier: 2, starting: true, actions: [physicalAttack("rapierStrike", 1, 1), willpowerDrain("dissonantChord", 2, 2, { concentration: 2 }), willpowerBoost("inspireChord", 2, 2, { concentration: 2 })], statWeights: { willpower: 3, dexterity: 2 }, minimums: { willpower: 5, dexterity: 4 } },
+    bard: { name: "Bard", tier: 2, starting: true, actions: [
+        physicalAttack("rapierStrike", 1, 1),
+        byRank(rank => willpowerDrain("dissonantChord", 2, rank === 1 ? 2 : 3, { concentration: 2 }, rank === 3 ? 3 : 2)),
+        byRank(rank => willpowerBoost("inspireChord", 2, rank === 1 ? 2 : 3, { concentration: 2 }, rank === 3 ? 3 : 2)),
+        byRank(rank => healing("soothingSong", 3, rank === 1 ? 2 : 3, { concentration: 2, cooldown: rank === 3 ? 1 : 2 })),
+    ], statWeights: { willpower: 3, dexterity: 2 }, minimums: { willpower: 5, dexterity: 4 } },
     berserker: { name: "Berserker", tier: 4, starting: true, actions: [physicalAttack("frenzyStrike", 1, 1)], statWeights: { strength: 4, constitution: 3 }, minimums: { strength: 8, constitution: 6 } },
     elementalist: { name: "Elementalist", tier: 4, starting: true, actions: [physicalAttack("staffStrike", 1, 4), magicalAttack("elementalBlast", 2, 4)], statWeights: { intelligence: 4, knowledge: 2 }, minimums: { intelligence: 8, willpower: 6 } },
     cleric: { name: "Cleric", tier: 4, starting: true, actions: [physicalAttack("maceStrike", 1, 3), magicalAttack("smite", 2, 3), healing("divineHealing", 2, 3)], statWeights: { willpower: 3, intelligence: 3 }, minimums: { willpower: 8, knowledge: 6 } },
@@ -63,8 +78,18 @@ export const characterClasses: Record<string, CharacterClass> = {
     guard: { name: "Guard", tier: 3, starting: true, actions: [physicalAttack("shieldBash", 2, 1, { cooldown: 1 }, effect("stun", 1)), tauntAction("taunt", 2, 3, { cooldown: 3 }, 2), physicalAttack("swordStrike", 1, 1), statusAction("protect", 3, 2, { cooldown: 3 }, "ally", user => ({ kind: "protected", amount: 0, turns: 1, source: user }))], statWeights: { resistance: 3, constitution: 2 }, minimums: { resistance: 6, constitution: 5 } },
     brawler: { name: "Brawler", tier: 3, starting: true, actions: [physicalAttack("haymaker", 1, 1), physicalAttack("fistFight", 1, 1), moveAction("knockBack", 2, 1, {}, { kind: "push", cells: 2, damage: true }), moveAction("fistCharge", 2, 3, {}, { kind: "dash", line: true, damage: true })], statWeights: { constitution: 3, strength: 2 }, minimums: { constitution: 6, strength: 5 } },
     scholar: { name: "Scholar", tier: 3, starting: true, actions: [physicalAttack("bookSmack", 1, 1), magicalAttack("arcaneSpark", 2, 3, { concentration: 2 }), statusAction("enchant", 3, 3, { concentration: 3 }, "ally", effect("damageUp", 2, 1)), areaAction("slow", 2, 4, { concentration: 3 }, { shape: { kind: "radius", size: 2 }, effect: effect("slow", 1, 1) })], statWeights: { knowledge: 3, intelligence: 2 }, minimums: { knowledge: 6, intelligence: 5 } },
-    scout: { name: "Scout", tier: 2, starting: true, actions: [physicalAttack("knifeThrow", 1, 3), physicalAttack("knifeStrike", 1, 1), moveAction("jump", 2, 1, {}, { kind: "jump", targets: "any" })], statWeights: { dexterity: 3, perception: 2 }, minimums: { dexterity: 5, constitution: 4 } },
-    tracker: { name: "Tracker", tier: 2, starting: true, actions: [physicalAttack("aimedShot", 1, 4), physicalAttack("knifeStrike", 1, 1), physicalAttack("legShot", 2, 4, {}, effect("slow", 1, 1))], statWeights: { perception: 3, dexterity: 2 }, minimums: { perception: 5, dexterity: 4 } },
+    scout: { name: "Scout", tier: 2, starting: true, actions: [
+        physicalAttack("knifeThrow", 1, 3),
+        physicalAttack("knifeStrike", 1, 1),
+        byRank(rank => moveAction("jump", rank === 1 ? 2 : 1, 1, {}, { kind: "jump", targets: "any", damage: rank === 3 })),
+        byRank(rank => physicalAttack("poisonedKnife", 2, rank === 1 ? 3 : 4, { cooldown: 2 }, effect("poison", rank === 3 ? 3 : 2))),
+    ], statWeights: { dexterity: 3, perception: 2 }, minimums: { dexterity: 5, constitution: 4 } },
+    tracker: { name: "Tracker", tier: 2, starting: true, actions: [
+        physicalAttack("aimedShot", 1, 4),
+        physicalAttack("knifeStrike", 1, 1),
+        byRank(rank => physicalAttack("legShot", 2, 4, {}, effect("slow", rank === 3 ? 2 : 1, rank === 1 ? 1 : 2))),
+        byRank(rank => areaAction("volley", 3, 4, { cooldown: rank === 3 ? 1 : 2, bonusDamage: rank > 1 ? 1 : 0 }, { shape: { kind: "square", size: 2 }, damage: "physical" })),
+    ], statWeights: { perception: 3, dexterity: 2 }, minimums: { perception: 5, dexterity: 4 } },
     mercenary: { name: "Mercenary", tier: 3, actions: [physicalAttack("bladeStrike", 1, 1), physicalAttack("gunShot", 2, 3), areaAction("bulletShower", 3, 3, { cooldown: 2 }, { shape: { kind: "square", size: 2 }, damage: "physical", friendlyFire: true })], statWeights: {}, minimums: { strength: 7, dexterity: 5, constitution: 4 } },
     shieldbearer: { name: "Shieldbearer", tier: 3, actions: [physicalAttack("shieldSlam", 1, 1), moveAction("shieldDash", 3, 3, { cooldown: 3 }, { kind: "dash", line: true, damage: true, effect: effect("stun", 1) }), tauntAction("taunt", 2, 3, { cooldown: 3 }, 2), statusAction("shieldUp", 2, 0, { cooldown: 2 }, "self", effect("resistanceUp", 1, 3))], statWeights: {}, minimums: { resistance: 7, constitution: 6, strength: 4 } },
     warden: { name: "Warden", tier: 3, actions: [physicalAttack("wardenStrike", 1, 1), groundZoneAction("wardenSlow", 2, { concentration: 2, cooldown: 3 }, 2, 2, { kind: "slow", amount: 1, turns: 1 }), statusAction("wardenHindrance", 2, 1, { concentration: 2, cooldown: 2 }, "enemy", effect("root", 1)), moveAction("wardenPush", 2, 1, { concentration: 2, cooldown: 2 }, { kind: "push", cells: 1 })], statWeights: {}, minimums: { constitution: 7, resistance: 5, perception: 4 } },

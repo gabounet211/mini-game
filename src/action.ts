@@ -62,6 +62,10 @@ export function withRanks(base: Action, rank2: Action, rank3: Action) {
     return base
 }
 
+export function byRank(make: (rank: number) => Action) {
+    return withRanks(make(1), make(2), make(3))
+}
+
 export function canTarget(action: Action, from: Vector2, to: Vector2) {
     return Grid.manathanDistance(from, to) <= action.range && (!action.line || inLine(from, to))
 }
@@ -208,7 +212,7 @@ export function moveAction(name: string, cost: number, range: number, costs: Act
             const movesUser = spec.kind === "dash" || spec.kind === "jump"
             if (movesUser)
                 forceMove(grid, spec.kind, user, target, spec.cells)
-            if (spec.damage)
+            if (spec.damage && target.player !== user.player)
                 dealDamage(game, target, rollDamage(physicalDamage(game, user), user, this), "physical", user)
             const shielded = target.player !== user.player && target.hasEffect("immune")
             if (spec.kind === "retreat" || (!movesUser && !shielded && target.healt > 0))
@@ -294,12 +298,12 @@ export function tauntAction(name: string, cost: number, range: number, costs: Ac
 
 export const drainDuration = 2
 
-export function willpowerDrain(name: string, cost: number, range: number, costs: ActionCosts = {}): Action {
-    return statusAction(name, cost, range, costs, "enemy", user => ({ kind: "willpowerDown", amount: Math.max(1, Math.floor(user.stats.willpower / 3)), turns: drainDuration }))
+export function willpowerDrain(name: string, cost: number, range: number, costs: ActionCosts = {}, turns = drainDuration): Action {
+    return statusAction(name, cost, range, costs, "enemy", user => ({ kind: "willpowerDown", amount: Math.max(1, Math.floor(user.stats.willpower / 3)), turns }))
 }
 
-export function willpowerBoost(name: string, cost: number, range: number, costs: ActionCosts = {}): Action {
-    return statusAction(name, cost, range, costs, "ally", user => ({ kind: "willpowerUp", amount: Math.max(1, Math.floor(user.stats.willpower / 4)), turns: drainDuration }))
+export function willpowerBoost(name: string, cost: number, range: number, costs: ActionCosts = {}, turns = drainDuration): Action {
+    return statusAction(name, cost, range, costs, "ally", user => ({ kind: "willpowerUp", amount: Math.max(1, Math.floor(user.stats.willpower / 4)), turns }))
 }
 
 export function cure(name: string, cost: number, range: number, costs: ActionCosts = {}): Action {
