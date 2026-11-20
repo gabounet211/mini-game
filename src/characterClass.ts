@@ -1,5 +1,6 @@
 import { Action, areaAction, cure, groundZoneAction, tauntAction, effect, healing, hybridAttack, magicalAttack, moveAction, physicalAttack, statusAction, willpowerBoost, willpowerDrain } from "./action"
 import { Rarity, Stats, StatWeights } from "./stats"
+import { upgradeSkillsForClass } from "./skill"
 import { Character } from "./character"
 
 export interface CharacterClass {
@@ -126,8 +127,10 @@ export function applyClassChange(character: Character, classKey: string, invento
         return false
     if (requiredItem)
         inventory.splice(inventory.indexOf(requiredItem), 1)
+    const previousClass = character.characterClass
     character.characterClass = classKey
     character.classChanges.push(chapter)
+    upgradeSkillsForClass(character, previousClass)
     return true
 }
 

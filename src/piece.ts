@@ -5,6 +5,7 @@ import { DamageKind, damageReduction, deriveAttributes, Rarity, Stats } from "./
 import { Character } from "./character";
 import { characterClasses } from "./characterClass";
 import { equippedStats } from "./items";
+import { equippedActions } from "./skill";
 import { burnDamage, effectStatChanges, EffectKind, harmfulEffects, poisonDamage, StatusEffect } from "./effect";
 
 const walkSpeed = 1.5
@@ -68,7 +69,7 @@ export class Piece {
         this.maxActionPoints = attributes.maxActionPoints
         this.moveRange = attributes.moveRange
         const characterClass = character.characterClass ? characterClasses[character.characterClass] : undefined
-        this.actions = characterClass?.actions ?? config.actions ?? []
+        this.actions = player && characterClass ? equippedActions(character) : characterClass?.actions ?? config.actions ?? []
         this.name = config.characterClass ? config.name : characterClass?.name ?? config.name
         this.inspiresAllies = !!characterClass?.inspiresAllies
         this.currentHealt = this.maxHealt

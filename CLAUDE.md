@@ -34,7 +34,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 - La classe oriente le tirage des stats (préférences par classe). Les classes communes ont une chance d'avoir un talent caché : une stat « hors norme » (ex. un bûcheron intelligent), qui ouvre des évolutions différentes.
 - Chaque classe a ses actions, avec leur propre nom. Règles décidées (détail classe par classe dans le doc « Actions des classes », https://claude.ai/artifact/5ct4Y4Gi5NwxqUydJ1CAYd) :
   - 2 actions au palier 1, 3 au palier 2, 4 à 5 aux paliers supérieurs ;
-  - en changeant de classe, le héros change toutes ses actions ;
+  - en changeant de classe, le héros garde ses compétences (voir Compétences plus bas) ;
   - les actions de base n'ont pas de temps de recharge, les actions plus puissantes en ont un ;
   - les classes magiques (DPS magiques, healers, soutiens magiques) utilisent une ressource appelée concentration ;
   - rôles : Tank, Healer, Soutien magique, DPS magique, DPS physique ; le Paladin (tank) utilise aussi la concentration pour soigner ; un rôle de soutien physique est envisagé, encore à définir ;
@@ -47,6 +47,13 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
   - réactions : taunt (les ennemis à 3 cases ou moins du lanceur doivent l'attaquer pendant 2 tours ; ils s'en approchent et n'attaquent personne d'autre), protect (le lanceur encaisse à la place de l'allié pendant 1 tour), riposte (le lanceur rend un coup physique à chaque ennemi qui l'attaque au corps à corps pendant 1 tour) ; les dégâts de feu, de poison et des réactions ne déclenchent pas d'autres réactions ;
   - coups critiques : chance = perception × 3 % (+ bonus de l'action, ex. headShot +30 % et +2 dégâts), dégâts doublés ; ils s'appliquent aux attaques, pas aux soins ni aux effets qui durent.
 - À chaque niveau, le joueur répartit lui-même ses points de stats.
+- Compétences (`src/skill.ts`, onglet Training du lobby) : les actions deviennent des compétences que chaque héros apprend, équipe et améliore.
+  - un héros commence avec l'attaque de base de sa classe et sa première compétence ; il gagne 1 point de compétence par niveau (des ressources à farmer viendront plus tard) ;
+  - apprendre une compétence de sa classe coûte 1 point ; 3 rangs : rang 2 = 1 point (+1 dégât), rang 3 = 2 points (+2 dégâts et recharge -1) ; des bonus de rang propres à chaque compétence pourront remplacer ces bonus génériques ;
+  - places équipées selon le palier (attaque de base comprise) : 2 au palier 1, 3 au palier 2, 4 au palier 3, 5 aux paliers 4 et 5 ;
+  - au changement de classe, le héros garde ses compétences ; celles que la nouvelle classe possède aussi passent à sa version (ex. legShot du Tracker devient celui du Sharpshooter, au même rang) ; l'attaque de base de la nouvelle classe est apprise et remplace l'ancienne si elle était équipée ;
+  - idée : les attaques de base viendront plus tard des armes (rapierStrike, etc.) ;
+  - les ennemis utilisent toutes les compétences de leur classe.
 - Au niveau X (puis à d'autres paliers), toutes les classes du palier suivant dont le héros atteint les statistiques minimums sont proposées (ex. Soldier : force 5 et résistance 4). Les classes faciles demandent 2 stats, les classes complexes des valeurs plus élevées ou 3 à 4 stats. Ça propose plus de classes et permet plus de diversité.
 - Plafond : un commun peut monter au plus jusqu'au palier rare (palier 3), un peu commun ou un rare jusqu'au palier légendaire (palier 4). Avec un seul changement de classe pour le moment, un commun s'arrête au palier 2. Un légendaire commence au palier 4 et a donc accès plus tôt aux classes uniques.
 - Les seuils sont pensés pour qu'un héros atteigne au moins une classe en plaçant ses 6 points de stats des niveaux 2 à 4 (vérifié par simulation). S'il n'atteint aucune classe, le lobby montre les 3 classes les plus proches et les stats qui manquent ; il peut continuer à monter de niveau pour les atteindre. D'autres classes répandues seront ajoutées.

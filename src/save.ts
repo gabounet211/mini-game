@@ -1,3 +1,4 @@
+import { initSkills, skillPointsPerLevel } from "./skill"
 import { Character, createHero, createId } from "./character"
 
 const saveKey = "miniGameSave"
@@ -16,14 +17,19 @@ export function loadSave(): SaveData {
     try {
         const data = JSON.parse(localStorage.getItem(saveKey) ?? "null")
         if (data?.version === saveVersion && Array.isArray(data.roster)) {
-            const roster: Character[] = data.roster.map((character: Character) => ({
-                ...character,
-                id: character.id ?? createId(),
-                statPoints: character.statPoints ?? 0,
-                finaleAttempts: character.finaleAttempts ?? [],
-                championsDefeated: character.championsDefeated ?? [],
-                classChanges: character.classChanges ?? [],
-            }))
+            const roster: Character[] = data.roster.map((stored: Character) => {
+                const character = {
+                    ...stored,
+                    id: stored.id ?? createId(),
+                    statPoints: stored.statPoints ?? 0,
+                    finaleAttempts: stored.finaleAttempts ?? [],
+                    championsDefeated: stored.championsDefeated ?? [],
+                    classChanges: stored.classChanges ?? [],
+                }
+                if (!character.skills)
+                    initSkills(character, (character.level - 1) * skillPointsPerLevel)
+                return character
+            })
             return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [], unlockedLevels: data.unlockedLevels ?? 1, lastTeam: data.lastTeam ?? [] }
         }
     } catch (error) {

@@ -6,10 +6,11 @@ import { addExperience, experienceToNextLevel, sacrificeExperience, sacrificeVal
 import { equipmentBonuses, equippedStats, itemName, items, itemSlots, ItemSlot } from "./items"
 import { SaveData, writeSave } from "./save"
 import { describeAction } from "./action"
+import { equippedActions, learnableSkills, learnCost, learnSkill, maxSkillRank, rankUpCost, rankUpSkill, skillAction, skillSlots, toggleEquipped } from "./skill"
 
-type LobbyTab = "heroes" | "combination" | "inventory"
+type LobbyTab = "heroes" | "training" | "combination" | "inventory"
 
-const tabs: [LobbyTab, string][] = [["heroes", "Heroes"], ["combination", "Combination"], ["inventory", "Inventory"]]
+const tabs: [LobbyTab, string][] = [["heroes", "Heroes"], ["training", "Training"], ["combination", "Combination"], ["inventory", "Inventory"]]
 
 export class Lobby {
     private element = document.createElement('div')
@@ -19,6 +20,7 @@ export class Lobby {
     private sacrifice: Character | undefined
     private receiver: Character | undefined
     private confirmingTransfer = false
+    private trainee: Character | undefined
     private tab: LobbyTab = "heroes"
 
     constructor(private save: SaveData, private onStart: (team: Character[], levelKey: string) => void) {
@@ -85,7 +87,7 @@ export class Lobby {
 
         const content = document.createElement('div')
         content.className = 'lobbyContent'
-        content.append(...(this.tab === "heroes" ? this.renderHeroes() : this.tab === "combination" ? this.renderCombination() : this.renderInventory()))
+        content.append(...(this.tab === "heroes" ? this.renderHeroes() : this.tab === "training" ? this.renderTraining() : this.tab === "combination" ? this.renderCombination() : this.renderInventory()))
 
         const startButton = document.createElement('button')
         startButton.className = 'startButton'
@@ -117,6 +119,72 @@ export class Lobby {
         heroList.className = 'heroList'
         heroList.append(...this.save.roster.map(character => this.createHeroRow(character)))
         return [summonRow, heroList]
+    }
+
+    private renderTraining() {
+        const trainee = this.trainee && this.save.roster.includes(this.trainee) ? this.trainee : this.save.roster[0]
+        this.trainee = trainee
+        const pickRow = this.createHeroSelect('Hero', trainee, undefined, character => this.trainee = character)
+        if (!trainee)
+            return [pickRow]
+
+        const info = document.createElement('div')
+        info.textContent = 'Skill points: ' + trainee.skillPoints + ' · Equipped: ' + trainee.equippedSkills.length + '/' + skillSlots(trainee)
+
+        const known = document.createElement('div')
+        known.className = 'heroList'
+        for (const name of Object.keys(trainee.skills)) {
+            const action = skillAction(trainee, name)
+            if (!action)
+                continue
+            const equipped = trainee.equippedSkills.includes(name)
+            const equipButton = document.createElement('button')
+            equipButton.textContent = equipped ? 'Unequip' : 'Equip'
+            equipButton.disabled = equipped ? trainee.equippedSkills.length <= 1 : trainee.equippedSkills.length >= skillSlots(trainee)
+            equipButton.addEventListener('click', () => this.updateTrainee(() => toggleEquipped(trainee, name)))
+            const cost = rankUpCost(trainee, name)
+            const rankButton = document.createElement('button')
+            rankButton.textContent = cost === undefined ? 'Max rank' : 'Rank up (' + cost + ')'
+            rankButton.disabled = cost === undefined || trainee.skillPoints < cost
+            rankButton.addEventListener('click', () => this.updateTrainee(() => rankUpSkill(trainee, name)))
+            known.append(this.createSkillRow(this.formatName(name) + ' · rank ' + trainee.skills[name].rank + '/' + maxSkillRank + (equipped ? ' · equipped' : ''), describeAction(action), [equipButton, rankButton]))
+        }
+
+        const learnTitle = document.createElement('div')
+        learnTitle.textContent = 'Learn (' + learnCost + ' point each)'
+        const learnable = document.createElement('div')
+        learnable.className = 'heroList'
+        for (const action of learnableSkills(trainee)) {
+            const learnButton = document.createElement('button')
+            learnButton.textContent = 'Learn'
+            learnButton.disabled = trainee.skillPoints < learnCost
+            learnButton.addEventListener('click', () => this.updateTrainee(() => learnSkill(trainee, action.name)))
+            learnable.append(this.createSkillRow(this.formatName(action.name), describeAction(action), [learnButton]))
+        }
+        if (!learnable.children.length)
+            learnable.textContent = 'Every skill of this class is learned.'
+        return [pickRow, info, known, learnTitle, learnable]
+    }
+
+    private updateTrainee(change: () => unknown) {
+        change()
+        writeSave(this.save)
+        this.render()
+    }
+
+    private createSkillRow(title: string, details: string, buttons: HTMLButtonElement[]) {
+        const row = document.createElement('div')
+        row.className = 'heroRow'
+        const info = document.createElement('div')
+        info.className = 'heroInfo'
+        const name = document.createElement('div')
+        name.textContent = title
+        const detail = document.createElement('div')
+        detail.className = 'heroDetails'
+        detail.textContent = details
+        info.append(name, detail)
+        row.append(info, ...buttons)
+        return row
     }
 
     private renderCombination() {
@@ -260,10 +328,10 @@ export class Lobby {
         this.details.replaceChildren(
             title,
             this.createSection('Progress', [['Level', character.level], ['Experience', character.experience + '/' + experienceToNextLevel(character.level)], ['Stat points', character.statPoints], ['Talent', character.talent ? this.formatName(character.talent) : '-']]),
-            this.createSection('Attributes', [['HP', attributes.maxHealt], ['AP', attributes.maxActionPoints], ['Ms', attributes.moveRange], ...((characterClass?.actions ?? []).some(action => action.concentration) ? [['Concentration', attributes.maxConcentration] as [string, number]] : [])]),
+            this.createSection('Attributes', [['HP', attributes.maxHealt], ['AP', attributes.maxActionPoints], ['Ms', attributes.moveRange], ...(equippedActions(character).some(action => action.concentration) ? [['Concentration', attributes.maxConcentration] as [string, number]] : [])]),
             this.createStatsSection(character),
             this.createEquipmentSection(character),
-            this.createSection('Actions', [...(characterClass?.inspiresAllies ? [['Inspire allies', '+1 damage'] as [string, string]] : []), ...(characterClass?.actions ?? []).map(action => [this.formatName(action.name), describeAction(action)] as [string, string])]),
+            this.createSection('Actions', [...(characterClass?.inspiresAllies ? [['Inspire allies', '+1 damage'] as [string, string]] : []), ...equippedActions(character).map(action => [this.formatName(action.name), describeAction(action)] as [string, string])]),
             ...this.createClassChangeSection(character),
             closeButton,
         )
