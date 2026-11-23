@@ -26,6 +26,7 @@ describe("save", () => {
         expect(save.lastTeam).toEqual([])
         expect(save.roster[0]).toMatchObject({ statPoints: 0, finaleAttempts: [], championsDefeated: [], classChanges: [] })
         expect(save.roster[0].id).toBeTruthy()
+        expect(save.roster[0]).toMatchObject({ skillPoints: 1, skills: {}, equippedSkills: [] })
     })
 
     it("can be written and cleared", () => {

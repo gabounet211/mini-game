@@ -1,5 +1,6 @@
 import { characterClasses, rarityTier, talentChance, talentWeight } from "./characterClass"
 import { Rarity, rarityBudget, rollStats, statNames, Stats, StatWeights } from "./stats"
+import { initSkills, KnownSkill } from "./skill"
 
 export interface Equipment {
     weapon?: string,
@@ -21,6 +22,9 @@ export interface Character {
     finaleAttempts: string[],
     championsDefeated: string[],
     classChanges: string[],
+    skills: Record<string, KnownSkill>,
+    equippedSkills: string[],
+    skillPoints: number,
 }
 
 export function createId() {
@@ -45,7 +49,7 @@ export function rollRarity(random = Math.random): Rarity {
 }
 
 export function createCharacter(entity: string, rarity: Rarity, characterClass?: string): Character {
-    return {
+    const character: Character = {
         id: createId(),
         entity,
         rarity,
@@ -58,7 +62,12 @@ export function createCharacter(entity: string, rarity: Rarity, characterClass?:
         finaleAttempts: [],
         championsDefeated: [],
         classChanges: [],
+        skills: {},
+        equippedSkills: [],
+        skillPoints: 0,
     }
+    initSkills(character)
+    return character
 }
 
 export function createHero(entity: string, rarity = rollRarity(), random = Math.random): Character {
@@ -70,7 +79,7 @@ export function createHero(entity: string, rarity = rollRarity(), random = Math.
         talent = statNames[Math.floor(random() * statNames.length)]
         weights[talent] = (weights[talent] ?? 1) + talentWeight
     }
-    return {
+    const character: Character = {
         id: createId(),
         entity,
         rarity,
@@ -84,5 +93,10 @@ export function createHero(entity: string, rarity = rollRarity(), random = Math.
         finaleAttempts: [],
         championsDefeated: [],
         classChanges: [],
+        skills: {},
+        equippedSkills: [],
+        skillPoints: 0,
     }
+    initSkills(character)
+    return character
 }

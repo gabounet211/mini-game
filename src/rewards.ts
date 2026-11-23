@@ -2,6 +2,7 @@ import { Character } from "./character"
 import { characterClasses } from "./characterClass"
 import { Piece } from "./piece"
 import { loadSave, SaveData, writeSave } from "./save"
+import { skillPointsPerLevel } from "./skill"
 import { items, randomItem, itemName, itemSlots } from "./items"
 import { levels } from "./gltf"
 
@@ -24,6 +25,7 @@ export function addExperience(character: Character, amount: number) {
         character.experience -= experienceToNextLevel(character.level)
         character.level++
         character.statPoints += statPointsPerLevel
+        character.skillPoints += skillPointsPerLevel
         levelsGained++
     }
     return levelsGained
