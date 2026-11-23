@@ -300,12 +300,12 @@ export function tauntAction(name: string, cost: number, range: number, costs: Ac
 
 export const drainDuration = 2
 
-export function willpowerDrain(name: string, cost: number, range: number, costs: ActionCosts = {}, turns = drainDuration): Action {
-    return statusAction(name, cost, range, costs, "enemy", user => ({ kind: "willpowerDown", amount: Math.max(1, Math.floor(user.stats.willpower / 3)), turns }))
+export function willpowerDrain(name: string, cost: number, range: number, costs: ActionCosts = {}, turns?: number): Action {
+    return statusAction(name, cost, range, costs, "enemy", user => ({ kind: "willpowerDown", amount: Math.max(1, Math.floor(user.stats.willpower / 3)), turns: turns ?? drainDuration }))
 }
 
-export function willpowerBoost(name: string, cost: number, range: number, costs: ActionCosts = {}, turns = drainDuration): Action {
-    return statusAction(name, cost, range, costs, "ally", user => ({ kind: "willpowerUp", amount: Math.max(1, Math.floor(user.stats.willpower / 4)), turns }))
+export function willpowerBoost(name: string, cost: number, range: number, costs: ActionCosts = {}, turns?: number): Action {
+    return statusAction(name, cost, range, costs, "ally", user => ({ kind: "willpowerUp", amount: Math.max(1, Math.floor(user.stats.willpower / 4)), turns: turns ?? drainDuration }))
 }
 
 export function cure(name: string, cost: number, range: number, costs: ActionCosts = {}): Action {
