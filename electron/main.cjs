@@ -4,6 +4,8 @@ const { pathToFileURL } = require("node:url")
 
 const root = path.join(__dirname, "..", "dist")
 
+app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required")
+
 protocol.registerSchemesAsPrivileged([
     { scheme: "app", privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true } },
 ])
