@@ -19,7 +19,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 - Savoir et perception : le savoir fixe la concentration maximale et la perception les chances de coup critique.
 - Équipement : la base est faite (objets qui donnent des bonus de stats, butin de victoire, inventaire et équipement dans le lobby). Plus tard : restrictions par classe, objets plus rares, effets propres.
 - Modèles et animations : remplacer le modèle rough par des modèles plus complets, puis ajuster la vitesse de marche et le moment du coup (`walkSpeed`, `walkAnimationSpeed`, `hitDelay` dans `piece.ts`).
-- Application : transformer le jeu en application, même s'il roule dans un navigateur pour le moment. Le bouton Quit Game du menu Setting fermera alors l'application (il est désactivé d'ici là).
+- Application : le jeu vise surtout le PC. Il est emballé avec Electron (dossier `electron/`, lancement local avec `npm run desktop`) et GitHub Actions construit un `.exe` Windows portable à chaque push (artefact du workflow Desktop). Le site GitHub Pages reste la version de test rapide. Dans l'application, le bouton Quit Game du menu Setting ferme le jeu (il reste désactivé dans le navigateur). La sauvegarde de l'application est séparée de celle du site ; ce qui dépend de la plateforme passe par `src/desktop.ts`.
 
 ### Système de classes
 
