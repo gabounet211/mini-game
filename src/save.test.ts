@@ -40,9 +40,11 @@ describe("save", () => {
         expect(loadSave().roster).toEqual([])
     })
 
-    it("shifts unlocked levels past chapter 1 once, for saves made before chapter 1 had 10 levels", () => {
+    it("moves unlocked levels to the 10-level chapters once, for older saves", () => {
         localStorage.setItem("miniGameSave", JSON.stringify({ version: 1, roster: [], unlockedLevels: 7 }))
-        expect(loadSave().unlockedLevels).toBe(12)
+        expect(loadSave().unlockedLevels).toBe(13)
+        localStorage.setItem("miniGameSave", JSON.stringify({ version: 1, levelLayout: 2, roster: [], unlockedLevels: 15 }))
+        expect(loadSave().unlockedLevels).toBe(20)
         localStorage.setItem("miniGameSave", JSON.stringify({ version: 1, roster: [], unlockedLevels: 3 }))
         expect(loadSave().unlockedLevels).toBe(3)
         const save = loadSave()

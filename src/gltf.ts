@@ -62,6 +62,7 @@ const goblinAdultModel = { obj: characterModel, offset: 0, animations: character
 const goblinChiefModel = { obj: championModel, offset: 0, animations: characterGltf.animations, color: 0x3d7a28 }
 const goblinBruteModel = { obj: championModel, offset: 0, animations: characterGltf.animations, color: 0x4f8f35 }
 const villagerModel = { obj: characterModel, offset: 0, animations: characterGltf.animations, color: 0xd8b27a }
+const merchantModel = { obj: characterModel, offset: 0, animations: characterGltf.animations, color: 0x6a5acd }
 
 export const levels = new Levels({
     map1: gltf.scenes.find(d => d.name == '1Map')!
@@ -106,6 +107,13 @@ export const levels = new Levels({
         npc: true,
         actions: [],
         ...villagerModel,
+    },
+    merchant: {
+        name: "Merchant",
+        rarity: "common",
+        npc: true,
+        actions: [],
+        ...merchantModel,
     },
     goblinChief: {
         name: "Goblin Chief",
@@ -350,7 +358,7 @@ levels.createLevel("chapter1-10", {
 })
 
 levels.createLevel("chapter2-1", {
-    title: "Chapter 2 - 1",
+    title: "Chapter 2 - 1: Roadblock",
     chapter: "chapter2",
     recommendedLevel: 6,
     map: "map1",
@@ -364,9 +372,26 @@ levels.createLevel("chapter2-1", {
 })
 
 levels.createLevel("chapter2-2", {
-    title: "Chapter 2 - 2",
+    title: "Chapter 2 - 2: Highway Robbery",
     chapter: "chapter2",
-    recommendedLevel: 7,
+    recommendedLevel: 6,
+    defeat: anyOf(allHeroesDefeated, keepAlive("Merchant", "the merchant")),
+    map: "map1",
+    startCells,
+    teamSize,
+    entities: [
+        [15, 8, "merchant", true],
+        [12, 13, "banditBrawler"],
+        [18, 13, "banditBrawler"],
+        [15, 17, "banditScout"],
+        [10, 18, "banditScout"],
+    ]
+})
+
+levels.createLevel("chapter2-3", {
+    title: "Chapter 2 - 3: Toll Road",
+    chapter: "chapter2",
+    recommendedLevel: 6,
     map: "map1",
     startCells,
     teamSize,
@@ -378,8 +403,46 @@ levels.createLevel("chapter2-2", {
     ]
 })
 
-levels.createLevel("chapter2-3", {
-    title: "Chapter 2 - 3",
+levels.createLevel("chapter2-4", {
+    title: "Chapter 2 - 4: Plains Ambush",
+    chapter: "chapter2",
+    recommendedLevel: 7,
+    victory: surviveRounds(5),
+    map: "map1",
+    startCells,
+    teamSize,
+    entities: [
+        [10, 1, "banditScout"],
+        [20, 1, "banditScout"],
+        [15, 7, "banditScout"],
+        [11, 5, "banditMercenary"],
+        [19, 5, "banditMercenary"],
+        [15, 9, "banditBrawler"],
+    ]
+})
+
+levels.createLevel("chapter2-5", {
+    title: "Chapter 2 - 5: The Loyal Berserker (Mini-boss)",
+    chapter: "chapter2",
+    recommendedLevel: 7,
+    music: championMusic,
+    victory: pieceDefeated("Loyal Berserker", "the Loyal Berserker"),
+    defeat: anyOf(allHeroesDefeated, roundLimit(6)),
+    map: "map1",
+    startCells,
+    teamSize,
+    entities: [
+        [15, 27, "banditBerserker"],
+        [12, 28, "banditBrawler"],
+        [18, 28, "banditBrawler"],
+        [15, 28, "banditMercenary"],
+        [13, 29, "banditScout"],
+        [17, 29, "banditScout"],
+    ]
+})
+
+levels.createLevel("chapter2-6", {
+    title: "Chapter 2 - 6: Bandit Camp",
     chapter: "chapter2",
     recommendedLevel: 7,
     map: "map1",
@@ -394,29 +457,71 @@ levels.createLevel("chapter2-3", {
     ]
 })
 
-levels.createLevel("chapter2-4", {
-    title: "Chapter 2 - 4 (Loyal Berserker)",
+levels.createLevel("chapter2-7", {
+    title: "Chapter 2 - 7: The Cages",
     chapter: "chapter2",
-    recommendedLevel: 8,
+    recommendedLevel: 7,
+    victory: reachCells([[14, 25], [15, 25], [16, 25]]),
     map: "map1",
     startCells,
     teamSize,
     entities: [
-        [15, 27, "banditBerserker"],
-        [12, 28, "banditBrawler"],
-        [18, 28, "banditBrawler"],
-        [15, 28, "banditMercenary"],
-        [13, 29, "banditScout"],
-        [17, 29, "banditScout"],
+        [13, 20, "banditBrawler"],
+        [17, 20, "banditBrawler"],
+        [15, 17, "banditMercenary"],
+        [12, 26, "banditScout"],
+        [18, 26, "banditScout"],
     ]
 })
 
-levels.createLevel("chapter2-5", {
-    title: "Chapter 2 - 5 (Marco)",
+levels.createLevel("chapter2-8", {
+    title: "Chapter 2 - 8: Burning Village",
+    chapter: "chapter2",
+    recommendedLevel: 8,
+    victory: surviveRounds(6),
+    defeat: anyOf(allHeroesDefeated, keepAlive("Villager", "the villagers", 2)),
+    map: "map1",
+    startCells,
+    teamSize,
+    entities: [
+        [14, 4, "villager", true],
+        [16, 4, "villager", true],
+        [10, 10, "banditBrawler"],
+        [20, 10, "banditBrawler"],
+        [13, 11, "banditScout"],
+        [17, 11, "banditScout"],
+        [12, 13, "banditMercenary"],
+        [18, 13, "banditMercenary"],
+        [15, 17, "banditScout"],
+    ]
+})
+
+levels.createLevel("chapter2-9", {
+    title: "Chapter 2 - 9: Marco's Lieutenants",
+    chapter: "chapter2",
+    recommendedLevel: 8,
+    defeat: anyOf(allHeroesDefeated, roundLimit(7)),
+    map: "map1",
+    startCells,
+    teamSize,
+    entities: [
+        [12, 18, "banditBrawler"],
+        [18, 18, "banditBrawler"],
+        [15, 18, "banditMercenary"],
+        [15, 21, "banditMercenary"],
+        [12, 22, "banditScout"],
+        [18, 22, "banditScout"],
+        [15, 26, "banditApprentice"],
+    ]
+})
+
+levels.createLevel("chapter2-10", {
+    title: "Chapter 2 - 10: Marco (Champion)",
     chapter: "chapter2",
     recommendedLevel: 8,
     finale: true,
     music: championMusic,
+    victory: pieceDefeated("Marco"),
     map: "map1",
     startCells,
     teamSize,
