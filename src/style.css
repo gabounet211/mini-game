@@ -269,6 +269,11 @@ button{
   opacity: 0.7;
 }
 
+.lobbyWarning{
+  font-size: 0.85em;
+  color: #ff7b6b;
+}
+
 .startButton{
   align-self: center;
 }

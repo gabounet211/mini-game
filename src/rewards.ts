@@ -13,6 +13,49 @@ export const statPointsPerLevel = 2
 export const summonRewardChance = 0.25
 export const lootChance = 0.5
 export const sacrificeExperience = 5
+export const introductionChapters = ["chapter1"]
+export const injuryCombats = 1
+
+export function characterName(character: Character) {
+    return character.characterClass ? characterClasses[character.characterClass].name : character.entity
+}
+
+export function isDeadly(levelKey: string) {
+    return !introductionChapters.includes(levels.getLevel(levelKey).chapter)
+}
+
+export function applyCasualties(save: SaveData, heroes: Piece[], levelKey: string) {
+    const lines: string[] = []
+    const fighting = new Set(heroes.map(hero => hero.character.id))
+    for (const character of save.roster)
+        if (character.injured && !fighting.has(character.id))
+            character.injured--
+    for (const hero of heroes) {
+        const character = save.roster.find(candidate => candidate.id === hero.character.id)
+        if (!character || hero.healt > 0)
+            continue
+        if (!isDeadly(levelKey)) {
+            character.injured = injuryCombats
+            lines.push(characterName(character) + ' is injured and will miss the next combat.')
+            continue
+        }
+        for (const slot of itemSlots) {
+            const item = character.equipment[slot]
+            if (item)
+                save.inventory.push(item)
+        }
+        save.roster.splice(save.roster.indexOf(character), 1)
+        save.lastTeam = save.lastTeam.filter(id => id !== character.id)
+        save.memorial.push({ name: characterName(character), level: character.level, levelTitle: levels.getLevel(levelKey).title })
+        lines.push(characterName(character) + ' has fallen. Their equipment returns to the inventory.')
+    }
+    if (save.roster.length && save.roster.every(character => character.injured)) {
+        for (const character of save.roster)
+            character.injured = 0
+        lines.push('With no one left standing, the whole team rests and recovers.')
+    }
+    return lines
+}
 
 export function experienceToNextLevel(level: number) {
     return 10 * level
@@ -65,17 +108,19 @@ function recordFinale(character: Character, levelKey: string, won: boolean) {
 
 export function grantDefeatResults(heroes: Piece[], levelKey: string) {
     const save = loadSave()
+    const lines = applyCasualties(save, heroes, levelKey)
     for (const hero of heroes) {
         const character = save.roster.find(candidate => candidate.id === hero.character.id)
         if (character)
             recordFinale(character, levelKey, false)
     }
     writeSave(save)
+    return lines
 }
 
 export function grantVictoryRewards(heroes: Piece[], levelKey: string) {
     const save = loadSave()
-    const lines: string[] = []
+    const lines = applyCasualties(save, heroes, levelKey)
     const keys = levels.keys()
     const nextUnlocked = Math.min(keys.length, keys.indexOf(levelKey) + 2)
     if (nextUnlocked > save.unlockedLevels) {
@@ -94,8 +139,7 @@ export function grantVictoryRewards(heroes: Piece[], levelKey: string) {
         }
         const amount = victoryExperience + hero.kills * killExperience + (levels.getLevel(levelKey).finale ? championExperience : 0)
         const levelsGained = addExperience(character, amount)
-        const name = character.characterClass ? characterClasses[character.characterClass].name : character.entity
-        lines.push(name + ': +' + amount + ' XP' + (levelsGained ? ' - Level up! (Level ' + character.level + ')' : ''))
+        lines.push(characterName(character) + ': +' + amount + ' XP' + (levelsGained ? ' - Level up! (Level ' + character.level + ')' : ''))
     }
     if (Math.random() < summonRewardChance) {
         save.summons++

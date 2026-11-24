@@ -2,7 +2,7 @@ import { Character, createHero } from "./character"
 import { applyClassChange, canChangeClass, characterClasses, classChangeOffers, closestClasses, missingStats } from "./characterClass"
 import { levels } from "./gltf"
 import { deriveAttributes, Stats } from "./stats"
-import { addExperience, experienceToNextLevel, sacrificeExperience, sacrificeValue, transferExperience } from "./rewards"
+import { addExperience, experienceToNextLevel, isDeadly, sacrificeExperience, sacrificeValue, transferExperience } from "./rewards"
 import { equipmentBonuses, equippedStats, itemName, items, itemSlots, ItemSlot } from "./items"
 import { SaveData, writeSave } from "./save"
 import { describeAction } from "./action"
@@ -36,8 +36,12 @@ export class Lobby {
     }
 
     private canBring(character: Character) {
+        return !character.injured && !this.facedChampion(character)
+    }
+
+    private facedChampion(character: Character) {
         const level = levels.getLevel(this.levelKey)
-        return !level.finale || !character.finaleAttempts.includes(level.chapter)
+        return !!level.finale && character.finaleAttempts.includes(level.chapter)
     }
 
     private teamLimit() {
@@ -72,6 +76,12 @@ export class Lobby {
         const teamInfo = document.createElement('div')
         teamInfo.textContent = 'Team: ' + this.team.size + '/' + this.teamLimit()
 
+        const dangerInfo = document.createElement('div')
+        dangerInfo.className = isDeadly(this.levelKey) ? 'lobbyWarning' : 'heroDetails'
+        dangerInfo.textContent = isDeadly(this.levelKey)
+            ? 'Heroes who fall in this level die for good.'
+            : 'Heroes who fall here are only injured and miss the next combat.'
+
         const tabRow = document.createElement('div')
         tabRow.className = 'lobbyTabs'
         for (const [key, label] of tabs) {
@@ -102,7 +112,7 @@ export class Lobby {
             this.onStart(team, this.levelKey)
         })
 
-        this.element.replaceChildren(title, levelRow, teamInfo, tabRow, content, startButton)
+        this.element.replaceChildren(title, levelRow, dangerInfo, teamInfo, tabRow, content, startButton)
     }
 
     private renderHeroes() {
@@ -118,7 +128,21 @@ export class Lobby {
         const heroList = document.createElement('div')
         heroList.className = 'heroList'
         heroList.append(...this.save.roster.map(character => this.createHeroRow(character)))
-        return [summonRow, heroList]
+        if (!this.save.memorial.length)
+            return [summonRow, heroList]
+
+        const memorialTitle = document.createElement('div')
+        memorialTitle.className = 'lobbyRow'
+        memorialTitle.textContent = 'Memorial'
+        const memorial = document.createElement('div')
+        memorial.className = 'heroList'
+        memorial.append(...this.save.memorial.map(fallen => {
+            const row = document.createElement('div')
+            row.className = 'heroDetails'
+            row.textContent = fallen.name + ' - Level ' + fallen.level + ' · fell in ' + fallen.levelTitle
+            return row
+        }))
+        return [summonRow, heroList, memorialTitle, memorial]
     }
 
     private renderTraining() {
@@ -305,7 +329,8 @@ export class Lobby {
             + (character.talent ? ' · Talent: ' + character.talent.charAt(0).toUpperCase() + character.talent.slice(1) : '')
             + (character.statPoints ? ' · ' + character.statPoints + ' points to spend' : '')
             + (canChangeClass(character) ? ' · Class change ready!' : '')
-            + (this.canBring(character) ? '' : ' · Already faced the champion')
+            + (character.injured ? ' · Injured: misses the next combat' : '')
+            + (this.facedChampion(character) ? ' · Already faced the champion' : '')
         info.append(name, details)
         info.addEventListener('click', () => this.showDetails(character))
 

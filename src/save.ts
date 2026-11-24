@@ -11,6 +11,13 @@ export interface SaveData {
     inventory: string[],
     unlockedLevels: number,
     lastTeam: string[],
+    memorial: FallenHero[],
+}
+
+export interface FallenHero {
+    name: string,
+    level: number,
+    levelTitle: string,
 }
 
 export function loadSave(): SaveData {
@@ -32,12 +39,12 @@ export function loadSave(): SaveData {
                     pruneSkills(character)
                 return character
             })
-            return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [], unlockedLevels: data.unlockedLevels ?? 1, lastTeam: data.lastTeam ?? [] }
+            return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [], unlockedLevels: data.unlockedLevels ?? 1, lastTeam: data.lastTeam ?? [], memorial: data.memorial ?? [] }
         }
     } catch (error) {
         console.warn("Save could not be loaded", error)
     }
-    return { roster: [], summons: 0, inventory: [], unlockedLevels: 1, lastTeam: [] }
+    return { roster: [], summons: 0, inventory: [], unlockedLevels: 1, lastTeam: [], memorial: [] }
 }
 
 export function loadOrCreateSave(): SaveData {
