@@ -1,4 +1,5 @@
 import { Action, canUse, describeAction, spendAction } from "./action"
+import { objectiveText } from "./endCondition"
 import { Game } from "./game"
 import { VolumeKind } from "./audioManager"
 import { Piece } from "./piece"
@@ -26,6 +27,7 @@ export class Ui {
     private inspected: Piece | undefined
     private endScreen = document.createElement('div')
     private turnBanner = document.createElement('div')
+    private objective = document.createElement('div')
     private actionButtonsByAction = new Map<Action, HTMLButtonElement>()
     private bannerTimeout: number | undefined
     private endScreenShown = false
@@ -59,12 +61,25 @@ export class Ui {
         this.turnBanner.id = 'turnBanner'
         document.body.append(this.turnBanner)
 
+        this.objective.id = 'objective'
+        document.body.append(this.objective)
+
     }
 
     update() {
+        this.updateObjective()
         this.updateCards()
         this.updateSheet()
         this.updateEndScreen()
+    }
+
+    private updateObjective() {
+        const logic = this.game.gameLogic
+        const limit = logic.victory.rounds ?? logic.defeat.rounds
+        const round = logic.state === "Placement" ? '' : ' · Round ' + logic.round + (limit ? '/' + limit : '')
+        const text = 'Objective: ' + objectiveText(logic.victory, logic.defeat) + round
+        if (this.objective.textContent !== text)
+            this.objective.textContent = text
     }
 
     private updateEndScreen() {
