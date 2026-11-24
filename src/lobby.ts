@@ -76,6 +76,11 @@ export class Lobby {
         const teamInfo = document.createElement('div')
         teamInfo.textContent = 'Team: ' + this.team.size + '/' + this.teamLimit()
 
+        const recommendedLevel = levels.getLevel(this.levelKey).recommendedLevel
+        const recommendedInfo = document.createElement('div')
+        recommendedInfo.className = 'heroDetails'
+        recommendedInfo.textContent = recommendedLevel ? 'Recommended level: ' + recommendedLevel + ' (heroes more than 1 level above earn less XP)' : ''
+
         const dangerInfo = document.createElement('div')
         dangerInfo.className = isDeadly(this.levelKey) ? 'lobbyWarning' : 'heroDetails'
         dangerInfo.textContent = isDeadly(this.levelKey)
@@ -112,7 +117,7 @@ export class Lobby {
             this.onStart(team, this.levelKey)
         })
 
-        this.element.replaceChildren(title, levelRow, dangerInfo, teamInfo, tabRow, content, startButton)
+        this.element.replaceChildren(title, levelRow, recommendedInfo, dangerInfo, teamInfo, tabRow, content, startButton)
     }
 
     private renderHeroes() {

@@ -15,6 +15,17 @@ export const lootChance = 0.5
 export const sacrificeExperience = 5
 export const injuryCombats = 1
 
+export const freeLevelGap = 1
+export const reductionPerLevel = 0.25
+export const minimumExperienceShare = 0.1
+
+export function experienceShare(heroLevel: number, recommendedLevel?: number) {
+    if (recommendedLevel === undefined)
+        return 1
+    const gap = heroLevel - recommendedLevel - freeLevelGap
+    return gap <= 0 ? 1 : Math.max(minimumExperienceShare, 1 - gap * reductionPerLevel)
+}
+
 export function characterName(character: Character) {
     return character.characterClass ? characterClasses[character.characterClass].name : character.entity
 }
@@ -149,9 +160,11 @@ export function grantVictoryRewards(heroes: Piece[], levelKey: string) {
             save.inventory.push(classItem)
             lines.push('The champion dropped: ' + itemName(classItem))
         }
-        const amount = victoryExperience + hero.kills * killExperience + (levels.getLevel(levelKey).finale ? championExperience : 0)
+        const fullAmount = victoryExperience + hero.kills * killExperience + (levels.getLevel(levelKey).finale ? championExperience : 0)
+        const share = experienceShare(character.level, levels.getLevel(levelKey).recommendedLevel)
+        const amount = Math.max(1, Math.round(fullAmount * share))
         const levelsGained = addExperience(character, amount)
-        lines.push(characterName(character) + ': +' + amount + ' XP' + (levelsGained ? ' - Level up! (Level ' + character.level + ')' : ''))
+        lines.push(characterName(character) + ': +' + amount + ' XP' + (share < 1 ? ' (reduced: level too high)' : '') + (levelsGained ? ' - Level up! (Level ' + character.level + ')' : ''))
     }
     if (Math.random() < summonRewardChance) {
         save.summons++

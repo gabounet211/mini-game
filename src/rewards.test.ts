@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 
 vi.mock("./gltf", () => ({ levels: { keys: () => [], getLevel: (key: string) => ({ introduction: key === "goblins", title: key }) } }))
 
-const { addExperience, applyCasualties, applyMastery, experienceToNextLevel, sacrificeExperience, statPointsPerLevel, totalExperience, transferExperience } = await import("./rewards")
+const { addExperience, applyCasualties, applyMastery, experienceShare, experienceToNextLevel, sacrificeExperience, statPointsPerLevel, totalExperience, transferExperience } = await import("./rewards")
 
 describe("addExperience", () => {
     it("needs 10 × level XP to level up", () => {
@@ -107,5 +107,16 @@ describe("applyMastery", () => {
         const hero = { character, skillUses: { standFirm: 7 } } as unknown as Parameters<typeof applyMastery>[1][number]
         expect(applyMastery(save, [hero])).toEqual(["hero: Stand Firm reached rank 2!"])
         expect(character.skills.standFirm).toEqual({ rank: 2, from: "farmer", mastery: 1 })
+    })
+})
+
+describe("experienceShare", () => {
+    it("gives full XP up to 1 level above the recommended level, then 25% less per level, at least 10%", () => {
+        expect(experienceShare(3, 2)).toBe(1)
+        expect(experienceShare(4, 2)).toBe(0.75)
+        expect(experienceShare(5, 2)).toBe(0.5)
+        expect(experienceShare(7, 2)).toBe(0.1)
+        expect(experienceShare(1, 6)).toBe(1)
+        expect(experienceShare(20)).toBe(1)
     })
 })
