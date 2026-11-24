@@ -84,6 +84,7 @@ export function describeAction(action: Action) {
 export function spendAction(piece: Piece, action: Action) {
     piece.actionPoints -= action.cost
     piece.concentration -= action.concentration ?? 0
+    piece.skillUses[action.name] = (piece.skillUses[action.name] ?? 0) + 1
     if (action.cooldown) {
         piece.cooldowns.set(action, action.cooldown)
         piece.usedThisTurn.add(action)

@@ -5,13 +5,24 @@ import { characterClasses } from "./characterClass"
 export interface KnownSkill {
     rank: number
     from: string
+    mastery?: number
 }
 
 export const maxSkillRank = 3
 export const skillPointsPerLevel = 1
 export const learnCost = 1
-const rankCosts: Record<number, number> = { 2: 1, 3: 2 }
+export const masteryToRank: Record<number, number> = { 2: 10, 3: 25 }
+const formerRankCosts: Record<number, number> = { 2: 1, 3: 2 }
 const slotsByTier: Record<number, number> = { 1: 2, 2: 3, 3: 4, 4: 5, 5: 5 }
+
+function newSkill(from: string): KnownSkill {
+    return { rank: 1, from, mastery: 0 }
+}
+
+export function formatSkillName(name: string) {
+    const words = name.replace(/([A-Z])/g, ' $1').trim()
+    return words.charAt(0).toUpperCase() + words.slice(1)
+}
 
 function classActions(classKey?: string) {
     return classKey ? characterClasses[classKey]?.actions ?? [] : []
@@ -27,7 +38,7 @@ export function initSkills(character: Character, skillPoints = 0) {
     character.equippedSkills = []
     character.skillPoints = skillPoints
     for (const action of classActions(character.characterClass).slice(0, 2)) {
-        character.skills[action.name] = { rank: 1, from: character.characterClass! }
+        character.skills[action.name] = newSkill(character.characterClass!)
         character.equippedSkills.push(action.name)
     }
 }
@@ -65,24 +76,40 @@ export function learnSkill(character: Character, name: string) {
     if (character.skillPoints < learnCost || !learnableSkills(character).some(action => action.name === name))
         return false
     character.skillPoints -= learnCost
-    character.skills[name] = { rank: 1, from: character.characterClass! }
+    character.skills[name] = newSkill(character.characterClass!)
     if (character.equippedSkills.length < skillSlots(character))
         character.equippedSkills.push(name)
     return true
 }
 
-export function rankUpCost(character: Character, name: string) {
-    const known = character.skills[name]
-    return known && known.rank < maxSkillRank ? rankCosts[known.rank + 1] : undefined
+export function masteryNeeded(known: KnownSkill) {
+    return known.rank < maxSkillRank ? masteryToRank[known.rank + 1] : undefined
 }
 
-export function rankUpSkill(character: Character, name: string) {
-    const cost = rankUpCost(character, name)
-    if (cost === undefined || character.skillPoints < cost)
-        return false
-    character.skillPoints -= cost
-    character.skills[name].rank++
-    return true
+export function addMastery(character: Character, name: string, uses: number) {
+    const known = character.skills[name]
+    if (!known)
+        return 0
+    let ranksGained = 0
+    known.mastery = (known.mastery ?? 0) + uses
+    for (let needed = masteryNeeded(known); needed !== undefined && known.mastery >= needed; needed = masteryNeeded(known)) {
+        known.mastery -= needed
+        known.rank++
+        ranksGained++
+    }
+    if (known.rank >= maxSkillRank)
+        known.mastery = 0
+    return ranksGained
+}
+
+export function migrateMastery(character: Character) {
+    for (const known of Object.values(character.skills)) {
+        if (known.mastery !== undefined)
+            continue
+        for (let rank = 2; rank <= known.rank; rank++)
+            character.skillPoints += formerRankCosts[rank]
+        known.mastery = 0
+    }
 }
 
 export function toggleEquipped(character: Character, name: string) {
@@ -98,8 +125,6 @@ export function pruneSkills(character: Character) {
     for (const [name, known] of Object.entries(character.skills)) {
         if (classActions(known.from).some(action => action.name === name))
             continue
-        for (let rank = 2; rank <= known.rank; rank++)
-            character.skillPoints += rankCosts[rank]
         character.skillPoints += learnCost
         delete character.skills[name]
     }
@@ -117,7 +142,7 @@ export function upgradeSkillsForClass(character: Character, previousClass?: stri
     const basic = actions[0]
     if (!basic || character.skills[basic.name])
         return
-    character.skills[basic.name] = { rank: 1, from: character.characterClass! }
+    character.skills[basic.name] = newSkill(character.characterClass!)
     const oldBasic = classActions(previousClass)[0]?.name
     const index = oldBasic ? character.equippedSkills.indexOf(oldBasic) : -1
     if (index >= 0)

@@ -38,6 +38,7 @@ export class Piece {
     usesConcentration: boolean
     cooldowns = new Map<Action, number>()
     usedThisTurn = new Set<Action>()
+    skillUses: Record<string, number> = {}
 
     stats: Stats
     baseStats: Stats

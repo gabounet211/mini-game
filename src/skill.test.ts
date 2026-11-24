@@ -5,7 +5,7 @@ import { applyClassChange } from "./characterClass"
 vi.mock("./gltf", () => ({ levels: { keys: () => [], getLevel: () => ({}) } }))
 
 const { addExperience } = await import("./rewards")
-import { equippedActions, learnSkill, pruneSkills, rankedAction, rankUpSkill, skillAction, skillSlots, toggleEquipped } from "./skill"
+import { addMastery, equippedActions, learnSkill, masteryToRank, migrateMastery, pruneSkills, rankedAction, skillAction, skillSlots, toggleEquipped } from "./skill"
 import { physicalAttack } from "./action"
 
 function hero(characterClass: string, skillPoints = 0) {
@@ -49,16 +49,18 @@ describe("skills", () => {
         expect(tracker.equippedSkills).toEqual(["aimedShot", "legShot", "knifeStrike"])
     })
 
-    it("ranks up for 1 then 2 points, with generic bonuses when a skill has no rank versions", () => {
+    it("ranks up after 10 then 25 uses, with generic bonuses when a skill has no rank versions", () => {
         const duelist = hero("duelist", 3)
-        duelist.skills.rapierSweep = { rank: 1, from: "duelist" }
-        expect(rankUpSkill(duelist, "rapierSweep")).toBe(true)
-        expect(duelist.skillPoints).toBe(2)
+        duelist.skills.rapierSweep = { rank: 1, from: "duelist", mastery: 0 }
+        expect(addMastery(duelist, "rapierSweep", 9)).toBe(0)
+        expect(addMastery(duelist, "rapierSweep", 1)).toBe(1)
+        expect(duelist.skills.rapierSweep).toEqual({ rank: 2, from: "duelist", mastery: 0 })
+        expect(duelist.skillPoints).toBe(3)
         expect(skillAction(duelist, "rapierSweep")!.bonusDamage).toBe(1)
-        expect(rankUpSkill(duelist, "rapierSweep")).toBe(true)
-        expect(duelist.skillPoints).toBe(0)
+        expect(addMastery(duelist, "rapierSweep", 30)).toBe(1)
+        expect(duelist.skills.rapierSweep).toEqual({ rank: 3, from: "duelist", mastery: 0 })
         expect(skillAction(duelist, "rapierSweep")!.bonusDamage).toBe(2)
-        expect(rankUpSkill(duelist, "rapierSweep")).toBe(false)
+        expect(addMastery(duelist, "rapierSweep", 50)).toBe(0)
         expect(rankedAction(physicalAttack("strike", 1, 1, { cooldown: 2 }), 3).cooldown).toBe(1)
     })
 
@@ -69,7 +71,7 @@ describe("skills", () => {
         tracker.level = 4
         tracker.championsDefeated = ["chapter1"]
         expect(applyClassChange(tracker, "sharpshooter", [])).toBe(true)
-        expect(tracker.skills.legShot).toEqual({ rank: 2, from: "sharpshooter" })
+        expect(tracker.skills.legShot).toEqual({ rank: 2, from: "sharpshooter", mastery: 0 })
         expect(tracker.skills.knifeStrike.from).toBe("tracker")
         expect(tracker.equippedSkills).toEqual(["piercingShot", "knifeStrike", "legShot"])
         expect(skillAction(tracker, "legShot")!.cooldown).toBe(2)
@@ -79,13 +81,13 @@ describe("skills", () => {
     it("uses a skill's own rank versions when it has them", () => {
         const farmer = hero("farmer", 3)
         expect(Object.keys(farmer.skills)).toEqual(["pitchforkStrike", "standFirm"])
-        rankUpSkill(farmer, "standFirm")
+        addMastery(farmer, "standFirm", masteryToRank[2])
         expect(skillAction(farmer, "standFirm")!.cooldown).toBe(2)
-        rankUpSkill(farmer, "standFirm")
+        addMastery(farmer, "standFirm", masteryToRank[3])
         expect(skillAction(farmer, "standFirm")!.cooldown).toBe(1)
         const hunter = hero("hunter", 3)
         learnSkill(hunter, "snare")
-        rankUpSkill(hunter, "snare")
+        addMastery(hunter, "snare", masteryToRank[2])
         expect(skillAction(hunter, "snare")!.range).toBe(4)
     })
 
@@ -93,12 +95,12 @@ describe("skills", () => {
         const cleric = createCharacter("hero", "legendary", "cleric")
         cleric.skillPoints = 2
         learnSkill(cleric, "holyWard")
-        rankUpSkill(cleric, "holyWard")
+        addMastery(cleric, "holyWard", masteryToRank[2])
         cleric.level = 4
         cleric.championsDefeated = ["chapter1"]
         const inventory = ["holyRelic"]
         expect(applyClassChange(cleric, "saint", inventory)).toBe(true)
-        expect(cleric.skills.holyWard).toEqual({ rank: 2, from: "saint" })
+        expect(cleric.skills.holyWard).toEqual({ rank: 2, from: "saint", mastery: 0 })
         expect(skillAction(cleric, "holyWard")!.range).toBe(4)
         expect(skillSlots(cleric)).toBe(5)
         expect(inventory).toEqual([])
@@ -109,9 +111,20 @@ describe("skills", () => {
         elementalist.skills = { staffStrike: { rank: 1, from: "elementalist" }, elementalBlast: { rank: 3, from: "elementalist" } }
         elementalist.equippedSkills = ["staffStrike", "elementalBlast"]
         elementalist.skillPoints = 0
+        migrateMastery(elementalist)
         pruneSkills(elementalist)
         expect(Object.keys(elementalist.skills)).toEqual(["staffStrike"])
         expect(elementalist.equippedSkills).toEqual(["staffStrike"])
         expect(elementalist.skillPoints).toBe(1 + 1 + 2)
+    })
+
+    it("gives back the points spent on ranks before mastery, once", () => {
+        const scholar = hero("scholar", 0)
+        scholar.skills.bookSmack = { rank: 3, from: "scholar" }
+        migrateMastery(scholar)
+        expect(scholar.skillPoints).toBe(1 + 2)
+        expect(scholar.skills.bookSmack).toEqual({ rank: 3, from: "scholar", mastery: 0 })
+        migrateMastery(scholar)
+        expect(scholar.skillPoints).toBe(1 + 2)
     })
 })
