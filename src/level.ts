@@ -8,6 +8,7 @@ export interface Level<M extends Record<string, Group>, E extends Record<string,
     chapter: string,
     finale?: boolean,
     introduction?: boolean,
+    recommendedLevel?: number,
     music?: string,
     map: keyof M,
     startCells: [x: number, y: number][]

@@ -165,6 +165,7 @@ const championMusic = 'championMusic.mp3'
 levels.createLevel("chapter1-1", {
     title: "Chapter 1 - 1: First Steps",
     chapter: "chapter1",
+    recommendedLevel: 1,
     introduction: true,
     map: "map1",
     startCells,
@@ -179,6 +180,7 @@ levels.createLevel("chapter1-1", {
 levels.createLevel("chapter1-2", {
     title: "Chapter 1 - 2: Patrol",
     chapter: "chapter1",
+    recommendedLevel: 1,
     introduction: true,
     map: "map1",
     startCells,
@@ -194,6 +196,7 @@ levels.createLevel("chapter1-2", {
 levels.createLevel("chapter1-3", {
     title: "Chapter 1 - 3: Ambush",
     chapter: "chapter1",
+    recommendedLevel: 2,
     introduction: true,
     map: "map1",
     startCells,
@@ -215,6 +218,7 @@ levels.createLevel("chapter1-3", {
 levels.createLevel("chapter1-4", {
     title: "Chapter 1 - 4: Scouts",
     chapter: "chapter1",
+    recommendedLevel: 2,
     introduction: true,
     map: "map1",
     startCells,
@@ -231,6 +235,7 @@ levels.createLevel("chapter1-4", {
 levels.createLevel("chapter1-5", {
     title: "Chapter 1 - 5: The Brute (Mini-boss)",
     chapter: "chapter1",
+    recommendedLevel: 3,
     introduction: true,
     music: championMusic,
     map: "map1",
@@ -248,6 +253,7 @@ levels.createLevel("chapter1-5", {
 levels.createLevel("chapter1-6", {
     title: "Chapter 1 - 6: Into the Woods",
     chapter: "chapter1",
+    recommendedLevel: 3,
     map: "map1",
     startCells,
     teamSize,
@@ -265,6 +271,7 @@ levels.createLevel("chapter1-6", {
 levels.createLevel("chapter1-7", {
     title: "Chapter 1 - 7: Village Defense",
     chapter: "chapter1",
+    recommendedLevel: 4,
     map: "map1",
     startCells,
     teamSize,
@@ -287,6 +294,7 @@ levels.createLevel("chapter1-7", {
 levels.createLevel("chapter1-8", {
     title: "Chapter 1 - 8: Camp Outskirts",
     chapter: "chapter1",
+    recommendedLevel: 4,
     map: "map1",
     startCells,
     teamSize,
@@ -303,6 +311,7 @@ levels.createLevel("chapter1-8", {
 levels.createLevel("chapter1-9", {
     title: "Chapter 1 - 9: Raise the Alarm",
     chapter: "chapter1",
+    recommendedLevel: 5,
     map: "map1",
     startCells,
     teamSize,
@@ -322,6 +331,7 @@ levels.createLevel("chapter1-9", {
 levels.createLevel("chapter1-10", {
     title: "Chapter 1 - 10: Goblin Chief (Champion)",
     chapter: "chapter1",
+    recommendedLevel: 6,
     finale: true,
     music: championMusic,
     map: "map1",
@@ -342,6 +352,7 @@ levels.createLevel("chapter1-10", {
 levels.createLevel("chapter2-1", {
     title: "Chapter 2 - 1",
     chapter: "chapter2",
+    recommendedLevel: 6,
     map: "map1",
     startCells,
     teamSize,
@@ -355,6 +366,7 @@ levels.createLevel("chapter2-1", {
 levels.createLevel("chapter2-2", {
     title: "Chapter 2 - 2",
     chapter: "chapter2",
+    recommendedLevel: 7,
     map: "map1",
     startCells,
     teamSize,
@@ -369,6 +381,7 @@ levels.createLevel("chapter2-2", {
 levels.createLevel("chapter2-3", {
     title: "Chapter 2 - 3",
     chapter: "chapter2",
+    recommendedLevel: 7,
     map: "map1",
     startCells,
     teamSize,
@@ -384,6 +397,7 @@ levels.createLevel("chapter2-3", {
 levels.createLevel("chapter2-4", {
     title: "Chapter 2 - 4 (Loyal Berserker)",
     chapter: "chapter2",
+    recommendedLevel: 8,
     map: "map1",
     startCells,
     teamSize,
@@ -400,6 +414,7 @@ levels.createLevel("chapter2-4", {
 levels.createLevel("chapter2-5", {
     title: "Chapter 2 - 5 (Marco)",
     chapter: "chapter2",
+    recommendedLevel: 8,
     finale: true,
     music: championMusic,
     map: "map1",
