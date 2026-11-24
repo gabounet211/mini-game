@@ -250,7 +250,7 @@ export class Lobby {
 
     private heroLabel(character: Character) {
         const characterClass = character.characterClass ? characterClasses[character.characterClass] : undefined
-        return (characterClass?.name ?? character.entity) + ' (' + character.rarity + ') - Level ' + character.level
+        return (characterClass?.name ?? character.entity) + ' (' + character.rarity + ')' + (characterClass ? ' · Tier ' + characterClass.tier : '') + ' - Level ' + character.level
     }
 
     private renderInventory() {
@@ -321,7 +321,7 @@ export class Lobby {
         const attributes = deriveAttributes(equippedStats(character))
         const title = document.createElement('div')
         title.className = 'lobbyTitle'
-        title.textContent = (characterClass?.name ?? character.entity) + ' (' + character.rarity + ')'
+        title.textContent = (characterClass?.name ?? character.entity) + ' (' + character.rarity + ')' + (characterClass ? ' · Tier ' + characterClass.tier : '')
         const closeButton = document.createElement('button')
         closeButton.textContent = 'Close'
         closeButton.addEventListener('click', () => this.showDetails(undefined))
