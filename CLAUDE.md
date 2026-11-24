@@ -116,6 +116,8 @@ L'univers du jeu est dans la Bible de l'univers, la référence unique partagée
 - Ne pas ajouter trop de commentaires dans le code.
 - Programmer le jeu en PvE, mais garder en tête qu'il peut devenir multijoueur plus tard.
 - Travailler par petits changements, un à la fois. Les grosses modifications faites d'un seul coup sont rares.
+- À l'essai : avant de proposer un pull, Claude fait relire le changement avec le plugin code-review (s'il est activé dans la session), corrige ce qui est trouvé, puis envoie le pull.
+- Une nouvelle session par grosse étape : CLAUDE.md et le journal de développement suffisent à reprendre le contexte, et une conversation plus courte consomme beaucoup moins.
 
 ## Questions ouvertes
 
