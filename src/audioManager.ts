@@ -25,6 +25,7 @@ export class AudioManager {
 
         for (const type of ['pointerdown', 'keydown'])
             document.addEventListener(type, () => this.start(), { once: true })
+        this.start()
     }
 
     private loadMusic(file: string) {
@@ -89,8 +90,13 @@ export class AudioManager {
     private start() {
         if (this.started)
             return
-        this.started = true
-        this.listener.context.resume().then(() => this.tryPlay())
+        const context = this.listener.context
+        context.resume().then(() => {
+            if (this.started || context.state !== "running")
+                return
+            this.started = true
+            this.tryPlay()
+        })
     }
 
     private tryPlay() {

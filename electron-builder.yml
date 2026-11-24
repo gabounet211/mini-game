@@ -1,0 +1,9 @@
+appId: com.gabounet211.minigame
+productName: Mini game
+directories:
+  output: release
+files:
+  - dist/**
+  - electron/**
+win:
+  target: portable

@@ -5,6 +5,7 @@ import { Piece } from "./piece"
 import { describeEffect } from "./effect"
 import { clearSave } from "./save"
 import { items } from "./items"
+import { desktop } from "./desktop"
 
 
 
@@ -206,7 +207,8 @@ export class Ui {
 
         const quitButton = document.createElement('button')
         quitButton.textContent = 'Quit Game'
-        quitButton.disabled = true
+        quitButton.disabled = !desktop
+        quitButton.addEventListener('click', () => desktop?.quit())
         this.settingMenu.append(quitButton)
 
         document.body.append(this.settingMenu)

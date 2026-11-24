@@ -10,7 +10,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 - Système de tour : à intégrer dans le jeu. Tour camp par camp : tous les personnages d'un camp jouent dans l'ordre voulu, puis le tour passe à l'autre camp. Pendant son tour, un personnage a un déplacement gratuit égal à son Ms, qu'il peut fractionner au cours du tour (ex. Ms 5 : 2 cases, une action, puis 3 cases) et des actions qui coûtent des points d'action (PA). Les PA sont une valeur unique à chaque personnage (les personnages vont devenir des personnages à statistiques et classe aléatoires) et reviennent au maximum à chaque tour.
 - Placement : avant le premier tour, le joueur place ses héros dans la zone de départ du niveau (`startCells`, un carré de 3x3 pour le moment). La zone peut être plus grande que l'équipe : `teamSize` fixe le nombre de héros.
 - Ordre de tour des ennemis : il dépend du comportement de leur race (les gobelins jouent dans un ordre au hasard, comme une bande désorganisée). On ne peut pas traverser les cases de ses alliés : c'est voulu, pour la profondeur stratégique.
-- Musique : chaque niveau peut avoir sa propre musique (`music`). Les salles de champion jouent le 4e mouvement (Allegro con fuoco) de la Symphonie n° 9 de Dvořák, enregistrement trouvé sur Wikimedia Commons (`public/championMusic.mp3`).
+- Musique : chaque niveau peut avoir sa propre musique (`music`). Les salles de champion jouent le 4e mouvement (Allegro con fuoco) de la Symphonie n° 9 de Dvořák, enregistrement trouvé sur Wikimedia Commons (`public/championMusic.mp3`). La musique tourne en boucle et part dès le chargement du niveau, sans attendre un clic (dans l'application, la règle de lecture automatique de Chrome est désactivée).
 - Multijoueur : idée pour plus tard, le jeu pourrait devenir multijoueur à un moment donné. On commence par un jeu PvE.
 
 ### Idées futures
@@ -19,7 +19,7 @@ Ce fichier sert à noter mes idées pour le jeu et les règles que Claude doit s
 - Savoir et perception : le savoir fixe la concentration maximale et la perception les chances de coup critique.
 - Équipement : la base est faite (objets qui donnent des bonus de stats, butin de victoire, inventaire et équipement dans le lobby). Plus tard : restrictions par classe, objets plus rares, effets propres.
 - Modèles et animations : remplacer le modèle rough par des modèles plus complets, puis ajuster la vitesse de marche et le moment du coup (`walkSpeed`, `walkAnimationSpeed`, `hitDelay` dans `piece.ts`).
-- Application : transformer le jeu en application, même s'il roule dans un navigateur pour le moment. Le bouton Quit Game du menu Setting fermera alors l'application (il est désactivé d'ici là).
+- Application : le jeu vise surtout le PC. Il est emballé avec Electron (dossier `electron/`, lancement local avec `npm run desktop`) et GitHub Actions construit un `.exe` Windows portable à chaque push (artefact du workflow Desktop). Le site GitHub Pages reste la version de test rapide. Dans l'application, le bouton Quit Game du menu Setting ferme le jeu (il reste désactivé dans le navigateur). La sauvegarde de l'application est séparée de celle du site ; ce qui dépend de la plateforme passe par `src/desktop.ts`.
 
 ### Système de classes
 
