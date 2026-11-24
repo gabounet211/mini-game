@@ -2,7 +2,7 @@ import { Character } from "./character"
 import { characterClasses } from "./characterClass"
 import { Piece } from "./piece"
 import { loadSave, SaveData, writeSave } from "./save"
-import { skillPointsPerLevel } from "./skill"
+import { addMastery, formatSkillName, skillPointsPerLevel } from "./skill"
 import { items, randomItem, itemName, itemSlots } from "./items"
 import { levels } from "./gltf"
 
@@ -106,9 +106,22 @@ function recordFinale(character: Character, levelKey: string, won: boolean) {
         character.championsDefeated.push(level.chapter)
 }
 
+export function applyMastery(save: SaveData, heroes: Piece[]) {
+    const lines: string[] = []
+    for (const hero of heroes) {
+        const character = save.roster.find(candidate => candidate.id === hero.character.id)
+        if (!character)
+            continue
+        for (const [name, uses] of Object.entries(hero.skillUses))
+            if (addMastery(character, name, uses))
+                lines.push(characterName(character) + ': ' + formatSkillName(name) + ' reached rank ' + character.skills[name].rank + '!')
+    }
+    return lines
+}
+
 export function grantDefeatResults(heroes: Piece[], levelKey: string) {
     const save = loadSave()
-    const lines = applyCasualties(save, heroes, levelKey)
+    const lines = [...applyCasualties(save, heroes, levelKey), ...applyMastery(save, heroes)]
     for (const hero of heroes) {
         const character = save.roster.find(candidate => candidate.id === hero.character.id)
         if (character)
@@ -120,7 +133,7 @@ export function grantDefeatResults(heroes: Piece[], levelKey: string) {
 
 export function grantVictoryRewards(heroes: Piece[], levelKey: string) {
     const save = loadSave()
-    const lines = applyCasualties(save, heroes, levelKey)
+    const lines = [...applyCasualties(save, heroes, levelKey), ...applyMastery(save, heroes)]
     const keys = levels.keys()
     const nextUnlocked = Math.min(keys.length, keys.indexOf(levelKey) + 2)
     if (nextUnlocked > save.unlockedLevels) {

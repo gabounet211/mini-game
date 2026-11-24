@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 
 vi.mock("./gltf", () => ({ levels: { keys: () => [], getLevel: (key: string) => ({ chapter: key === "goblins" ? "chapter1" : "chapter2", title: key }) } }))
 
-const { addExperience, applyCasualties, experienceToNextLevel, sacrificeExperience, statPointsPerLevel, totalExperience, transferExperience } = await import("./rewards")
+const { addExperience, applyCasualties, applyMastery, experienceToNextLevel, sacrificeExperience, statPointsPerLevel, totalExperience, transferExperience } = await import("./rewards")
 
 describe("addExperience", () => {
     it("needs 10 × level XP to level up", () => {
@@ -97,5 +97,15 @@ describe("applyCasualties", () => {
         applyCasualties(data, [fought(first, 0), fought(second, 0)], "goblins")
         expect(first.injured).toBe(0)
         expect(second.injured).toBe(0)
+    })
+})
+
+describe("applyMastery", () => {
+    it("ranks up the skills a hero used in combat", () => {
+        const character = { id: "a", entity: "hero", skills: { standFirm: { rank: 1, from: "farmer", mastery: 4 } } } as unknown as Parameters<typeof addExperience>[0]
+        const save = { roster: [character] } as unknown as Parameters<typeof applyMastery>[0]
+        const hero = { character, skillUses: { standFirm: 7 } } as unknown as Parameters<typeof applyMastery>[1][number]
+        expect(applyMastery(save, [hero])).toEqual(["hero: Stand Firm reached rank 2!"])
+        expect(character.skills.standFirm).toEqual({ rank: 2, from: "farmer", mastery: 1 })
     })
 })

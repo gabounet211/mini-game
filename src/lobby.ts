@@ -6,7 +6,7 @@ import { addExperience, experienceToNextLevel, isDeadly, sacrificeExperience, sa
 import { equipmentBonuses, equippedStats, itemName, items, itemSlots, ItemSlot } from "./items"
 import { SaveData, writeSave } from "./save"
 import { describeAction } from "./action"
-import { equippedActions, learnableSkills, learnCost, learnSkill, maxSkillRank, rankUpCost, rankUpSkill, skillAction, skillSlots, toggleEquipped } from "./skill"
+import { equippedActions, learnableSkills, learnCost, learnSkill, masteryNeeded, maxSkillRank, skillAction, skillSlots, toggleEquipped } from "./skill"
 
 type LobbyTab = "heroes" | "training" | "combination" | "inventory"
 
@@ -153,7 +153,7 @@ export class Lobby {
             return [pickRow]
 
         const info = document.createElement('div')
-        info.textContent = 'Skill points: ' + trainee.skillPoints + ' · Equipped: ' + trainee.equippedSkills.length + '/' + skillSlots(trainee)
+        info.textContent = 'Skill points: ' + trainee.skillPoints + ' · Equipped: ' + trainee.equippedSkills.length + '/' + skillSlots(trainee) + ' · Skills rank up by being used in combat'
 
         const known = document.createElement('div')
         known.className = 'heroList'
@@ -166,12 +166,10 @@ export class Lobby {
             equipButton.textContent = equipped ? 'Unequip' : 'Equip'
             equipButton.disabled = equipped ? trainee.equippedSkills.length <= 1 : trainee.equippedSkills.length >= skillSlots(trainee)
             equipButton.addEventListener('click', () => this.updateTrainee(() => toggleEquipped(trainee, name)))
-            const cost = rankUpCost(trainee, name)
-            const rankButton = document.createElement('button')
-            rankButton.textContent = cost === undefined ? 'Max rank' : 'Rank up (' + cost + ')'
-            rankButton.disabled = cost === undefined || trainee.skillPoints < cost
-            rankButton.addEventListener('click', () => this.updateTrainee(() => rankUpSkill(trainee, name)))
-            known.append(this.createSkillRow(this.formatName(name) + ' · rank ' + trainee.skills[name].rank + '/' + maxSkillRank + (equipped ? ' · equipped' : ''), describeAction(action), [equipButton, rankButton]))
+            const skill = trainee.skills[name]
+            const needed = masteryNeeded(skill)
+            const progress = needed === undefined ? ' · max rank' : ' · mastery ' + (skill.mastery ?? 0) + '/' + needed
+            known.append(this.createSkillRow(this.formatName(name) + ' · rank ' + skill.rank + '/' + maxSkillRank + progress + (equipped ? ' · equipped' : ''), describeAction(action), [equipButton]))
         }
 
         const learnTitle = document.createElement('div')
