@@ -4,10 +4,13 @@ import { Clock } from 'three';
 import { Lobby } from './lobby';
 import { loadOrCreateSave } from './save';
 import { Character } from './character';
+import { playLobbyMusic } from './audioManager';
 
+const stopLobbyMusic = playLobbyMusic()
 new Lobby(loadOrCreateSave(), startGame)
 
 function startGame(team: Character[], levelKey: string) {
+  stopLobbyMusic()
   const game = new Game(team, levelKey)
 
   window.addEventListener('resize', () => {

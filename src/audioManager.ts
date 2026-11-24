@@ -5,9 +5,45 @@ export type VolumeKind = 'main' | 'sfx' | 'music'
 const musicGain = 0.1
 const defaultMusic = 'music_test.mp3'
 const volumesKey = "miniGameVolumes"
+const lobbyMusic = 'lobbyMusic.mp3'
+
+function defaultVolumes(): Record<VolumeKind, number> {
+    return { main: 1, sfx: 1, music: 0.5 }
+}
+
+function loadVolumes() {
+    const volumes = defaultVolumes()
+    try {
+        const saved = JSON.parse(localStorage.getItem(volumesKey) ?? "null")
+        for (const kind of Object.keys(volumes) as VolumeKind[])
+            if (typeof saved?.[kind] === "number")
+                volumes[kind] = saved[kind]
+    } catch (error) {
+        console.warn("Volumes could not be loaded", error)
+    }
+    return volumes
+}
+
+export function playLobbyMusic() {
+    const element = document.createElement('audio')
+    const volumes = loadVolumes()
+    const listeners = new AbortController()
+    element.loop = true
+    element.volume = volumes.main * volumes.music * musicGain
+    element.src = lobbyMusic
+    const play = () => element.play().then(() => listeners.abort(), () => { })
+    for (const type of ['pointerdown', 'keydown'])
+        document.addEventListener(type, play, { signal: listeners.signal })
+    play()
+    return () => {
+        listeners.abort()
+        element.pause()
+        element.removeAttribute('src')
+    }
+}
 
 export class AudioManager {
-    volumes: Record<VolumeKind, number> = { main: 1, sfx: 1, music: 0.5 }
+    volumes = loadVolumes()
 
     private listener = new AudioListener()
     private music = new Audio(this.listener)
@@ -17,7 +53,6 @@ export class AudioManager {
 
     constructor(camera: Object3D, music = defaultMusic) {
         camera.add(this.listener)
-        this.loadVolumes()
         this.musicElement.loop = true
         this.music.setMediaElementSource(this.musicElement)
         this.applyVolumes()
@@ -70,17 +105,6 @@ export class AudioManager {
             oscillator.start(start)
             oscillator.stop(start + 0.2)
         })
-    }
-
-    private loadVolumes() {
-        try {
-            const saved = JSON.parse(localStorage.getItem(volumesKey) ?? "null")
-            for (const kind of Object.keys(this.volumes) as VolumeKind[])
-                if (typeof saved?.[kind] === "number")
-                    this.volumes[kind] = saved[kind]
-        } catch (error) {
-            console.warn("Volumes could not be loaded", error)
-        }
     }
 
     private applyVolumes() {
