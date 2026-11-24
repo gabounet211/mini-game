@@ -81,7 +81,7 @@ export class GameLogic {
             return
         if (this.defeat(this.grid)) {
             this.state = "Defeat"
-            grantDefeatResults(this.heroes, this.levelKey)
+            this.rewards = grantDefeatResults(this.heroes, this.levelKey)
         }
         else if (this.victory(this.grid)) {
             this.state = "Victory"

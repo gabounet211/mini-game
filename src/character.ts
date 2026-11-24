@@ -25,6 +25,7 @@ export interface Character {
     skills: Record<string, KnownSkill>,
     equippedSkills: string[],
     skillPoints: number,
+    injured?: number,
 }
 
 export function createId() {

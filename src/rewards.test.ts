@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest"
 
-vi.mock("./gltf", () => ({ levels: { keys: () => [], getLevel: () => ({}) } }))
+vi.mock("./gltf", () => ({ levels: { keys: () => [], getLevel: (key: string) => ({ chapter: key === "goblins" ? "chapter1" : "chapter2", title: key }) } }))
 
-const { addExperience, experienceToNextLevel, sacrificeExperience, statPointsPerLevel, totalExperience, transferExperience } = await import("./rewards")
+const { addExperience, applyCasualties, experienceToNextLevel, sacrificeExperience, statPointsPerLevel, totalExperience, transferExperience } = await import("./rewards")
 
 describe("addExperience", () => {
     it("needs 10 × level XP to level up", () => {
@@ -49,5 +49,53 @@ describe("transferExperience", () => {
         const save = { roster: [only], inventory: [] as string[] } as unknown as Parameters<typeof transferExperience>[0]
         expect(transferExperience(save, only, only)).toBe(0)
         expect(save.roster).toEqual([only])
+    })
+})
+
+describe("applyCasualties", () => {
+    type Save = Parameters<typeof applyCasualties>[0]
+    type Hero = Parameters<typeof applyCasualties>[1][number]
+
+    function character(id: string) {
+        return { id, entity: "hero", level: 3, equipment: {} } as Save["roster"][number]
+    }
+
+    function fought(target: Save["roster"][number], healt: number) {
+        return { character: target, healt } as unknown as Hero
+    }
+
+    function save(...roster: Save["roster"]) {
+        return { roster, inventory: [], lastTeam: roster.map(hero => hero.id), memorial: [] } as unknown as Save
+    }
+
+    it("only injures fallen heroes during the introduction", () => {
+        const fallen = character("a"), standing = character("b"), resting = character("c")
+        const data = save(fallen, standing, resting)
+        applyCasualties(data, [fought(fallen, 0), fought(standing, 5)], "goblins")
+        expect(data.roster).toEqual([fallen, standing, resting])
+        expect(fallen.injured).toBe(1)
+        expect(standing.injured).toBeUndefined()
+        applyCasualties(data, [fought(standing, 5), fought(resting, 5)], "goblins")
+        expect(fallen.injured).toBe(0)
+    })
+
+    it("kills fallen heroes after the introduction and keeps their equipment", () => {
+        const fallen = character("a"), standing = character("b")
+        fallen.equipment.weapon = "rustySword"
+        const data = save(fallen, standing)
+        const lines = applyCasualties(data, [fought(fallen, 0), fought(standing, 5)], "bandits")
+        expect(data.roster).toEqual([standing])
+        expect(data.inventory).toEqual(["rustySword"])
+        expect(data.lastTeam).toEqual(["b"])
+        expect(data.memorial).toEqual([{ name: "hero", level: 3, levelTitle: "bandits" }])
+        expect(lines).toHaveLength(1)
+    })
+
+    it("lets the team recover when every hero is injured", () => {
+        const first = character("a"), second = character("b")
+        const data = save(first, second)
+        applyCasualties(data, [fought(first, 0), fought(second, 0)], "goblins")
+        expect(first.injured).toBe(0)
+        expect(second.injured).toBe(0)
     })
 })
