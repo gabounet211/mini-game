@@ -312,7 +312,7 @@ export class SmallGrid<T> {
     private grid: T[][];
     private half: number;
 
-    constructor(n: number, d: T, private start: Vector2) {
+    constructor(n: number, private d: T, private start: Vector2) {
         this.grid = Array(n * 2 + 1).fill([]).map(() => Array(n * 2 + 1).fill(d));
         this.half = n;
     }
@@ -326,7 +326,7 @@ export class SmallGrid<T> {
     get(v: Vector2): T {
         const x = v.x - this.start.x + this.half;
         const y = v.y - this.start.y + this.half;
-        return this.grid[x][y];
+        return this.grid[x]?.[y] ?? this.d;
     }
 
     /**

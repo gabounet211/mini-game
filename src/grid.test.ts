@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { Object3D, Vector2 } from "three"
 import { Piece } from "./piece"
-import { Grid } from "./grid"
+import { Grid, SmallGrid } from "./grid"
 
 function createGrid(size: number, walls: string[], lowObstacles: string[] = []) {
     const grid = Object.create(Grid.prototype) as Grid
@@ -73,5 +73,16 @@ describe("canSee", () => {
         const grid = createGrid(7, ['3,3'], ['3,3'])
         expect(grid.canSee(new Vector2(1, 3), new Vector2(5, 3))).toBe(true)
         expect(grid.isFree(new Vector2(3, 3))).toBe(false)
+    })
+})
+
+describe("SmallGrid", () => {
+    it("returns its default value outside its bounds instead of crashing", () => {
+        const range = new SmallGrid(2, false, new Vector2(5, 5))
+        range.set(new Vector2(6, 5), true)
+        expect(range.get(new Vector2(6, 5))).toBe(true)
+        expect(range.get(new Vector2(12, 5))).toBe(false)
+        expect(range.get(new Vector2(5, 12))).toBe(false)
+        expect(range.get(new Vector2(-3, -3))).toBe(false)
     })
 })
