@@ -3,9 +3,10 @@ import { Character, createHero, createId } from "./character"
 
 const saveKey = "miniGameSave"
 const saveVersion = 1
-const levelLayout = 2
-const oldChapterLength = 5
-const addedChapterOneLevels = 5
+const levelLayout = 3
+const chapterLength = 10
+const chapterOneOldLength = 5
+const chapterTwoNewPositions = [0, 1, 3, 5, 6, 10]
 const startingHeroes = 5
 
 export interface SaveData {
@@ -53,8 +54,13 @@ export function loadSave(): SaveData {
 }
 
 function migrateUnlockedLevels(data: { unlockedLevels?: number, levelLayout?: number }) {
-    const unlocked = data.unlockedLevels ?? 1
-    return data.levelLayout !== levelLayout && unlocked > oldChapterLength ? unlocked + addedChapterOneLevels : unlocked
+    let unlocked = data.unlockedLevels ?? 1
+    const layout = data.levelLayout ?? 1
+    if (layout < 2 && unlocked > chapterOneOldLength)
+        unlocked += chapterLength - chapterOneOldLength
+    if (layout < 3 && unlocked > chapterLength)
+        unlocked = chapterLength + chapterTwoNewPositions[Math.min(unlocked - chapterLength, chapterTwoNewPositions.length - 1)]
+    return unlocked
 }
 
 export function loadOrCreateSave(): SaveData {
