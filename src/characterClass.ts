@@ -345,7 +345,7 @@ export const rarityTierCap: Record<Rarity, number> = {
     legendary: 5,
 }
 
-export const classChangeLevel = 4
+export const classChangeLevel = 6
 
 export const maxClassChanges = 1
 

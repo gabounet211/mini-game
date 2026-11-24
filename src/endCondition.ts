@@ -24,7 +24,7 @@ export const allEnemiesDefeated: EndCondition = {
 
 export const allHeroesDefeated: EndCondition = {
     description: "",
-    check: ({ grid }) => !grid.getPieces(true).length,
+    check: ({ grid }) => !grid.getPieces(true).some(piece => !piece.config?.npc),
 }
 
 export function pieceDefeated(name: string, label = name): EndCondition {
@@ -34,10 +34,10 @@ export function pieceDefeated(name: string, label = name): EndCondition {
     }
 }
 
-export function keepAlive(name: string, label = name): EndCondition {
+export function keepAlive(name: string, label = name, count = 1): EndCondition {
     return {
         description: "Keep " + label + " alive",
-        check: ({ grid }) => !allPieces(grid).some(piece => piece.name === name),
+        check: ({ grid }) => allPieces(grid).filter(piece => piece.name === name).length < count,
     }
 }
 

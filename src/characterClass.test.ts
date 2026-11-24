@@ -7,7 +7,7 @@ function hero(characterClass: string, rarity: Character["rarity"], stats: Partia
     const character = createHero("hero", rarity)
     character.characterClass = characterClass
     character.stats = { strength: 1, resistance: 1, constitution: 1, willpower: 1, knowledge: 1, intelligence: 1, dexterity: 1, perception: 1, ...stats }
-    character.level = 4
+    character.level = 6
     character.championsDefeated = ["chapter1"]
     return character
 }
@@ -24,12 +24,12 @@ describe("createHero", () => {
 })
 
 describe("canChangeClass", () => {
-    it("needs level 4 and a defeated champion not yet used", () => {
+    it("needs level 6 and a defeated champion not yet used", () => {
         const character = hero("lumberjack", "common", { strength: 8 })
         expect(canChangeClass(character)).toBe(true)
-        character.level = 3
+        character.level = 5
         expect(canChangeClass(character)).toBe(false)
-        character.level = 4
+        character.level = 6
         character.classChanges = ["chapter1"]
         expect(canChangeClass(character)).toBe(false)
     })

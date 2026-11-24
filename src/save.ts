@@ -3,6 +3,9 @@ import { Character, createHero, createId } from "./character"
 
 const saveKey = "miniGameSave"
 const saveVersion = 1
+const levelLayout = 2
+const oldChapterLength = 5
+const addedChapterOneLevels = 5
 const startingHeroes = 5
 
 export interface SaveData {
@@ -41,12 +44,17 @@ export function loadSave(): SaveData {
                 }
                 return character
             })
-            return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [], unlockedLevels: data.unlockedLevels ?? 1, lastTeam: data.lastTeam ?? [], memorial: data.memorial ?? [] }
+            return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [], unlockedLevels: migrateUnlockedLevels(data), lastTeam: data.lastTeam ?? [], memorial: data.memorial ?? [] }
         }
     } catch (error) {
         console.warn("Save could not be loaded", error)
     }
     return { roster: [], summons: 0, inventory: [], unlockedLevels: 1, lastTeam: [], memorial: [] }
+}
+
+function migrateUnlockedLevels(data: { unlockedLevels?: number, levelLayout?: number }) {
+    const unlocked = data.unlockedLevels ?? 1
+    return data.levelLayout !== levelLayout && unlocked > oldChapterLength ? unlocked + addedChapterOneLevels : unlocked
 }
 
 export function loadOrCreateSave(): SaveData {
@@ -60,7 +68,7 @@ export function loadOrCreateSave(): SaveData {
 
 export function writeSave(save: SaveData) {
     try {
-        localStorage.setItem(saveKey, JSON.stringify({ version: saveVersion, ...save }))
+        localStorage.setItem(saveKey, JSON.stringify({ version: saveVersion, levelLayout, ...save }))
     } catch (error) {
         console.warn("Save could not be written", error)
     }

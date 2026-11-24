@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 
-vi.mock("./gltf", () => ({ levels: { keys: () => [], getLevel: (key: string) => ({ chapter: key === "goblins" ? "chapter1" : "chapter2", title: key }) } }))
+vi.mock("./gltf", () => ({ levels: { keys: () => [], getLevel: (key: string) => ({ introduction: key === "goblins", title: key }) } }))
 
 const { addExperience, applyCasualties, applyMastery, experienceToNextLevel, sacrificeExperience, statPointsPerLevel, totalExperience, transferExperience } = await import("./rewards")
 

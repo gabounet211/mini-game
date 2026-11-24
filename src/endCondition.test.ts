@@ -41,6 +41,19 @@ describe("end conditions", () => {
         expect(defeat.description).toBe("Keep the villager alive")
     })
 
+    it("loses as soon as one of several protected pieces falls", () => {
+        const defeat = keepAlive("villager", "the villagers", 2)
+        const other = piece("villager", true)
+        expect(defeat.check({ grid: grid([[0, 0, hero], [1, 0, villager], [2, 0, other]]), round: 1 })).toBe(false)
+        expect(defeat.check({ grid: grid([[0, 0, hero], [1, 0, villager]]), round: 1 })).toBe(true)
+    })
+
+    it("ignores villagers when checking if every hero fell", () => {
+        const npc = { name: "villager", player: true, config: { npc: true } } as unknown as Piece
+        expect(allHeroesDefeated.check({ grid: grid([[1, 0, npc]]), round: 1 })).toBe(true)
+        expect(allHeroesDefeated.check({ grid: grid([[0, 0, hero], [1, 0, npc]]), round: 1 })).toBe(false)
+    })
+
     it("wins when a hero, or the named piece, reaches a marked cell", () => {
         const anyHero = reachCells([[4, 4]])
         expect(anyHero.check({ grid: grid([[4, 4, goblin], [0, 0, hero]]), round: 1 })).toBe(false)
