@@ -13,7 +13,6 @@ export const statPointsPerLevel = 2
 export const summonRewardChance = 0.25
 export const lootChance = 0.5
 export const sacrificeExperience = 5
-export const introductionChapters = ["chapter1"]
 export const injuryCombats = 1
 
 export function characterName(character: Character) {
@@ -21,7 +20,7 @@ export function characterName(character: Character) {
 }
 
 export function isDeadly(levelKey: string) {
-    return !introductionChapters.includes(levels.getLevel(levelKey).chapter)
+    return !levels.getLevel(levelKey).introduction
 }
 
 export function applyCasualties(save: SaveData, heroes: Piece[], levelKey: string) {

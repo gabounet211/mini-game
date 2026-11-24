@@ -23,6 +23,7 @@ export interface PieceConfig {
     behavior ?: AiBehavior,
     animations ?: AnimationClip[],
     color ?: number,
+    npc ?: boolean,
 }
 
 export class Piece {

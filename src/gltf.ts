@@ -3,7 +3,8 @@ import asset from '../public/assets/assets.gltf?url';
 import characterAsset from '../public/assets/roughCharacter.glb?url';
 import { Group } from "three";
 import { Levels } from "./level";
-import { basicAttack, magicalAttack, physicalAttack } from "./action";
+import { basicAttack, effect, magicalAttack, physicalAttack } from "./action";
+import { allHeroesDefeated, anyOf, keepAlive, pieceDefeated, reachCells, roundLimit, surviveRounds } from "./endCondition";
 import { approachTarget, createBehavior, delayedInitiative, nearestFirstInitiative, nearestTarget, randomInitiative, stayBehind, stayBehindAllies, weakestInRange } from "./aiBehavior";
 import { Piece } from "./piece";
 
@@ -59,6 +60,8 @@ const banditModel = { obj: characterModel, offset: 0, animations: characterGltf.
 const banditLeaderModel = { obj: championModel, offset: 0, animations: characterGltf.animations, color: 0x8a2b1a }
 const goblinAdultModel = { obj: characterModel, offset: 0, animations: characterGltf.animations, color: 0x4f8f35 }
 const goblinChiefModel = { obj: championModel, offset: 0, animations: characterGltf.animations, color: 0x3d7a28 }
+const goblinBruteModel = { obj: championModel, offset: 0, animations: characterGltf.animations, color: 0x4f8f35 }
+const villagerModel = { obj: characterModel, offset: 0, animations: characterGltf.animations, color: 0xd8b27a }
 
 export const levels = new Levels({
     map1: gltf.scenes.find(d => d.name == '1Map')!
@@ -89,6 +92,20 @@ export const levels = new Levels({
         behavior: goblinBehavior,
         actions: [physicalAttack("goblinShot", 1, 4)],
         ...goblinAdultModel,
+    },
+    goblinBrute: {
+        name: "Goblin Brute",
+        rarity: "legendary",
+        behavior: goblinBehavior,
+        actions: [physicalAttack("bruteSmash", 2, 1, { cooldown: 2, bonusDamage: 2 }, effect("stun", 1)), physicalAttack("goblinSlash", 1, 1)],
+        ...goblinBruteModel,
+    },
+    villager: {
+        name: "Villager",
+        rarity: "common",
+        npc: true,
+        actions: [],
+        ...villagerModel,
     },
     goblinChief: {
         name: "Goblin Chief",
@@ -145,9 +162,10 @@ const startCells: [number, number][] = [[14, 2], [15, 2], [16, 2], [15, 1], [14,
 const teamSize = 4
 const championMusic = 'championMusic.mp3'
 
-levels.createLevel("level1", {
-    title: "Chapter 1 - 1",
+levels.createLevel("chapter1-1", {
+    title: "Chapter 1 - 1: First Steps",
     chapter: "chapter1",
+    introduction: true,
     map: "map1",
     startCells,
     teamSize,
@@ -158,9 +176,10 @@ levels.createLevel("level1", {
     ]
 })
 
-levels.createLevel("level2", {
-    title: "Chapter 1 - 2",
+levels.createLevel("chapter1-2", {
+    title: "Chapter 1 - 2: Patrol",
     chapter: "chapter1",
+    introduction: true,
     map: "map1",
     startCells,
     teamSize,
@@ -172,9 +191,31 @@ levels.createLevel("level2", {
     ]
 })
 
-levels.createLevel("level3", {
-    title: "Chapter 1 - 3",
+levels.createLevel("chapter1-3", {
+    title: "Chapter 1 - 3: Ambush",
     chapter: "chapter1",
+    introduction: true,
+    map: "map1",
+    startCells,
+    teamSize,
+    victory: surviveRounds(5),
+    entities: [
+        [10, 1, "goblinYoung"],
+        [10, 3, "goblinYoung"],
+        [20, 1, "goblinYoung"],
+        [20, 3, "goblinYoung"],
+        [13, 6, "goblinYoung"],
+        [15, 6, "goblinYoung"],
+        [17, 6, "goblinYoung"],
+        [11, 5, "goblinWarrior"],
+        [19, 5, "goblinWarrior"],
+    ]
+})
+
+levels.createLevel("chapter1-4", {
+    title: "Chapter 1 - 4: Scouts",
+    chapter: "chapter1",
+    introduction: true,
     map: "map1",
     startCells,
     teamSize,
@@ -187,8 +228,64 @@ levels.createLevel("level3", {
     ]
 })
 
-levels.createLevel("level4", {
-    title: "Chapter 1 - 4",
+levels.createLevel("chapter1-5", {
+    title: "Chapter 1 - 5: The Brute (Mini-boss)",
+    chapter: "chapter1",
+    introduction: true,
+    music: championMusic,
+    map: "map1",
+    startCells,
+    teamSize,
+    defeat: anyOf(allHeroesDefeated, keepAlive("Villager", "the villager")),
+    entities: [
+        [15, 11, "villager", true],
+        [15, 21, "goblinBrute"],
+        [13, 20, "goblinYoung"],
+        [17, 20, "goblinYoung"],
+    ]
+})
+
+levels.createLevel("chapter1-6", {
+    title: "Chapter 1 - 6: Into the Woods",
+    chapter: "chapter1",
+    map: "map1",
+    startCells,
+    teamSize,
+    victory: reachCells([[14, 22], [15, 22], [16, 22]]),
+    entities: [
+        [12, 10, "goblinYoung"],
+        [18, 10, "goblinYoung"],
+        [15, 16, "goblinYoung"],
+        [13, 20, "goblinWarrior"],
+        [17, 20, "goblinWarrior"],
+        [15, 26, "goblinArcher"],
+    ]
+})
+
+levels.createLevel("chapter1-7", {
+    title: "Chapter 1 - 7: Village Defense",
+    chapter: "chapter1",
+    map: "map1",
+    startCells,
+    teamSize,
+    victory: surviveRounds(6),
+    defeat: anyOf(allHeroesDefeated, keepAlive("Villager", "the villagers", 2)),
+    entities: [
+        [14, 4, "villager", true],
+        [16, 4, "villager", true],
+        [10, 10, "goblinYoung"],
+        [13, 11, "goblinYoung"],
+        [17, 11, "goblinYoung"],
+        [20, 10, "goblinYoung"],
+        [15, 13, "goblinYoung"],
+        [12, 13, "goblinWarrior"],
+        [18, 13, "goblinWarrior"],
+        [15, 17, "goblinArcher"],
+    ]
+})
+
+levels.createLevel("chapter1-8", {
+    title: "Chapter 1 - 8: Camp Outskirts",
     chapter: "chapter1",
     map: "map1",
     startCells,
@@ -203,14 +300,34 @@ levels.createLevel("level4", {
     ]
 })
 
-levels.createLevel("level5", {
-    title: "Chapter 1 - 5 (Champion)",
+levels.createLevel("chapter1-9", {
+    title: "Chapter 1 - 9: Raise the Alarm",
+    chapter: "chapter1",
+    map: "map1",
+    startCells,
+    teamSize,
+    defeat: anyOf(allHeroesDefeated, roundLimit(7)),
+    entities: [
+        [12, 18, "goblinYoung"],
+        [15, 18, "goblinYoung"],
+        [18, 18, "goblinYoung"],
+        [15, 21, "goblinYoung"],
+        [12, 22, "goblinWarrior"],
+        [18, 22, "goblinWarrior"],
+        [13, 26, "goblinArcher"],
+        [17, 26, "goblinArcher"],
+    ]
+})
+
+levels.createLevel("chapter1-10", {
+    title: "Chapter 1 - 10: Goblin Chief (Champion)",
     chapter: "chapter1",
     finale: true,
     music: championMusic,
     map: "map1",
     startCells,
     teamSize,
+    victory: pieceDefeated("Goblin Chief", "the Goblin Chief"),
     entities: [
         [15, 29, "goblinChief"],
         [13, 27, "goblinYoung"],
@@ -222,7 +339,7 @@ levels.createLevel("level5", {
     ]
 })
 
-levels.createLevel("level6", {
+levels.createLevel("chapter2-1", {
     title: "Chapter 2 - 1",
     chapter: "chapter2",
     map: "map1",
@@ -235,7 +352,7 @@ levels.createLevel("level6", {
     ]
 })
 
-levels.createLevel("level7", {
+levels.createLevel("chapter2-2", {
     title: "Chapter 2 - 2",
     chapter: "chapter2",
     map: "map1",
@@ -249,7 +366,7 @@ levels.createLevel("level7", {
     ]
 })
 
-levels.createLevel("level8", {
+levels.createLevel("chapter2-3", {
     title: "Chapter 2 - 3",
     chapter: "chapter2",
     map: "map1",
@@ -264,7 +381,7 @@ levels.createLevel("level8", {
     ]
 })
 
-levels.createLevel("level9", {
+levels.createLevel("chapter2-4", {
     title: "Chapter 2 - 4 (Loyal Berserker)",
     chapter: "chapter2",
     map: "map1",
@@ -280,7 +397,7 @@ levels.createLevel("level9", {
     ]
 })
 
-levels.createLevel("level10", {
+levels.createLevel("chapter2-5", {
     title: "Chapter 2 - 5 (Marco)",
     chapter: "chapter2",
     finale: true,

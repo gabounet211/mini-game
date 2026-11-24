@@ -297,7 +297,7 @@ export class Selector {
     }
 
     private isPlayerEntity(entity: any): entity is Piece {
-        return entity instanceof Piece && entity.player && (this.gameLogic.state === "PlayerTurn" || this.gameLogic.state === "Placement")
+        return entity instanceof Piece && entity.player && !entity.config.npc && (this.gameLogic.state === "PlayerTurn" || this.gameLogic.state === "Placement")
     }
 
 }

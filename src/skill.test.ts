@@ -68,7 +68,7 @@ describe("skills", () => {
         const tracker = hero("tracker", 1)
         learnSkill(tracker, "legShot")
         tracker.skills.legShot.rank = 2
-        tracker.level = 4
+        tracker.level = 6
         tracker.championsDefeated = ["chapter1"]
         expect(applyClassChange(tracker, "sharpshooter", [])).toBe(true)
         expect(tracker.skills.legShot).toEqual({ rank: 2, from: "sharpshooter", mastery: 0 })
@@ -96,7 +96,7 @@ describe("skills", () => {
         cleric.skillPoints = 2
         learnSkill(cleric, "holyWard")
         addMastery(cleric, "holyWard", masteryToRank[2])
-        cleric.level = 4
+        cleric.level = 6
         cleric.championsDefeated = ["chapter1"]
         const inventory = ["holyRelic"]
         expect(applyClassChange(cleric, "saint", inventory)).toBe(true)

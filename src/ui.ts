@@ -76,7 +76,7 @@ export class Ui {
     private updateObjective() {
         const logic = this.game.gameLogic
         const limit = logic.victory.rounds ?? logic.defeat.rounds
-        const round = logic.state === "Placement" ? '' : ' · Round ' + logic.round + (limit ? '/' + limit : '')
+        const round = logic.state === "Placement" ? '' : ' · Round ' + (limit ? Math.min(logic.round, limit) + '/' + limit : logic.round)
         const text = 'Objective: ' + objectiveText(logic.victory, logic.defeat) + round
         if (this.objective.textContent !== text)
             this.objective.textContent = text
