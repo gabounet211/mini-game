@@ -1,7 +1,7 @@
 import { Game } from "./game";
 import { Grid } from "./grid";
 import { levels } from './gltf';
-import { Group, Scene, Vector2, Vector3 } from "three";
+import { Color, Group, Mesh, MeshBasicMaterial, PlaneGeometry, Scene, Vector2, Vector3 } from "three";
 import { applyGroundZones, drawGroundZones, GroundZone } from "./groundZone";
 import { Selector } from "./selector";
 import { CameraControle } from "./cameraControle";
@@ -32,6 +32,7 @@ export class GameLogic {
     levelKey: string
     groundZones: GroundZone[] = []
     zoneGroup = new Group()
+    round = 1
 
 
     constructor(
@@ -46,6 +47,7 @@ export class GameLogic {
         this.grid = new Grid(levels.maps[desLevel1.map])
         this.victory = desLevel1.victory ?? allEnemiesDefeated
         this.defeat = desLevel1.defeat ?? allHeroesDefeated
+        this.drawTargetCells(scene)
         scene.add(this.grid.scene)
         cameraControle.boundMax.setScalar(this.grid.gridsize / 2)
         cameraControle.boundMin.setScalar(-this.grid.gridsize / 2)
@@ -79,14 +81,30 @@ export class GameLogic {
     checkEnd() {
         if (this.state !== "PlayerTurn" && this.state !== "AiTurn")
             return
-        if (this.defeat(this.grid)) {
+        const battle = { grid: this.grid, round: this.round }
+        if (this.defeat.check(battle)) {
             this.state = "Defeat"
             this.rewards = grantDefeatResults(this.heroes, this.levelKey)
         }
-        else if (this.victory(this.grid)) {
+        else if (this.victory.check(battle)) {
             this.state = "Victory"
             this.rewards = grantVictoryRewards(this.heroes, this.levelKey)
         }
+    }
+
+    private drawTargetCells(scene: Scene) {
+        const group = new Group()
+        for (const cell of [...this.victory.cells ?? [], ...this.defeat.cells ?? []]) {
+            const pos = this.grid.gridToWorldPos(cell.clone())
+            const block = new Mesh(
+                new PlaneGeometry(0.9, 0.9),
+                new MeshBasicMaterial({ color: Color.NAMES.gold, opacity: 0.45, transparent: true })
+            )
+            block.rotateX(-Math.PI / 2)
+            block.position.set(pos.x, .006, pos.y)
+            group.add(block)
+        }
+        scene.add(group)
     }
 
     addGroundZone(zone: GroundZone) {
@@ -100,6 +118,8 @@ export class GameLogic {
         for (const piece of this.grid.getPieces(this.state === "PlayerTurn"))
             piece.endOwnTurn()
         this.state = this.state === "PlayerTurn" ? "AiTurn" : "PlayerTurn"
+        if (this.state === "PlayerTurn")
+            this.round++
         this.groundZones = applyGroundZones(this.groundZones, this.grid, this.state === "PlayerTurn")
         drawGroundZones(this.zoneGroup, this.groundZones, this.grid)
         for (const piece of this.grid.getPieces(this.state === "PlayerTurn"))
