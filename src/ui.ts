@@ -5,7 +5,7 @@ import { VolumeKind } from "./audioManager"
 import { Piece } from "./piece"
 import { describeEffect } from "./effect"
 import { clearSave } from "./save"
-import { items } from "./items"
+import { itemName } from "./items"
 import { desktop } from "./desktop"
 
 
@@ -113,7 +113,7 @@ export class Ui {
         this.sheetDetails.replaceChildren(
             this.createSection('Attributes', [...(piece.effects.length ? [['Effects', piece.effects.map(describeEffect).join(', ')] as [string, string]] : []), ['Level', piece.character.level], ['Talent', piece.character.talent ? this.formatName(piece.character.talent) : '-'], ['Ms', piece.movePoints + ' / ' + piece.moveRange]]),
             this.createSection('Stats', Object.entries(piece.stats).map(([name, value]) => [this.formatName(name), value])),
-            this.createSection('Equipment', [['Weapon', items[piece.character.equipment.weapon ?? '']?.name ?? '-'], ['Armor', items[piece.character.equipment.armor ?? '']?.name ?? '-'], ['Jewelry', items[piece.character.equipment.jewelry ?? '']?.name ?? '-']]),
+            this.createSection('Equipment', [['Weapon', (piece.character.equipment.weapon ? itemName(piece.character.equipment.weapon) : '-')], ['Armor', (piece.character.equipment.armor ? itemName(piece.character.equipment.armor) : '-')], ['Jewelry', (piece.character.equipment.jewelry ? itemName(piece.character.equipment.jewelry) : '-')]]),
             this.createSection('Actions', [...(piece.inspiresAllies ? [['Inspire allies', '+1 damage'] as [string, string]] : []), ...piece.actions.map(action => [this.formatName(action.name), describeAction(action)] as [string, string])]),
         )
     }

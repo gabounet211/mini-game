@@ -3,7 +3,7 @@ import { characterClasses } from "./characterClass"
 import { Piece } from "./piece"
 import { loadSave, SaveData, writeSave } from "./save"
 import { addMastery, formatSkillName, skillPointsPerLevel } from "./skill"
-import { items, randomItem, itemName, itemSlots } from "./items"
+import { randomItem, itemName, itemSlots } from "./items"
 import { levels } from "./gltf"
 import { applyHarvest } from "./base"
 
@@ -174,7 +174,7 @@ export function grantVictoryRewards(heroes: Piece[], levelKey: string) {
     if (Math.random() < lootChance) {
         const item = randomItem()
         save.inventory.push(item)
-        lines.push('You found: ' + items[item].name)
+        lines.push('You found: ' + itemName(item))
     }
     writeSave(save)
     return lines

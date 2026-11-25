@@ -3,7 +3,7 @@ import { applyClassChange, canChangeClass, characterClasses, classChangeOffers, 
 import { levels } from "./gltf"
 import { deriveAttributes, Stats } from "./stats"
 import { addExperience, experienceToNextLevel, isDeadly, sacrificeExperience, sacrificeValue, transferExperience } from "./rewards"
-import { equipmentBonuses, equippedStats, itemName, items, itemSlots, ItemSlot } from "./items"
+import { equipmentBonuses, equippedStats, getItem, itemName, itemSlots, ItemSlot } from "./items"
 import { SaveData, writeSave } from "./save"
 import { describeAction } from "./action"
 import { assignHarvest, harvestAmount, isHarvesting, Resource, resourceNames, resources } from "./base"
@@ -298,7 +298,8 @@ export class Lobby {
             name.textContent = itemName(key) + (count > 1 ? ' ×' + count : '')
             const details = document.createElement('div')
             details.className = 'heroDetails'
-            details.textContent = items[key] ? this.formatName(items[key].slot) + ' · ' + this.formatBonuses(key) : 'Class change item'
+            const item = getItem(key)
+            details.textContent = item ? this.formatName(item.slot) + ' · ' + this.formatBonuses(key) : 'Class change item'
             info.append(name, details)
             row.append(info)
             list.append(row)
@@ -476,11 +477,11 @@ export class Lobby {
             name.textContent = this.formatName(slot)
             const select = document.createElement('select')
             const current = character.equipment[slot]
-            const choices = [...new Set(this.save.inventory.filter(key => items[key]?.slot === slot))]
+            const choices = [...new Set(this.save.inventory.filter(key => getItem(key)?.slot === slot))]
             for (const key of ['', ...(current ? [current] : []), ...choices.filter(key => key !== current)]) {
                 const option = document.createElement('option')
                 option.value = key
-                option.textContent = key ? items[key].name + ' (' + this.formatBonuses(key) + ')' : '-'
+                option.textContent = key ? itemName(key) + ' (' + this.formatBonuses(key) + ')' : '-'
                 option.selected = key === (current ?? '')
                 select.append(option)
             }
@@ -492,7 +493,7 @@ export class Lobby {
     }
 
     private formatBonuses(key: string) {
-        return Object.entries(items[key].bonuses).map(([stat, value]) => '+' + value + ' ' + this.formatName(stat)).join(', ')
+        return Object.entries(getItem(key)?.bonuses ?? {}).map(([stat, value]) => '+' + value + ' ' + this.formatName(stat)).join(', ')
     }
 
     private equip(character: Character, slot: ItemSlot, item: string | undefined) {

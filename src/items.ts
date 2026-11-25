@@ -27,8 +27,26 @@ export const classChangeItems: Record<string, { name: string }> = {
     holyRelic: { name: "Holy Relic" },
 }
 
+export function parseItemKey(key: string) {
+    const [base, level] = key.split("+")
+    return { base, upgrade: Number(level ?? 0) }
+}
+
+export function upgradedKey(base: string, upgrade: number) {
+    return upgrade ? base + "+" + upgrade : base
+}
+
+export function getItem(key: string): Item | undefined {
+    const { base, upgrade } = parseItemKey(key)
+    const item = items[base]
+    if (!item || !upgrade)
+        return item
+    const bonuses = Object.fromEntries(Object.entries(item.bonuses).map(([stat, value]) => [stat, value + upgrade]))
+    return { ...item, name: item.name + " +" + upgrade, bonuses }
+}
+
 export function itemName(key: string) {
-    return items[key]?.name ?? classChangeItems[key]?.name ?? key
+    return getItem(key)?.name ?? classChangeItems[key]?.name ?? key
 }
 
 export const itemSlots: ItemSlot[] = ["weapon", "armor", "jewelry"]
@@ -36,7 +54,7 @@ export const itemSlots: ItemSlot[] = ["weapon", "armor", "jewelry"]
 export function equipmentBonuses(character: Character) {
     const bonuses = Object.fromEntries(statNames.map(name => [name, 0])) as unknown as Stats
     for (const slot of itemSlots) {
-        const item = items[character.equipment[slot] ?? ""]
+        const item = getItem(character.equipment[slot] ?? "")
         for (const [stat, value] of Object.entries(item?.bonuses ?? {}) as [keyof Stats, number][])
             bonuses[stat] += value
     }
