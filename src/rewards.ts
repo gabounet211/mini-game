@@ -5,6 +5,7 @@ import { loadSave, SaveData, writeSave } from "./save"
 import { addMastery, formatSkillName, skillPointsPerLevel } from "./skill"
 import { items, randomItem, itemName, itemSlots } from "./items"
 import { levels } from "./gltf"
+import { applyHarvest } from "./base"
 
 export const killExperience = 6
 export const victoryExperience = 3
@@ -131,7 +132,7 @@ export function applyMastery(save: SaveData, heroes: Piece[]) {
 
 export function grantDefeatResults(heroes: Piece[], levelKey: string) {
     const save = loadSave()
-    const lines = [...applyCasualties(save, heroes, levelKey), ...applyMastery(save, heroes)]
+    const lines = [...applyHarvest(save, heroes.map(hero => hero.character.id)), ...applyCasualties(save, heroes, levelKey), ...applyMastery(save, heroes)]
     for (const hero of heroes) {
         const character = save.roster.find(candidate => candidate.id === hero.character.id)
         if (character)
@@ -143,7 +144,7 @@ export function grantDefeatResults(heroes: Piece[], levelKey: string) {
 
 export function grantVictoryRewards(heroes: Piece[], levelKey: string) {
     const save = loadSave()
-    const lines = [...applyCasualties(save, heroes, levelKey), ...applyMastery(save, heroes)]
+    const lines = [...applyHarvest(save, heroes.map(hero => hero.character.id)), ...applyCasualties(save, heroes, levelKey), ...applyMastery(save, heroes)]
     const keys = levels.keys()
     const nextUnlocked = Math.min(keys.length, keys.indexOf(levelKey) + 2)
     if (nextUnlocked > save.unlockedLevels) {
