@@ -31,7 +31,7 @@ export function canAfford(save: SaveData, cost: Cost) {
     return resources.every(resource => save.resources[resource] >= (cost[resource] ?? 0))
 }
 
-function pay(save: SaveData, cost: Cost) {
+export function pay(save: SaveData, cost: Cost) {
     for (const resource of resources)
         save.resources[resource] -= cost[resource] ?? 0
 }

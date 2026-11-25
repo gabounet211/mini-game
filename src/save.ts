@@ -19,6 +19,14 @@ export interface SaveData {
     memorial: FallenHero[],
     resources: Record<Resource, number>,
     harvest: Record<string, Resource>,
+    researchers: string[],
+    research: ResearchState,
+}
+
+export interface ResearchState {
+    current?: string,
+    progress: number,
+    done: string[],
 }
 
 export interface FallenHero {
@@ -48,12 +56,12 @@ export function loadSave(): SaveData {
                 }
                 return character
             })
-            return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [], unlockedLevels: migrateUnlockedLevels(data), lastTeam: data.lastTeam ?? [], memorial: data.memorial ?? [], resources: { ...emptyResources(), ...data.resources }, harvest: data.harvest ?? {} }
+            return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [], unlockedLevels: migrateUnlockedLevels(data), lastTeam: data.lastTeam ?? [], memorial: data.memorial ?? [], resources: { ...emptyResources(), ...data.resources }, harvest: data.harvest ?? {}, researchers: data.researchers ?? [], research: { progress: 0, done: [], ...data.research } }
         }
     } catch (error) {
         console.warn("Save could not be loaded", error)
     }
-    return { roster: [], summons: 0, inventory: [], unlockedLevels: 1, lastTeam: [], memorial: [], resources: emptyResources(), harvest: {} }
+    return { roster: [], summons: 0, inventory: [], unlockedLevels: 1, lastTeam: [], memorial: [], resources: emptyResources(), harvest: {}, researchers: [], research: { progress: 0, done: [] } }
 }
 
 function migrateUnlockedLevels(data: { unlockedLevels?: number, levelLayout?: number }) {

@@ -39,9 +39,9 @@ export const rarityChances: Record<Rarity, number> = {
     legendary: 0.07,
 }
 
-export function rollRarity(random = Math.random): Rarity {
+export function rollRarity(random = Math.random, chances = rarityChances): Rarity {
     let roll = random()
-    for (const [rarity, chance] of Object.entries(rarityChances) as [Rarity, number][]) {
+    for (const [rarity, chance] of Object.entries(chances) as [Rarity, number][]) {
         roll -= chance
         if (roll < 0)
             return rarity
