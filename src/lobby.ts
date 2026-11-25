@@ -7,6 +7,7 @@ import { equipmentBonuses, equippedStats, getItem, itemName, itemSlots, ItemSlot
 import { SaveData, writeSave } from "./save"
 import { describeAction } from "./action"
 import { assignHarvest, harvestAmount, isHarvesting, Resource, resourceNames, resources } from "./base"
+import { canAfford, Cost, craft, dismantle, dismantleValue, recipes, upgrade, upgradeCost } from "./forge"
 import { equippedActions, learnableSkills, learnCost, learnSkill, masteryNeeded, maxSkillRank, skillAction, skillSlots, toggleEquipped } from "./skill"
 
 type LobbyTab = "heroes" | "training" | "combination" | "inventory" | "base"
@@ -339,7 +340,48 @@ export class Lobby {
             row.append(info, select)
             list.append(row)
         }
-        return [stock, intro, list]
+        return [stock, intro, list, ...this.renderForge()]
+    }
+
+    private renderForge() {
+        const title = document.createElement('div')
+        title.className = 'lobbyRow'
+        title.textContent = 'Forge'
+        const craftList = document.createElement('div')
+        craftList.className = 'heroList'
+        for (const [key, cost] of Object.entries(recipes)) {
+            const craftButton = document.createElement('button')
+            craftButton.textContent = 'Craft'
+            craftButton.disabled = !canAfford(this.save, cost)
+            craftButton.addEventListener('click', () => this.updateTrainee(() => craft(this.save, key)))
+            craftList.append(this.createSkillRow(itemName(key) + ' (' + this.formatBonuses(key) + ')', 'Cost: ' + this.formatCost(cost), [craftButton]))
+        }
+        const workTitle = document.createElement('div')
+        workTitle.textContent = 'Upgrade or dismantle unused items'
+        const workList = document.createElement('div')
+        workList.className = 'heroList'
+        for (const key of new Set(this.save.inventory)) {
+            const value = dismantleValue(key)
+            if (!value)
+                continue
+            const cost = upgradeCost(key)
+            const upgradeButton = document.createElement('button')
+            upgradeButton.textContent = cost ? 'Upgrade (' + this.formatCost(cost) + ')' : 'Max'
+            upgradeButton.disabled = !cost || !canAfford(this.save, cost)
+            upgradeButton.addEventListener('click', () => this.updateTrainee(() => upgrade(this.save, key)))
+            const dismantleButton = document.createElement('button')
+            dismantleButton.textContent = 'Dismantle (' + this.formatCost(value) + ')'
+            dismantleButton.addEventListener('click', () => this.updateTrainee(() => dismantle(this.save, key)))
+            const count = this.save.inventory.filter(other => other === key).length
+            workList.append(this.createSkillRow(itemName(key) + (count > 1 ? ' ×' + count : ''), this.formatBonuses(key), [upgradeButton, dismantleButton]))
+        }
+        if (!workList.children.length)
+            workList.textContent = 'No unused items. Unequip an item to work on it.'
+        return [title, craftList, workTitle, workList]
+    }
+
+    private formatCost(cost: Cost) {
+        return resources.filter(resource => cost[resource]).map(resource => cost[resource] + ' ' + resourceNames[resource]).join(', ')
     }
 
     private createHeroRow(character: Character) {
