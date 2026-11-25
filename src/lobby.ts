@@ -7,7 +7,7 @@ import { equipmentBonuses, equippedStats, getItem, itemName, itemSlots, ItemSlot
 import { SaveData, writeSave } from "./save"
 import { describeAction } from "./action"
 import { assignHarvest, harvestAmount, isHarvesting, Resource, resourceNames, resources } from "./base"
-import { isResearching, summonChances, teamBonus } from "./research"
+import { assignResearch, canStartResearch, isResearching, researchAmount, researchProjects, startResearch, summonChances, teamBonus } from "./research"
 import { canAfford, Cost, craft, dismantle, dismantleValue, recipes, upgrade, upgradeCost } from "./forge"
 import { equippedActions, learnableSkills, learnCost, learnSkill, masteryNeeded, maxSkillRank, skillAction, skillSlots, toggleEquipped } from "./skill"
 
@@ -314,7 +314,7 @@ export class Lobby {
         stock.textContent = 'Stock: ' + resources.map(resource => resourceNames[resource] + ' ' + this.save.resources[resource]).join(' · ')
         const intro = document.createElement('div')
         intro.className = 'heroDetails'
-        intro.textContent = 'Heroes at the harvest gather after each combat but cannot join the team. Villagers gather more of their own resource, injured heroes gather half.'
+        intro.textContent = 'Heroes at the base work after each combat but cannot join the team. Villagers gather more of their own resource, Scholars, Alchemists and Sages research faster, injured heroes do half.'
         const list = document.createElement('div')
         list.className = 'heroList'
         for (const character of this.save.roster) {
@@ -324,15 +324,17 @@ export class Lobby {
             info.className = 'heroInfo'
             info.textContent = this.heroLabel(character) + (character.injured ? ' · Injured' : '')
             const select = document.createElement('select')
-            for (const resource of [undefined, ...resources]) {
+            const research = isResearching(this.save, character)
+            for (const resource of [undefined, "research", ...resources] as (Resource | "research" | undefined)[]) {
                 const option = document.createElement('option')
                 option.value = resource ?? ''
-                option.textContent = resource ? resourceNames[resource] + ' (+' + harvestAmount(character, resource) + ')' : 'Not working'
-                option.selected = this.save.harvest[character.id] === resource
+                option.textContent = resource === "research" ? 'Research (+' + researchAmount(character) + ')' : resource ? resourceNames[resource] + ' (+' + harvestAmount(character, resource) + ')' : 'Not working'
+                option.selected = research ? resource === "research" : this.save.harvest[character.id] === resource
                 select.append(option)
             }
             select.addEventListener('change', () => {
-                assignHarvest(this.save, character, (select.value || undefined) as Resource | undefined)
+                assignResearch(this.save, character, select.value === "research")
+                assignHarvest(this.save, character, select.value && select.value !== "research" ? select.value as Resource : undefined)
                 if (select.value)
                     this.team.delete(character)
                 writeSave(this.save)
@@ -341,7 +343,29 @@ export class Lobby {
             row.append(info, select)
             list.append(row)
         }
-        return [stock, intro, list, ...this.renderForge()]
+        return [stock, intro, list, ...this.renderResearch(), ...this.renderForge()]
+    }
+
+    private renderResearch() {
+        const title = document.createElement('div')
+        title.className = 'lobbyRow'
+        title.textContent = 'Research'
+        const current = this.save.research.current
+        const status = document.createElement('div')
+        status.textContent = current
+            ? 'In progress: ' + researchProjects[current].name + ' ' + this.save.research.progress + '/' + researchProjects[current].points + ' (' + this.save.researchers.length + ' researchers)'
+            : 'No research in progress. Start one below.'
+        const list = document.createElement('div')
+        list.className = 'heroList'
+        for (const [key, project] of Object.entries(researchProjects)) {
+            const done = this.save.research.done.includes(key)
+            const startButton = document.createElement('button')
+            startButton.textContent = done ? 'Done' : key === current ? 'In progress' : 'Start'
+            startButton.disabled = !canStartResearch(this.save, key)
+            startButton.addEventListener('click', () => this.updateTrainee(() => startResearch(this.save, key)))
+            list.append(this.createSkillRow(project.name, project.description + ' · ' + project.points + ' points · Cost: ' + this.formatCost(project.cost), [startButton]))
+        }
+        return [title, status, list]
     }
 
     private renderForge() {
@@ -414,6 +438,7 @@ export class Lobby {
             + (canChangeClass(character) ? ' · Class change ready!' : '')
             + (character.injured ? ' · Injured: misses the next combat' : '')
             + (isHarvesting(this.save, character) ? ' · At the base: ' + resourceNames[this.save.harvest[character.id]] : '')
+            + (isResearching(this.save, character) ? ' · At the base: Research' : '')
             + (this.facedChampion(character) ? ' · Already faced the champion' : '')
         info.append(name, details)
         info.addEventListener('click', () => this.showDetails(character))
