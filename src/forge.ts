@@ -14,6 +14,15 @@ export const recipes: Record<string, Cost> = {
     ringOfVigor: { ore: 4 },
     amuletOfFocus: { ore: 3, wood: 1 },
     luckyCharm: { wood: 2, leather: 2 },
+    steelSword: { ore: 8, wood: 2 },
+    longbow: { wood: 7, leather: 3 },
+    runedStaff: { wood: 6, ore: 3 },
+    plateArmor: { ore: 10, leather: 3 },
+    silverAmulet: { ore: 7 },
+}
+
+export function isRecipeUnlocked(save: SaveData, base: string) {
+    return !items[base]?.advanced || save.research.done.includes("advancedSmithing")
 }
 
 export const maxUpgrade = 3
@@ -38,7 +47,7 @@ export function pay(save: SaveData, cost: Cost) {
 
 export function craft(save: SaveData, base: string) {
     const cost = recipes[base]
-    if (!cost || !canAfford(save, cost))
+    if (!cost || !isRecipeUnlocked(save, base) || !canAfford(save, cost))
         return false
     pay(save, cost)
     save.inventory.push(base)
