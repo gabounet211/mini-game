@@ -8,7 +8,7 @@ import { SaveData, writeSave } from "./save"
 import { describeAction } from "./action"
 import { assignHarvest, harvestAmount, isHarvesting, Resource, resourceNames, resources } from "./base"
 import { assignResearch, canStartResearch, isResearching, researchAmount, researchProjects, startResearch, summonChances, teamBonus } from "./research"
-import { canAfford, Cost, craft, dismantle, dismantleValue, recipes, upgrade, upgradeCost } from "./forge"
+import { canAfford, Cost, craft, isRecipeUnlocked, dismantle, dismantleValue, recipes, upgrade, upgradeCost } from "./forge"
 import { equippedActions, learnableSkills, learnCost, learnSkill, masteryNeeded, maxSkillRank, skillAction, skillSlots, toggleEquipped } from "./skill"
 
 type LobbyTab = "heroes" | "training" | "combination" | "inventory" | "base"
@@ -375,6 +375,8 @@ export class Lobby {
         const craftList = document.createElement('div')
         craftList.className = 'heroList'
         for (const [key, cost] of Object.entries(recipes)) {
+            if (!isRecipeUnlocked(this.save, key))
+                continue
             const craftButton = document.createElement('button')
             craftButton.textContent = 'Craft'
             craftButton.disabled = !canAfford(this.save, cost)

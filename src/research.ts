@@ -13,6 +13,7 @@ export interface ResearchProject {
 export const researchProjects: Record<string, ResearchProject> = {
     largerSquad: { name: "Larger Squad", description: "+1 hero in the team for every level", points: 8, cost: { food: 10 } },
     summoningRites: { name: "Summoning Rites", description: "Summons: 40% common, 30% uncommon, 20% rare, 10% legendary", points: 10, cost: { food: 8, ore: 4 } },
+    advancedSmithing: { name: "Advanced Smithing", description: "The forge can craft Steel Sword, Longbow, Runed Staff, Plate Armor and Silver Amulet", points: 12, cost: { food: 6, ore: 10 } },
 }
 
 export const researchPoints = 1

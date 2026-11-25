@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { emptyResources } from "./base"
 import { craft, dismantle, dismantleValue, maxUpgrade, recipes, upgrade, upgradeCost } from "./forge"
 import { createHero } from "./character"
-import { equippedStats, getItem, items, itemName } from "./items"
+import { equippedStats, getItem, items, itemName, randomItem } from "./items"
 import { SaveData } from "./save"
 
 function save(): SaveData {
@@ -22,6 +22,17 @@ describe("forge", () => {
         expect(craft(data, "rustySword")).toBe(true)
         expect(data.inventory).toEqual(["rustySword"])
         expect(data.resources).toEqual(emptyResources())
+    })
+
+    it("crafts advanced items only after Advanced Smithing, and never drops them as loot", () => {
+        const data = save()
+        data.resources.ore = 10
+        data.resources.wood = 2
+        expect(craft(data, "steelSword")).toBe(false)
+        data.research.done.push("advancedSmithing")
+        expect(craft(data, "steelSword")).toBe(true)
+        for (let roll = 0; roll < 1; roll += 0.05)
+            expect(items[randomItem(() => roll)].advanced).toBeFalsy()
     })
 
     it("upgrades an item up to +3, doubling the cost each time", () => {

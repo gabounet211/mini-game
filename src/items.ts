@@ -7,6 +7,7 @@ export interface Item {
     name: string,
     slot: ItemSlot,
     bonuses: Partial<Stats>,
+    advanced?: boolean,
 }
 
 export const items: Record<string, Item> = {
@@ -19,6 +20,11 @@ export const items: Record<string, Item> = {
     ringOfVigor: { name: "Ring of Vigor", slot: "jewelry", bonuses: { constitution: 2 } },
     amuletOfFocus: { name: "Amulet of Focus", slot: "jewelry", bonuses: { willpower: 2 } },
     luckyCharm: { name: "Lucky Charm", slot: "jewelry", bonuses: { perception: 2 } },
+    steelSword: { name: "Steel Sword", slot: "weapon", bonuses: { strength: 4 }, advanced: true },
+    longbow: { name: "Longbow", slot: "weapon", bonuses: { dexterity: 3, perception: 2 }, advanced: true },
+    runedStaff: { name: "Runed Staff", slot: "weapon", bonuses: { intelligence: 4, knowledge: 1 }, advanced: true },
+    plateArmor: { name: "Plate Armor", slot: "armor", bonuses: { resistance: 5, constitution: 2 }, advanced: true },
+    silverAmulet: { name: "Silver Amulet", slot: "jewelry", bonuses: { willpower: 3, knowledge: 1 }, advanced: true },
 }
 
 export const classChangeItems: Record<string, { name: string }> = {
@@ -67,6 +73,6 @@ export function equippedStats(character: Character): Stats {
 }
 
 export function randomItem(random = Math.random) {
-    const keys = Object.keys(items)
+    const keys = Object.keys(items).filter(key => !items[key].advanced)
     return keys[Math.floor(random() * keys.length)]
 }
