@@ -6,11 +6,12 @@ import { addExperience, experienceToNextLevel, isDeadly, sacrificeExperience, sa
 import { equipmentBonuses, equippedStats, itemName, items, itemSlots, ItemSlot } from "./items"
 import { SaveData, writeSave } from "./save"
 import { describeAction } from "./action"
+import { assignHarvest, harvestAmount, isHarvesting, Resource, resourceNames, resources } from "./base"
 import { equippedActions, learnableSkills, learnCost, learnSkill, masteryNeeded, maxSkillRank, skillAction, skillSlots, toggleEquipped } from "./skill"
 
-type LobbyTab = "heroes" | "training" | "combination" | "inventory"
+type LobbyTab = "heroes" | "training" | "combination" | "inventory" | "base"
 
-const tabs: [LobbyTab, string][] = [["heroes", "Heroes"], ["training", "Training"], ["combination", "Combination"], ["inventory", "Inventory"]]
+const tabs: [LobbyTab, string][] = [["heroes", "Heroes"], ["training", "Training"], ["combination", "Combination"], ["inventory", "Inventory"], ["base", "Base"]]
 
 export class Lobby {
     private element = document.createElement('div')
@@ -36,7 +37,7 @@ export class Lobby {
     }
 
     private canBring(character: Character) {
-        return !character.injured && !this.facedChampion(character)
+        return !character.injured && !this.facedChampion(character) && !isHarvesting(this.save, character)
     }
 
     private facedChampion(character: Character) {
@@ -102,7 +103,7 @@ export class Lobby {
 
         const content = document.createElement('div')
         content.className = 'lobbyContent'
-        content.append(...(this.tab === "heroes" ? this.renderHeroes() : this.tab === "training" ? this.renderTraining() : this.tab === "combination" ? this.renderCombination() : this.renderInventory()))
+        content.append(...(this.tab === "heroes" ? this.renderHeroes() : this.tab === "training" ? this.renderTraining() : this.tab === "combination" ? this.renderCombination() : this.tab === "inventory" ? this.renderInventory() : this.renderBase()))
 
         const startButton = document.createElement('button')
         startButton.className = 'startButton'
@@ -305,6 +306,41 @@ export class Lobby {
         return [list]
     }
 
+    private renderBase() {
+        const stock = document.createElement('div')
+        stock.textContent = 'Stock: ' + resources.map(resource => resourceNames[resource] + ' ' + this.save.resources[resource]).join(' · ')
+        const intro = document.createElement('div')
+        intro.className = 'heroDetails'
+        intro.textContent = 'Heroes at the harvest gather after each combat but cannot join the team. Villagers gather more of their own resource, injured heroes gather half.'
+        const list = document.createElement('div')
+        list.className = 'heroList'
+        for (const character of this.save.roster) {
+            const row = document.createElement('label')
+            row.className = 'heroRow'
+            const info = document.createElement('div')
+            info.className = 'heroInfo'
+            info.textContent = this.heroLabel(character) + (character.injured ? ' · Injured' : '')
+            const select = document.createElement('select')
+            for (const resource of [undefined, ...resources]) {
+                const option = document.createElement('option')
+                option.value = resource ?? ''
+                option.textContent = resource ? resourceNames[resource] + ' (+' + harvestAmount(character, resource) + ')' : 'Not working'
+                option.selected = this.save.harvest[character.id] === resource
+                select.append(option)
+            }
+            select.addEventListener('change', () => {
+                assignHarvest(this.save, character, (select.value || undefined) as Resource | undefined)
+                if (select.value)
+                    this.team.delete(character)
+                writeSave(this.save)
+                this.render()
+            })
+            row.append(info, select)
+            list.append(row)
+        }
+        return [stock, intro, list]
+    }
+
     private createHeroRow(character: Character) {
         const row = document.createElement('div')
         row.className = 'heroRow'
@@ -333,6 +369,7 @@ export class Lobby {
             + (character.statPoints ? ' · ' + character.statPoints + ' points to spend' : '')
             + (canChangeClass(character) ? ' · Class change ready!' : '')
             + (character.injured ? ' · Injured: misses the next combat' : '')
+            + (isHarvesting(this.save, character) ? ' · At the base: ' + resourceNames[this.save.harvest[character.id]] : '')
             + (this.facedChampion(character) ? ' · Already faced the champion' : '')
         info.append(name, details)
         info.addEventListener('click', () => this.showDetails(character))
