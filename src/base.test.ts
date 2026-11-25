@@ -4,7 +4,7 @@ import { createCharacter } from "./character"
 import { SaveData } from "./save"
 
 function save(...roster: SaveData["roster"]): SaveData {
-    return { roster, summons: 0, inventory: [], unlockedLevels: 1, lastTeam: [], memorial: [], resources: emptyResources(), harvest: {} }
+    return { roster, summons: 0, inventory: [], unlockedLevels: 1, lastTeam: [], memorial: [], resources: emptyResources(), harvest: {}, researchers: [], research: { progress: 0, done: [] } }
 }
 
 describe("harvest", () => {

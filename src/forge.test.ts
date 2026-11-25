@@ -6,7 +6,7 @@ import { equippedStats, getItem, items, itemName } from "./items"
 import { SaveData } from "./save"
 
 function save(): SaveData {
-    return { roster: [], summons: 0, inventory: [], unlockedLevels: 1, lastTeam: [], memorial: [], resources: emptyResources(), harvest: {} }
+    return { roster: [], summons: 0, inventory: [], unlockedLevels: 1, lastTeam: [], memorial: [], resources: emptyResources(), harvest: {}, researchers: [], research: { progress: 0, done: [] } }
 }
 
 describe("forge", () => {

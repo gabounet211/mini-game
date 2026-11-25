@@ -35,8 +35,10 @@ export function isHarvesting(save: SaveData, character: Character) {
 }
 
 export function assignHarvest(save: SaveData, character: Character, resource?: Resource) {
-    if (resource)
+    if (resource) {
         save.harvest[character.id] = resource
+        save.researchers = save.researchers.filter(id => id !== character.id)
+    }
     else
         delete save.harvest[character.id]
 }

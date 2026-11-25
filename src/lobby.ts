@@ -1,4 +1,4 @@
-import { Character, createHero } from "./character"
+import { Character, createHero, rollRarity } from "./character"
 import { applyClassChange, canChangeClass, characterClasses, classChangeOffers, closestClasses, missingStats } from "./characterClass"
 import { levels } from "./gltf"
 import { deriveAttributes, Stats } from "./stats"
@@ -7,6 +7,7 @@ import { equipmentBonuses, equippedStats, getItem, itemName, itemSlots, ItemSlot
 import { SaveData, writeSave } from "./save"
 import { describeAction } from "./action"
 import { assignHarvest, harvestAmount, isHarvesting, Resource, resourceNames, resources } from "./base"
+import { isResearching, summonChances, teamBonus } from "./research"
 import { canAfford, Cost, craft, dismantle, dismantleValue, recipes, upgrade, upgradeCost } from "./forge"
 import { equippedActions, learnableSkills, learnCost, learnSkill, masteryNeeded, maxSkillRank, skillAction, skillSlots, toggleEquipped } from "./skill"
 
@@ -38,7 +39,7 @@ export class Lobby {
     }
 
     private canBring(character: Character) {
-        return !character.injured && !this.facedChampion(character) && !isHarvesting(this.save, character)
+        return !character.injured && !this.facedChampion(character) && !isHarvesting(this.save, character) && !isResearching(this.save, character)
     }
 
     private facedChampion(character: Character) {
@@ -47,7 +48,7 @@ export class Lobby {
     }
 
     private teamLimit() {
-        return levels.getLevel(this.levelKey).teamSize
+        return levels.getLevel(this.levelKey).teamSize + teamBonus(this.save)
     }
 
     private render() {
@@ -579,7 +580,7 @@ export class Lobby {
         if (this.save.summons < 1)
             return
         this.save.summons--
-        this.save.roster.push(createHero("hero"))
+        this.save.roster.push(createHero("hero", rollRarity(Math.random, summonChances(this.save))))
         writeSave(this.save)
         this.render()
     }

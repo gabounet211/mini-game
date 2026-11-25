@@ -52,7 +52,7 @@ export class GameLogic {
         cameraControle.boundMax.setScalar(this.grid.gridsize / 2)
         cameraControle.boundMin.setScalar(-this.grid.gridsize / 2)
         this.startCells = desLevel1.startCells.map(([x, y]) => new Vector2(x, y)).filter(cell => this.grid.isFree(cell))
-        team.slice(0, Math.min(desLevel1.teamSize, this.startCells.length)).forEach((character, index) => {
+        team.slice(0, this.startCells.length).forEach((character, index) => {
             this.heroes.push(this.grid.add(levels.entities[character.entity as keyof typeof levels.entities], character, this.startCells[index], true))
         })
         for (const [x, y, entity, player] of desLevel1.entities) {
