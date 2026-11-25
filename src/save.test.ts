@@ -24,6 +24,8 @@ describe("save", () => {
         expect(save.summons).toBe(0)
         expect(save.inventory).toEqual([])
         expect(save.lastTeam).toEqual([])
+        expect(save.resources).toEqual({ wood: 0, food: 0, leather: 0, ore: 0 })
+        expect(save.harvest).toEqual({})
         expect(save.roster[0]).toMatchObject({ statPoints: 0, finaleAttempts: [], championsDefeated: [], classChanges: [] })
         expect(save.roster[0].id).toBeTruthy()
         expect(save.roster[0]).toMatchObject({ skillPoints: 1, skills: {}, equippedSkills: [] })

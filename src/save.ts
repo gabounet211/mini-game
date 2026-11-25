@@ -1,5 +1,6 @@
 import { initSkills, migrateMastery, pruneSkills, skillPointsPerLevel } from "./skill"
 import { Character, createHero, createId } from "./character"
+import { emptyResources, Resource } from "./base"
 
 const saveKey = "miniGameSave"
 const saveVersion = 1
@@ -16,6 +17,8 @@ export interface SaveData {
     unlockedLevels: number,
     lastTeam: string[],
     memorial: FallenHero[],
+    resources: Record<Resource, number>,
+    harvest: Record<string, Resource>,
 }
 
 export interface FallenHero {
@@ -45,12 +48,12 @@ export function loadSave(): SaveData {
                 }
                 return character
             })
-            return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [], unlockedLevels: migrateUnlockedLevels(data), lastTeam: data.lastTeam ?? [], memorial: data.memorial ?? [] }
+            return { roster, summons: data.summons ?? 0, inventory: data.inventory ?? [], unlockedLevels: migrateUnlockedLevels(data), lastTeam: data.lastTeam ?? [], memorial: data.memorial ?? [], resources: { ...emptyResources(), ...data.resources }, harvest: data.harvest ?? {} }
         }
     } catch (error) {
         console.warn("Save could not be loaded", error)
     }
-    return { roster: [], summons: 0, inventory: [], unlockedLevels: 1, lastTeam: [], memorial: [] }
+    return { roster: [], summons: 0, inventory: [], unlockedLevels: 1, lastTeam: [], memorial: [], resources: emptyResources(), harvest: {} }
 }
 
 function migrateUnlockedLevels(data: { unlockedLevels?: number, levelLayout?: number }) {
