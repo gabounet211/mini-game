@@ -2,12 +2,18 @@ import './style.css'
 import { Game } from './game';
 import { Clock } from 'three';
 import { Lobby } from './lobby';
+import { Village } from './village';
 import { loadOrCreateSave } from './save';
 import { Character } from './character';
 import { playLobbyMusic } from './audioManager';
 
 const stopLobbyMusic = playLobbyMusic()
-new Lobby(loadOrCreateSave(), startGame)
+const save = loadOrCreateSave()
+const village = new Village(save, building => lobby.open(building))
+const lobby = new Lobby(save, (team, levelKey) => {
+  village.remove()
+  startGame(team, levelKey)
+}, () => village.show())
 
 function startGame(team: Character[], levelKey: string) {
   stopLobbyMusic()

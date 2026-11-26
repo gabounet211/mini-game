@@ -27,14 +27,16 @@ await page.evaluate(() => {
 })
 await page.reload()
 await page.waitForTimeout(2000)
-const levelKeys = await page.$$eval("#lobby select option", options => options.map(option => option.value))
+await page.click('.building[data-building="warHall"]')
+const levelKeys = await page.$$eval("#lobby .mission:not(:disabled)", missions => missions.map(mission => mission.dataset.level))
 if (levelKeys.length < 2)
     fail("The lobby lists only " + levelKeys.length + " level(s)")
 
 for (const key of levelKeys) {
     await page.goto(url)
     await page.waitForTimeout(1500)
-    await page.selectOption("#lobby select", key)
+    await page.click('.building[data-building="warHall"]')
+    await page.click(`#lobby .mission[data-level="${key}"]`)
     await page.click(".startButton")
     await page.waitForTimeout(2500)
     const objective = await page.evaluate(() => document.getElementById("objective")?.textContent ?? "")

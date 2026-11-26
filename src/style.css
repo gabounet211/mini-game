@@ -455,3 +455,704 @@ select{
 body.targeting canvas{
   cursor: crosshair;
 }
+
+#village{
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #A9CF84;
+  background-image:
+    linear-gradient(#DCC593, #DCC593),
+    linear-gradient(#DCC593, #DCC593);
+  background-size: 100% 56px, 56px 90%;
+  background-position: 0 54%, 50% 100%;
+  background-repeat: no-repeat;
+  z-index: 50;
+}
+
+.villageStock{
+  position: absolute;
+  left: 24px;
+  top: 20px;
+  padding: 8px 18px;
+  border: 1px solid var(--gold-dark);
+  border-radius: 12px;
+  background-color: var(--panel);
+}
+
+.villageHint{
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  padding: 6px 18px;
+  border-radius: 999px;
+  background-color: var(--panel);
+  color: var(--text-soft);
+  font-size: 0.9em;
+}
+
+.building{
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  transition: transform 0.15s ease;
+}
+
+.building:hover:not(:disabled){
+  transform: translateY(-6px);
+}
+
+.plaque{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 14px;
+  border: 1px solid var(--gold-dark);
+  border-radius: 10px;
+  background-color: var(--panel);
+}
+
+.building:hover .plaque{
+  border-color: var(--gold);
+}
+
+.plaqueName{
+  font-family: var(--title-font);
+  font-weight: 700;
+}
+
+.mainPlaque{
+  border: 2px solid var(--gold);
+}
+
+.mainPlaque .plaqueName{
+  color: var(--gold);
+  font-size: 1.15em;
+}
+
+.plaqueStatus{
+  font-size: 0.8em;
+  color: var(--text-soft);
+}
+
+.backButton{
+  align-self: flex-start;
+}
+
+.tree{
+  position: absolute;
+  border-radius: 50%;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+}
+
+#lobby.buildingScreen{
+  width: min(1200px, calc(100vw - 32px));
+  height: calc(100vh - 32px);
+}
+
+.warHallBody{
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
+.missionColumn{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 340px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.mission{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.selectedMission{
+  border: 2px solid var(--gold);
+}
+
+.missionSeal{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: var(--line-soft);
+  font-family: var(--title-font);
+  font-weight: 700;
+  font-size: 0.85em;
+}
+
+.selectedMission .missionSeal{
+  background-color: var(--gold);
+  color: #2A2218;
+}
+
+.missionText{
+  display: flex;
+  flex-direction: column;
+}
+
+.missionName{
+  font-family: var(--title-font);
+  font-weight: 700;
+}
+
+.missionBrief{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background-color: var(--panel-dark);
+}
+
+.missionBrief .plaqueName{
+  color: var(--gold);
+}
+
+.safeInfo{
+  font-size: 0.85em;
+  color: #8FD3B0;
+}
+
+.companyColumn{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.teamSlots{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.teamSlot{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 90px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  color: var(--text-soft);
+}
+
+.teamSlot.filled{
+  border: 2px solid var(--gold);
+  color: var(--text);
+}
+
+.teamSlot:disabled{
+  opacity: 1;
+  cursor: default;
+}
+
+.rosterGrid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.heroCard{
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background-color: var(--panel-dark);
+}
+
+.heroCard.inTeam{
+  border-color: var(--gold-dark);
+  opacity: 0.6;
+}
+
+.heroPick{
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 2px;
+  border: none;
+  text-align: left;
+  background: none;
+}
+
+.detailsButton{
+  margin: 8px;
+  align-self: center;
+  font-size: 0.85em;
+}
+
+.companyColumn .startButton{
+  align-self: flex-end;
+  margin-top: auto;
+  padding: 12px 40px;
+  border: none;
+  background-color: var(--gold);
+  color: #2A2218;
+  font-family: var(--title-font);
+  font-weight: 700;
+  font-size: 1.2em;
+  letter-spacing: 2px;
+}
+
+#lobby.buildingScreen .lobbyContent{
+  flex: 1;
+  overflow: hidden;
+}
+
+.sideColumn{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 260px;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.sideHero{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.pointBadge{
+  min-width: 22px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background-color: #C0602A;
+  color: #FFFFFF;
+  font-size: 0.85em;
+  font-weight: 700;
+  text-align: center;
+}
+
+.heroBanner{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1px solid var(--gold-dark);
+  border-radius: 14px;
+  background-color: var(--panel-dark);
+}
+
+.heroBanner > .plaqueName{
+  flex: 1;
+  font-size: 1.2em;
+}
+
+.counter{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 14px;
+  border-radius: 10px;
+  background-color: var(--panel);
+}
+
+.counterValue{
+  font-size: 1.3em;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.skillGrid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.skillCard{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background-color: var(--panel-dark);
+}
+
+.skillCard.equipped{
+  border: 2px solid var(--gold);
+}
+
+.skillCard.learnable{
+  flex-direction: row;
+  align-items: center;
+  border: 1px dashed #C0602A;
+}
+
+.skillCard.learnable .missionText{
+  flex: 1;
+}
+
+.learnButton:not(:disabled){
+  border: none;
+  background-color: #C0602A;
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.rankPips{
+  display: flex;
+  gap: 6px;
+}
+
+.rankPip{
+  width: 10px;
+  height: 10px;
+  transform: rotate(45deg);
+  background-color: var(--line-soft);
+}
+
+.rankPip.filled{
+  background-color: var(--gold);
+}
+
+.masteryRow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85em;
+  color: var(--text-soft);
+}
+
+.masteryRow .bar{
+  flex: 1;
+}
+
+.barFill.mastery{
+  background-color: #F0A070;
+}
+
+.equippedText{
+  font-size: 0.85em;
+  color: var(--gold);
+}
+
+.altars{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 8px 0;
+}
+
+.altar{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 230px;
+  min-height: 90px;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 14px;
+  border-radius: 14px;
+  background-color: var(--panel-dark);
+  text-align: center;
+}
+
+.sacrificeAltar{
+  border: 2px solid #C0392B;
+}
+
+.receiverAltar{
+  border: 2px solid var(--gold);
+}
+
+.altarFlow{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+}
+
+.altarFlow .counterValue{
+  color: #B9A6F0;
+}
+
+.sacrificePick{
+  border: 2px solid #C0392B;
+}
+
+.sacrificeTag{
+  font-size: 0.85em;
+  color: #F0A08F;
+}
+
+.altarFooter{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: auto;
+}
+
+.combineButton:not(:disabled){
+  padding: 12px 36px;
+  border: none;
+  background-color: #7B5CC4;
+  color: #FFFFFF;
+  font-family: var(--title-font);
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.memorial{
+  width: 300px;
+  padding: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background-color: #232733;
+}
+
+.memorialStone{
+  display: flex;
+  flex-direction: column;
+  padding: 10px 14px;
+  border: 1px solid #5A6070;
+  border-radius: 10px;
+  background-color: #3A3F4C;
+}
+
+.itemGrid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.itemTile{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 12px;
+  text-align: center;
+}
+
+.itemIcon{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  border-radius: 12px;
+}
+
+.itemCount{
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.itemPanel{
+  width: 320px;
+  padding: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--gold-dark);
+  border-radius: 14px;
+  background-color: var(--panel-dark);
+}
+
+.itemHeader{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bonusRow{
+  padding: 8px 12px;
+  border-radius: 8px;
+  background-color: var(--panel);
+}
+
+.bonusValue{
+  font-weight: 700;
+  color: #8FD3B0;
+}
+
+.recipeCard{
+  flex-direction: row;
+  align-items: center;
+}
+
+.recipeCard .missionText{
+  flex: 1;
+  gap: 4px;
+}
+
+.costChips{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.costChip{
+  padding: 1px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.8em;
+}
+
+.costChip.missing{
+  border-color: #C0392B;
+  color: #F0A08F;
+}
+
+.forgeButton:not(:disabled){
+  border: none;
+  background-color: #E07B39;
+  color: #2A2218;
+  font-weight: 700;
+}
+
+.workButtons{
+  display: flex;
+  gap: 8px;
+}
+
+.workButtons button{
+  flex: 1;
+  font-size: 0.85em;
+}
+
+.lockedNote{
+  padding: 10px 14px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  color: #9AA3BF;
+  font-size: 0.9em;
+}
+
+.researchStatus{
+  display: flex;
+  gap: 20px;
+  padding: 16px 18px;
+  border: 1px solid #3D6FD9;
+  border-radius: 14px;
+  background-color: var(--panel-dark);
+}
+
+.researchStatus .sideColumn{
+  width: 340px;
+  max-height: 260px;
+}
+
+.researchName{
+  font-size: 1.4em;
+}
+
+.researchBar{
+  height: 12px;
+}
+
+.barFill.research{
+  background-color: #3D6FD9;
+}
+
+.researchButton:not(:disabled){
+  border: none;
+  background-color: #3D6FD9;
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.campGrid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.campCard{
+  gap: 10px;
+}
+
+.campBanner{
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.85em;
+}
+
+.campBanner .plaqueName{
+  font-size: 1.15em;
+}
+
+.summonColumn{
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.summonCircle{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  height: 300px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: #2A2450;
+  box-shadow: inset 0 0 0 8px #6E5AA8, inset 0 0 0 20px #2A2450, inset 0 0 0 23px #9C88E0, 0 0 60px rgba(156, 136, 224, 0.35);
+}
+
+.summonTokens{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 150px;
+  border: 2px dashed #9C88E0;
+  border-radius: 50%;
+}
+
+.summonTokens .counterValue{
+  font-family: var(--title-font);
+  font-size: 2.6em;
+}
+
+.summonButton:not(:disabled){
+  padding: 12px 40px;
+  border: none;
+  background-color: #6E5AA8;
+  color: #FFFFFF;
+  font-family: var(--title-font);
+  font-weight: 700;
+  letter-spacing: 2px;
+}
