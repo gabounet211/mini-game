@@ -17,6 +17,13 @@ const layout: [Building, Look, number, number, string][] = [
     ["fields", "fields", 62, 68, "#8A6A3E"],
 ]
 
+const trees: [number, number, number, string][] = [
+    [3, 12, 54, "#5E9E3E"], [23, 11, 40, "#4F8F35"], [62, 10, 46, "#5E9E3E"], [93, 17, 60, "#4F8F35"],
+    [89, 12, 38, "#6FAE4C"], [4, 44, 44, "#6FAE4C"], [25, 46, 30, "#5E9E3E"], [64, 42, 34, "#6FAE4C"],
+    [94, 67, 52, "#5E9E3E"], [87, 80, 40, "#4F8F35"], [3, 88, 60, "#4F8F35"], [26, 88, 44, "#5E9E3E"],
+    [60, 90, 36, "#6FAE4C"], [82, 92, 50, "#5E9E3E"],
+]
+
 const houseSvg = (roof: string) => `<svg width="150" height="122" viewBox="0 0 160 130" aria-hidden="true"><rect x="20" y="58" width="120" height="70" rx="4" fill="#F2E6C9" stroke="#B49A6A" stroke-width="2"/><polygon points="4,62 80,6 156,62" fill="${roof}"/><rect x="66" y="88" width="28" height="40" rx="14" fill="#6B4A2B"/><rect x="34" y="76" width="20" height="18" rx="3" fill="#F5CF72"/><rect x="106" y="76" width="20" height="18" rx="3" fill="#F5CF72"/></svg>`
 
 const hallSvg = (roof: string) => `<svg width="250" height="196" viewBox="0 0 280 220" aria-hidden="true"><rect x="30" y="20" width="44" height="190" rx="4" fill="#E9DCBC" stroke="#B49A6A" stroke-width="2"/><rect x="206" y="20" width="44" height="190" rx="4" fill="#E9DCBC" stroke="#B49A6A" stroke-width="2"/><polygon points="24,24 52,0 80,24" fill="#3D6FD9"/><polygon points="200,24 228,0 256,24" fill="#3D6FD9"/><rect x="70" y="80" width="140" height="130" fill="#F2E6C9" stroke="#B49A6A" stroke-width="2"/><polygon points="60,86 140,30 220,86" fill="${roof}"/><path d="M116 210v-48a24 24 0 0 1 48 0v48z" fill="#6B4A2B"/><rect x="44" y="60" width="16" height="44" fill="#E8B23A"/><rect x="220" y="60" width="16" height="44" fill="#E8B23A"/><rect x="128" y="98" width="24" height="24" rx="12" fill="#F5CF72"/></svg>`
@@ -36,7 +43,7 @@ export class Village {
         const hint = document.createElement('div')
         hint.className = 'villageHint'
         hint.textContent = 'Click a building to enter it'
-        this.element.append(this.stock, ...layout.map(entry => this.createBuilding(...entry)), hint)
+        this.element.append(...trees.map(entry => this.createTree(...entry)), this.stock, ...layout.map(entry => this.createBuilding(...entry)), hint)
         document.body.append(this.element)
         this.show()
     }
@@ -50,6 +57,16 @@ export class Village {
 
     remove() {
         this.element.remove()
+    }
+
+    private createTree(left: number, top: number, size: number, color: string) {
+        const tree = document.createElement('span')
+        tree.className = 'tree'
+        tree.style.left = left + '%'
+        tree.style.top = top + '%'
+        tree.style.width = tree.style.height = size + 'px'
+        tree.style.backgroundColor = color
+        return tree
     }
 
     private createBuilding(building: Building, look: Look, left: number, top: number, color: string) {
