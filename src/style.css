@@ -1,11 +1,21 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --panel: rgba(38, 45, 64, 0.94);
+  --panel-dark: #1B2030;
+  --line: #4A5374;
+  --line-soft: #3A4360;
+  --gold: #E8B23A;
+  --gold-dark: #8C6B2E;
+  --text: #F1E9D6;
+  --text-soft: #C9BFA8;
+  --title-font: Cinzel, Georgia, serif;
+
+  font-family: 'Alegreya Sans', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color-scheme: dark;
+  color: var(--text);
+  background-color: var(--panel-dark);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -38,8 +48,9 @@ canvas {
   align-items: center;
   gap: 16px;
   padding: 8px 16px;
-  border: 2px solid rgba(255, 255, 255, 0.87);
-  background-color: rgba(20, 20, 20, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background-color: var(--panel);
   z-index: 100;
 }
 
@@ -55,12 +66,28 @@ canvas {
 .partyCard{
   min-width: 96px;
   padding: 6px 10px;
-  border: 2px solid rgba(255, 255, 255, 0.87);
-  background-color: rgba(20, 20, 20, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background-color: var(--panel);
 }
 
 .partyCard.selected{
-  border-color: #2c4;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+
+.partyCard > div:first-child,
+#characterSheet > div:first-child,
+.lobbyTitle,
+.endTitle{
+  font-family: var(--title-font);
+  font-weight: 700;
+}
+
+.lobbyTitle,
+.endTitle{
+  color: var(--gold);
+  letter-spacing: 2px;
 }
 
 .partyCard{
@@ -77,8 +104,9 @@ canvas {
   gap: 8px;
   min-width: 200px;
   padding: 12px 16px;
-  border: 2px solid rgba(255, 255, 255, 0.87);
-  background-color: rgba(20, 20, 20, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background-color: var(--panel);
   z-index: 100;
 }
 
@@ -100,8 +128,10 @@ canvas {
 }
 
 .sheetTitle{
-  font-weight: 600;
-  opacity: 0.7;
+  font-size: 0.8em;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #9AA3BF;
 }
 
 .sheetRow{
@@ -126,8 +156,9 @@ canvas {
   gap: 16px;
   min-width: 280px;
   padding: 24px;
-  border: 2px solid rgba(255, 255, 255, 0.87);
-  background-color: rgba(20, 20, 20, 0.95);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background-color: var(--panel);
   z-index: 200;
 }
 
@@ -141,8 +172,9 @@ canvas {
   gap: 24px;
   min-width: 280px;
   padding: 32px;
-  border: 2px solid rgba(255, 255, 255, 0.87);
-  background-color: rgba(20, 20, 20, 0.95);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background-color: var(--panel);
   z-index: 200;
 }
 
@@ -164,7 +196,12 @@ canvas {
   top: unset;
   padding: 8px 20px;
   font-size: 1.25rem;
-  background-color: #d11;
+  font-family: var(--title-font);
+  font-weight: 700;
+  letter-spacing: 1px;
+  background-color: var(--gold);
+  border-color: var(--gold);
+  color: #2A2218;
   z-index: 100;
 }
 
@@ -173,8 +210,26 @@ button:disabled{
 }
 
 button{
-  background-color: blue;
-  color: aliceblue;
+  font-family: inherit;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background-color: var(--panel-dark);
+  color: var(--text);
+  cursor: pointer;
+}
+
+button:hover:not(:disabled){
+  border-color: var(--gold);
+}
+
+select{
+  font-family: inherit;
+  padding: 4px 8px;
+  border: 1px solid var(--gold-dark);
+  border-radius: 8px;
+  background-color: var(--panel-dark);
+  color: var(--text);
 }
 #lobby{
   left: 50%;
@@ -187,8 +242,9 @@ button{
   max-height: calc(100vh - 32px);
   box-sizing: border-box;
   padding: 24px;
-  border: 2px solid rgba(255, 255, 255, 0.87);
-  background-color: rgba(20, 20, 20, 0.95);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background-color: var(--panel);
   z-index: 200;
 }
 
@@ -216,7 +272,8 @@ button{
 
 .lobbyTabs button.activeTab{
   opacity: 1;
-  outline: 2px solid gold;
+  border-color: var(--gold);
+  color: var(--gold);
 }
 
 .lobbyContent{
@@ -238,8 +295,10 @@ button{
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 6px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 8px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background-color: var(--panel-dark);
 }
 
 .heroInfo{
@@ -259,8 +318,9 @@ button{
   overflow-y: auto;
   box-sizing: border-box;
   padding: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.87);
-  background-color: rgba(20, 20, 20, 0.98);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background-color: var(--panel);
   z-index: 300;
 }
 
@@ -299,9 +359,10 @@ button{
   left: 50%;
   top: 16px;
   transform: translateX(-50%);
-  padding: 6px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  background-color: rgba(20, 20, 20, 0.8);
+  padding: 6px 18px;
+  border: 1px solid var(--gold-dark);
+  border-radius: 12px;
+  background-color: var(--panel);
   white-space: nowrap;
   z-index: 100;
 }
@@ -311,10 +372,13 @@ button{
   top: 18%;
   transform: translate(-50%, -50%);
   padding: 12px 32px;
-  border: 2px solid rgba(255, 255, 255, 0.87);
-  background-color: rgba(20, 20, 20, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background-color: var(--panel);
   font-size: 1.8em;
-  font-weight: 600;
+  font-family: var(--title-font);
+  font-weight: 700;
+  color: var(--gold);
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s;
@@ -326,8 +390,9 @@ button{
 }
 
 .selectedAction{
-  outline: 3px solid #ffd54a;
-  background-color: #6b5a1e;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold);
+  background-color: rgba(232, 178, 58, 0.18);
 }
 
 body.targeting canvas{
