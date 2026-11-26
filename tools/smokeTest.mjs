@@ -34,6 +34,7 @@ if (levelKeys.length < 2)
 for (const key of levelKeys) {
     await page.goto(url)
     await page.waitForTimeout(1500)
+    await page.click('.building[data-building="warHall"]')
     await page.selectOption("#lobby select", key)
     await page.click(".startButton")
     await page.waitForTimeout(2500)

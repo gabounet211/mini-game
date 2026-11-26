@@ -11,9 +11,18 @@ import { assignResearch, canStartResearch, isResearching, researchAmount, resear
 import { canAfford, Cost, craft, isRecipeUnlocked, dismantle, dismantleValue, recipes, upgrade, upgradeCost } from "./forge"
 import { equippedActions, learnableSkills, learnCost, learnSkill, masteryNeeded, maxSkillRank, skillAction, skillSlots, toggleEquipped } from "./skill"
 
-type LobbyTab = "heroes" | "training" | "combination" | "inventory" | "base"
+export type Building = "warHall" | "trainingGrounds" | "shrine" | "storehouse" | "fields" | "library" | "forge" | "summoning"
 
-const tabs: [LobbyTab, string][] = [["heroes", "Heroes"], ["training", "Training"], ["combination", "Combination"], ["inventory", "Inventory"], ["base", "Base"]]
+export const buildingNames: Record<Building, string> = {
+    warHall: "War Hall",
+    trainingGrounds: "Training Grounds",
+    shrine: "Shrine",
+    storehouse: "Storehouse",
+    fields: "Fields & Camps",
+    library: "Library",
+    forge: "Forge",
+    summoning: "Summoning Circle",
+}
 
 export class Lobby {
     private element = document.createElement('div')
@@ -24,18 +33,32 @@ export class Lobby {
     private receiver: Character | undefined
     private confirmingTransfer = false
     private trainee: Character | undefined
-    private tab: LobbyTab = "heroes"
+    private building: Building = "warHall"
 
-    constructor(private save: SaveData, private onStart: (team: Character[], levelKey: string) => void) {
+    constructor(private save: SaveData, private onStart: (team: Character[], levelKey: string) => void, private onBack: () => void) {
         const unlocked = levels.keys().slice(0, save.unlockedLevels)
         this.levelKey = unlocked[unlocked.length - 1] ?? levels.keys()[0]
         this.element.id = 'lobby'
+        this.element.style.display = 'none'
         this.details.id = 'heroWindow'
         document.body.append(this.element, this.details)
         const lastTeam = save.roster.filter(character => save.lastTeam.includes(character.id))
         for (const character of (lastTeam.length ? lastTeam : save.roster).filter(character => this.canBring(character)).slice(0, this.teamLimit()))
             this.team.add(character)
         this.render()
+    }
+
+    open(building: Building) {
+        this.building = building
+        this.showDetails(undefined)
+        this.render()
+        this.element.style.display = 'flex'
+    }
+
+    private close() {
+        this.element.style.display = 'none'
+        this.showDetails(undefined)
+        this.onBack()
     }
 
     private canBring(character: Character) {
@@ -54,7 +77,20 @@ export class Lobby {
     private render() {
         const title = document.createElement('div')
         title.className = 'lobbyTitle'
-        title.textContent = 'Lobby'
+        title.textContent = buildingNames[this.building]
+
+        const backButton = document.createElement('button')
+        backButton.className = 'backButton'
+        backButton.textContent = 'Back to village'
+        backButton.addEventListener('click', () => this.close())
+
+        if (this.building !== "warHall") {
+            const content = document.createElement('div')
+            content.className = 'lobbyContent'
+            content.append(...this.renderBuilding())
+            this.element.replaceChildren(backButton, title, content)
+            return
+        }
 
         const levelRow = document.createElement('label')
         levelRow.className = 'lobbyRow'
@@ -90,22 +126,9 @@ export class Lobby {
             ? 'Heroes who fall in this level die for good.'
             : 'Heroes who fall here are only injured and miss the next combat.'
 
-        const tabRow = document.createElement('div')
-        tabRow.className = 'lobbyTabs'
-        for (const [key, label] of tabs) {
-            const tabButton = document.createElement('button')
-            tabButton.textContent = label
-            tabButton.classList.toggle('activeTab', key === this.tab)
-            tabButton.addEventListener('click', () => {
-                this.tab = key
-                this.render()
-            })
-            tabRow.append(tabButton)
-        }
-
         const content = document.createElement('div')
         content.className = 'lobbyContent'
-        content.append(...(this.tab === "heroes" ? this.renderHeroes() : this.tab === "training" ? this.renderTraining() : this.tab === "combination" ? this.renderCombination() : this.tab === "inventory" ? this.renderInventory() : this.renderBase()))
+        content.append(...this.renderHeroes())
 
         const startButton = document.createElement('button')
         startButton.className = 'startButton'
@@ -120,10 +143,23 @@ export class Lobby {
             this.onStart(team, this.levelKey)
         })
 
-        this.element.replaceChildren(title, levelRow, recommendedInfo, dangerInfo, teamInfo, tabRow, content, startButton)
+        this.element.replaceChildren(backButton, title, levelRow, recommendedInfo, dangerInfo, teamInfo, content, startButton)
     }
 
-    private renderHeroes() {
+    private renderBuilding() {
+        switch (this.building) {
+            case "trainingGrounds": return this.renderTraining()
+            case "shrine": return [...this.renderCombination(), ...this.renderMemorial()]
+            case "storehouse": return this.renderInventory()
+            case "fields": return this.renderBase()
+            case "library": return [this.renderStock(), ...this.renderResearch()]
+            case "forge": return [this.renderStock(), ...this.renderForge()]
+            case "summoning": return this.renderSummoning()
+            default: return this.renderHeroes()
+        }
+    }
+
+    private renderSummoning() {
         const summonRow = document.createElement('div')
         summonRow.className = 'lobbyRow'
         summonRow.textContent = 'Summon tokens: ' + this.save.summons
@@ -132,12 +168,19 @@ export class Lobby {
         summonButton.disabled = this.save.summons < 1
         summonButton.addEventListener('click', () => this.summon())
         summonRow.append(summonButton)
+        return [summonRow]
+    }
 
+    private renderHeroes() {
         const heroList = document.createElement('div')
         heroList.className = 'heroList'
         heroList.append(...this.save.roster.map(character => this.createHeroRow(character)))
+        return [heroList]
+    }
+
+    private renderMemorial() {
         if (!this.save.memorial.length)
-            return [summonRow, heroList]
+            return []
 
         const memorialTitle = document.createElement('div')
         memorialTitle.className = 'lobbyRow'
@@ -150,7 +193,7 @@ export class Lobby {
             row.textContent = fallen.name + ' - Level ' + fallen.level + ' · fell in ' + fallen.levelTitle
             return row
         }))
-        return [summonRow, heroList, memorialTitle, memorial]
+        return [memorialTitle, memorial]
     }
 
     private renderTraining() {
@@ -309,9 +352,14 @@ export class Lobby {
         return [list]
     }
 
-    private renderBase() {
+    private renderStock() {
         const stock = document.createElement('div')
         stock.textContent = 'Stock: ' + resources.map(resource => resourceNames[resource] + ' ' + this.save.resources[resource]).join(' · ')
+        return stock
+    }
+
+    private renderBase() {
+        const stock = this.renderStock()
         const intro = document.createElement('div')
         intro.className = 'heroDetails'
         intro.textContent = 'Heroes at the base work after each combat but cannot join the team. Villagers gather more of their own resource, Scholars, Alchemists and Sages research faster, injured heroes do half.'
@@ -343,7 +391,7 @@ export class Lobby {
             row.append(info, select)
             list.append(row)
         }
-        return [stock, intro, list, ...this.renderResearch(), ...this.renderForge()]
+        return [stock, intro, list]
     }
 
     private renderResearch() {

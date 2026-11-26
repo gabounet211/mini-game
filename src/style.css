@@ -455,3 +455,92 @@ select{
 body.targeting canvas{
   cursor: crosshair;
 }
+
+#village{
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #A9CF84;
+  background-image:
+    linear-gradient(#DCC593, #DCC593),
+    linear-gradient(#DCC593, #DCC593);
+  background-size: 100% 56px, 56px 90%;
+  background-position: 0 54%, 50% 100%;
+  background-repeat: no-repeat;
+  z-index: 50;
+}
+
+.villageStock{
+  position: absolute;
+  left: 24px;
+  top: 20px;
+  padding: 8px 18px;
+  border: 1px solid var(--gold-dark);
+  border-radius: 12px;
+  background-color: var(--panel);
+}
+
+.villageHint{
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  padding: 6px 18px;
+  border-radius: 999px;
+  background-color: var(--panel);
+  color: var(--text-soft);
+  font-size: 0.9em;
+}
+
+.building{
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  transition: transform 0.15s ease;
+}
+
+.building:hover:not(:disabled){
+  transform: translateY(-6px);
+}
+
+.plaque{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 14px;
+  border: 1px solid var(--gold-dark);
+  border-radius: 10px;
+  background-color: var(--panel);
+}
+
+.building:hover .plaque{
+  border-color: var(--gold);
+}
+
+.plaqueName{
+  font-family: var(--title-font);
+  font-weight: 700;
+}
+
+.mainPlaque{
+  border: 2px solid var(--gold);
+}
+
+.mainPlaque .plaqueName{
+  color: var(--gold);
+  font-size: 1.15em;
+}
+
+.plaqueStatus{
+  font-size: 0.8em;
+  color: var(--text-soft);
+}
+
+.backButton{
+  align-self: flex-start;
+}
