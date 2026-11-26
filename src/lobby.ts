@@ -96,7 +96,7 @@ export class Lobby {
 
         const startButton = document.createElement('button')
         startButton.className = 'startButton'
-        startButton.textContent = 'Depart'
+        startButton.textContent = 'Start'
         startButton.disabled = this.team.size === 0 || this.team.size > this.teamLimit()
         startButton.addEventListener('click', () => {
             this.element.remove()
