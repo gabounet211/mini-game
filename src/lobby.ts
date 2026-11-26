@@ -1,8 +1,8 @@
 import { Character, createHero, rollRarity } from "./character"
 import { applyClassChange, canChangeClass, characterClasses, classChangeOffers, closestClasses, missingStats } from "./characterClass"
 import { levels } from "./gltf"
-import { deriveAttributes, Stats } from "./stats"
-import { addExperience, experienceToNextLevel, isDeadly, sacrificeExperience, sacrificeValue, transferExperience } from "./rewards"
+import { deriveAttributes, Rarity, Stats } from "./stats"
+import { addExperience, experienceToNextLevel, isDeadly, sacrificeExperience, sacrificeValue, summonRewardChance, transferExperience } from "./rewards"
 import { equipmentBonuses, equippedStats, getItem, itemName, itemSlots, ItemSlot } from "./items"
 import { SaveData, writeSave } from "./save"
 import { describeAction } from "./action"
@@ -19,6 +19,13 @@ const itemIcons: Record<ItemSlot | "classItem", [string, string]> = {
     armor: ["#3E5A7A", "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"],
     jewelry: ["#6E5A2A", "M12 8a6 6 0 1 0 0 12a6 6 0 1 0 0-12zM9 3h6l-3 5z"],
     classItem: ["#5A3F8A", "M12 2l7 7-7 13-7-13z"],
+}
+
+const rarityColors: Record<Rarity, string> = {
+    common: "#9AA3BF",
+    uncommon: "#6FCF8E",
+    rare: "#7FA4FF",
+    legendary: "#E8B23A",
 }
 
 const campLooks: Record<Resource, [string, string]> = {
@@ -51,6 +58,7 @@ export class Lobby {
     private confirmingTransfer = false
     private trainee: Character | undefined
     private storedItem: string | undefined
+    private lastSummon: Character | undefined
     private itemFilter: ItemSlot | "classItem" | "all" = "all"
     private building: Building = "warHall"
 
@@ -58,6 +66,7 @@ export class Lobby {
         const unlocked = levels.keys().slice(0, save.unlockedLevels)
         this.levelKey = unlocked[unlocked.length - 1] ?? levels.keys()[0]
         this.element.id = 'lobby'
+        this.element.className = 'buildingScreen'
         this.element.style.display = 'none'
         this.details.id = 'heroWindow'
         document.body.append(this.element, this.details)
@@ -103,7 +112,6 @@ export class Lobby {
         backButton.textContent = 'Back to village'
         backButton.addEventListener('click', () => this.close())
 
-        this.element.classList.toggle('warHall', this.building === "warHall" || this.building === "trainingGrounds" || this.building === "shrine" || this.building === "storehouse" || this.building === "forge" || this.building === "library" || this.building === "fields")
         if (this.building !== "warHall") {
             const content = document.createElement('div')
             content.className = 'lobbyContent'
@@ -148,15 +156,77 @@ export class Lobby {
     }
 
     private renderSummoning() {
-        const summonRow = document.createElement('div')
-        summonRow.className = 'lobbyRow'
-        summonRow.textContent = 'Summon tokens: ' + this.save.summons
+        const circleColumn = document.createElement('div')
+        circleColumn.className = 'companyColumn summonColumn'
+        const circle = document.createElement('div')
+        circle.className = 'summonCircle'
+        const tokens = document.createElement('div')
+        tokens.className = 'summonTokens'
+        const count = document.createElement('span')
+        count.className = 'counterValue'
+        count.textContent = String(this.save.summons)
+        const label = document.createElement('span')
+        label.className = 'heroDetails'
+        label.textContent = 'summon tokens'
+        tokens.append(count, label)
+        circle.append(tokens)
         const summonButton = document.createElement('button')
-        summonButton.textContent = 'Summon (1)'
+        summonButton.className = 'summonButton'
+        summonButton.textContent = 'Summon · 1 token'
         summonButton.disabled = this.save.summons < 1
         summonButton.addEventListener('click', () => this.summon())
-        summonRow.append(summonButton)
-        return [summonRow]
+        const hint = document.createElement('div')
+        hint.className = 'heroDetails'
+        hint.textContent = 'Tokens are sometimes found after a combat (' + Math.round(summonRewardChance * 100) + '% chance)'
+        circleColumn.append(circle, summonButton, hint)
+        if (this.lastSummon) {
+            const joined = document.createElement('div')
+            joined.className = 'skillCard equipped'
+            const joinedTitle = document.createElement('span')
+            joinedTitle.className = 'sheetTitle'
+            joinedTitle.textContent = 'Joined your company'
+            const joinedName = document.createElement('span')
+            joinedName.className = 'plaqueName'
+            joinedName.textContent = this.heroLabel(this.lastSummon)
+            joined.append(joinedTitle, joinedName)
+            circleColumn.append(joined)
+        }
+
+        const odds = document.createElement('div')
+        odds.className = 'sideColumn itemPanel'
+        const oddsTitle = document.createElement('div')
+        oddsTitle.className = 'plaqueName'
+        oddsTitle.textContent = 'Odds'
+        odds.append(oddsTitle)
+        for (const [rarity, chance] of Object.entries(summonChances(this.save)) as [Rarity, number][]) {
+            const row = document.createElement('div')
+            row.className = 'lobbyRow'
+            const name = document.createElement('span')
+            name.style.color = rarityColors[rarity]
+            name.textContent = this.formatName(rarity)
+            const value = document.createElement('span')
+            value.textContent = Math.round(chance * 100) + '%'
+            row.append(name, value)
+            const bar = document.createElement('div')
+            bar.className = 'bar'
+            const fill = document.createElement('div')
+            fill.className = 'barFill'
+            fill.style.width = Math.round(chance * 100) + '%'
+            fill.style.backgroundColor = rarityColors[rarity]
+            bar.append(fill)
+            odds.append(row, bar)
+        }
+        if (!this.save.research.done.includes("summoningRites")) {
+            const note = document.createElement('div')
+            note.className = 'heroDetails'
+            note.textContent = 'Research Summoning Rites at the Library to improve the odds.'
+            odds.append(note)
+        }
+
+        const body = document.createElement('div')
+        body.className = 'warHallBody'
+        body.append(circleColumn, odds)
+        return [body]
     }
 
     private renderTraining() {
@@ -1220,7 +1290,8 @@ export class Lobby {
         if (this.save.summons < 1)
             return
         this.save.summons--
-        this.save.roster.push(createHero("hero", rollRarity(Math.random, summonChances(this.save))))
+        this.lastSummon = createHero("hero", rollRarity(Math.random, summonChances(this.save)))
+        this.save.roster.push(this.lastSummon)
         writeSave(this.save)
         this.render()
     }
