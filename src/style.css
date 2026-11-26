@@ -1004,3 +1004,56 @@ body.targeting canvas{
   font-weight: 700;
   color: #8FD3B0;
 }
+
+.recipeCard{
+  flex-direction: row;
+  align-items: center;
+}
+
+.recipeCard .missionText{
+  flex: 1;
+  gap: 4px;
+}
+
+.costChips{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.costChip{
+  padding: 1px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.8em;
+}
+
+.costChip.missing{
+  border-color: #C0392B;
+  color: #F0A08F;
+}
+
+.forgeButton:not(:disabled){
+  border: none;
+  background-color: #E07B39;
+  color: #2A2218;
+  font-weight: 700;
+}
+
+.workButtons{
+  display: flex;
+  gap: 8px;
+}
+
+.workButtons button{
+  flex: 1;
+  font-size: 0.85em;
+}
+
+.lockedNote{
+  padding: 10px 14px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  color: #9AA3BF;
+  font-size: 0.9em;
+}

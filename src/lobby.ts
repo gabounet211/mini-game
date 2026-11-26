@@ -96,7 +96,7 @@ export class Lobby {
         backButton.textContent = 'Back to village'
         backButton.addEventListener('click', () => this.close())
 
-        this.element.classList.toggle('warHall', this.building === "warHall" || this.building === "trainingGrounds" || this.building === "shrine" || this.building === "storehouse")
+        this.element.classList.toggle('warHall', this.building === "warHall" || this.building === "trainingGrounds" || this.building === "shrine" || this.building === "storehouse" || this.building === "forge")
         if (this.building !== "warHall") {
             const content = document.createElement('div')
             content.className = 'lobbyContent'
@@ -134,7 +134,7 @@ export class Lobby {
             case "storehouse": return this.renderInventory()
             case "fields": return this.renderBase()
             case "library": return [this.renderStock(), ...this.renderResearch()]
-            case "forge": return [this.renderStock(), ...this.renderForge()]
+            case "forge": return this.renderForge()
             case "summoning": return this.renderSummoning()
             default: return []
         }
@@ -662,42 +662,112 @@ export class Lobby {
     }
 
     private renderForge() {
-        const title = document.createElement('div')
-        title.className = 'lobbyRow'
-        title.textContent = 'Forge'
+        const craftColumn = document.createElement('div')
+        craftColumn.className = 'companyColumn'
+        const craftTitle = document.createElement('div')
+        craftTitle.className = 'plaqueName'
+        craftTitle.textContent = 'Craft'
         const craftList = document.createElement('div')
-        craftList.className = 'heroList'
+        craftList.className = 'skillGrid'
+        const locked: string[] = []
         for (const [key, cost] of Object.entries(recipes)) {
-            if (!isRecipeUnlocked(this.save, key))
+            if (!isRecipeUnlocked(this.save, key)) {
+                locked.push(itemName(key))
                 continue
+            }
+            const card = document.createElement('div')
+            card.className = 'skillCard recipeCard'
+            const text = document.createElement('div')
+            text.className = 'missionText'
+            const name = document.createElement('span')
+            name.className = 'plaqueName'
+            name.textContent = itemName(key)
+            const bonus = document.createElement('span')
+            bonus.className = 'bonusValue'
+            bonus.textContent = this.formatBonuses(key)
+            text.append(name, bonus, this.createCostChips(cost))
             const craftButton = document.createElement('button')
+            craftButton.className = 'forgeButton'
             craftButton.textContent = 'Craft'
             craftButton.disabled = !canAfford(this.save, cost)
             craftButton.addEventListener('click', () => this.updateTrainee(() => craft(this.save, key)))
-            craftList.append(this.createSkillRow(itemName(key) + ' (' + this.formatBonuses(key) + ')', 'Cost: ' + this.formatCost(cost), [craftButton]))
+            card.append(text, craftButton)
+            craftList.append(card)
         }
+        craftColumn.append(this.renderStock(), craftTitle, craftList)
+        if (locked.length) {
+            const lockedNote = document.createElement('div')
+            lockedNote.className = 'lockedNote'
+            lockedNote.textContent = locked.join(', ') + ' · research Advanced Smithing at the Library'
+            craftColumn.append(lockedNote)
+        }
+
+        const workColumn = document.createElement('div')
+        workColumn.className = 'sideColumn itemPanel'
         const workTitle = document.createElement('div')
-        workTitle.textContent = 'Upgrade or dismantle unused items'
-        const workList = document.createElement('div')
-        workList.className = 'heroList'
+        workTitle.className = 'plaqueName'
+        workTitle.textContent = 'Upgrade or dismantle'
+        const workInfo = document.createElement('div')
+        workInfo.className = 'heroDetails'
+        workInfo.textContent = 'Unused items from the Storehouse. Unequip an item to work on it.'
+        workColumn.append(workTitle, workInfo)
         for (const key of new Set(this.save.inventory)) {
             const value = dismantleValue(key)
             if (!value)
                 continue
             const cost = upgradeCost(key)
+            const count = this.save.inventory.filter(other => other === key).length
+            const card = document.createElement('div')
+            card.className = 'skillCard'
+            const header = document.createElement('div')
+            header.className = 'lobbyRow'
+            const name = document.createElement('span')
+            name.className = 'plaqueName'
+            name.textContent = itemName(key) + (count > 1 ? ' ×' + count : '')
+            const bonus = document.createElement('span')
+            bonus.className = 'bonusValue'
+            bonus.textContent = this.formatBonuses(key)
+            header.append(name, bonus)
+            const buttons = document.createElement('div')
+            buttons.className = 'workButtons'
             const upgradeButton = document.createElement('button')
-            upgradeButton.textContent = cost ? 'Upgrade (' + this.formatCost(cost) + ')' : 'Max'
+            upgradeButton.className = 'forgeButton'
+            upgradeButton.textContent = cost ? 'Upgrade · ' + this.formatCost(cost) : 'Max'
             upgradeButton.disabled = !cost || !canAfford(this.save, cost)
             upgradeButton.addEventListener('click', () => this.updateTrainee(() => upgrade(this.save, key)))
             const dismantleButton = document.createElement('button')
-            dismantleButton.textContent = 'Dismantle (' + this.formatCost(value) + ')'
+            dismantleButton.textContent = 'Dismantle · +' + this.formatCost(value)
             dismantleButton.addEventListener('click', () => this.updateTrainee(() => dismantle(this.save, key)))
-            const count = this.save.inventory.filter(other => other === key).length
-            workList.append(this.createSkillRow(itemName(key) + (count > 1 ? ' ×' + count : ''), this.formatBonuses(key), [upgradeButton, dismantleButton]))
+            buttons.append(upgradeButton, dismantleButton)
+            card.append(header, buttons)
+            workColumn.append(card)
         }
-        if (!workList.children.length)
-            workList.textContent = 'No unused items. Unequip an item to work on it.'
-        return [title, craftList, workTitle, workList]
+        if (workColumn.children.length === 2) {
+            const empty = document.createElement('div')
+            empty.className = 'heroDetails'
+            empty.textContent = 'No unused items.'
+            workColumn.append(empty)
+        }
+
+        const body = document.createElement('div')
+        body.className = 'warHallBody'
+        body.append(craftColumn, workColumn)
+        return [body]
+    }
+
+    private createCostChips(cost: Cost) {
+        const chips = document.createElement('span')
+        chips.className = 'costChips'
+        for (const resource of resources) {
+            const amount = cost[resource]
+            if (!amount)
+                continue
+            const chip = document.createElement('span')
+            chip.className = 'costChip' + (this.save.resources[resource] < amount ? ' missing' : '')
+            chip.textContent = amount + ' ' + resourceNames[resource]
+            chips.append(chip)
+        }
+        return chips
     }
 
     private formatCost(cost: Cost) {
