@@ -78,6 +78,7 @@ export class Lobby {
 
     open(building: Building) {
         this.building = building
+        this.confirmingTransfer = false
         this.showDetails(undefined)
         this.render()
         this.element.style.display = 'flex'
@@ -387,21 +388,6 @@ export class Lobby {
         change()
         writeSave(this.save)
         this.render()
-    }
-
-    private createSkillRow(title: string, details: string, buttons: HTMLButtonElement[]) {
-        const row = document.createElement('div')
-        row.className = 'heroRow'
-        const info = document.createElement('div')
-        info.className = 'heroInfo'
-        const name = document.createElement('div')
-        name.textContent = title
-        const detail = document.createElement('div')
-        detail.className = 'heroDetails'
-        detail.textContent = details
-        info.append(name, detail)
-        row.append(info, ...buttons)
-        return row
     }
 
     private renderShrine() {
