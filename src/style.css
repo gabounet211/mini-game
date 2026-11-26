@@ -1057,3 +1057,36 @@ body.targeting canvas{
   color: #9AA3BF;
   font-size: 0.9em;
 }
+
+.researchStatus{
+  display: flex;
+  gap: 20px;
+  padding: 16px 18px;
+  border: 1px solid #3D6FD9;
+  border-radius: 14px;
+  background-color: var(--panel-dark);
+}
+
+.researchStatus .sideColumn{
+  width: 340px;
+  max-height: 260px;
+}
+
+.researchName{
+  font-size: 1.4em;
+}
+
+.researchBar{
+  height: 12px;
+}
+
+.barFill.research{
+  background-color: #3D6FD9;
+}
+
+.researchButton:not(:disabled){
+  border: none;
+  background-color: #3D6FD9;
+  color: #FFFFFF;
+  font-weight: 700;
+}

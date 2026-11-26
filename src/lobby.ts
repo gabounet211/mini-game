@@ -96,7 +96,7 @@ export class Lobby {
         backButton.textContent = 'Back to village'
         backButton.addEventListener('click', () => this.close())
 
-        this.element.classList.toggle('warHall', this.building === "warHall" || this.building === "trainingGrounds" || this.building === "shrine" || this.building === "storehouse" || this.building === "forge")
+        this.element.classList.toggle('warHall', this.building === "warHall" || this.building === "trainingGrounds" || this.building === "shrine" || this.building === "storehouse" || this.building === "forge" || this.building === "library")
         if (this.building !== "warHall") {
             const content = document.createElement('div')
             content.className = 'lobbyContent'
@@ -133,7 +133,7 @@ export class Lobby {
             case "shrine": return this.renderShrine()
             case "storehouse": return this.renderInventory()
             case "fields": return this.renderBase()
-            case "library": return [this.renderStock(), ...this.renderResearch()]
+            case "library": return this.renderResearch()
             case "forge": return this.renderForge()
             case "summoning": return this.renderSummoning()
             default: return []
@@ -640,25 +640,99 @@ export class Lobby {
     }
 
     private renderResearch() {
-        const title = document.createElement('div')
-        title.className = 'lobbyRow'
-        title.textContent = 'Research'
         const current = this.save.research.current
         const status = document.createElement('div')
-        status.textContent = current
-            ? 'In progress: ' + researchProjects[current].name + ' ' + this.save.research.progress + '/' + researchProjects[current].points + ' (' + this.save.researchers.length + ' researchers)'
-            : 'No research in progress. Start one below.'
-        const list = document.createElement('div')
-        list.className = 'heroList'
+        status.className = 'researchStatus'
+        const progress = document.createElement('div')
+        progress.className = 'companyColumn'
+        const label = document.createElement('div')
+        label.className = 'sheetTitle'
+        label.textContent = current ? 'In progress' : 'No research in progress'
+        const name = document.createElement('div')
+        name.className = 'plaqueName researchName'
+        name.textContent = current ? researchProjects[current].name : 'Start a project below'
+        progress.append(label, name)
+        if (current) {
+            const project = researchProjects[current]
+            const description = document.createElement('div')
+            description.className = 'heroDetails'
+            description.textContent = project.description
+            const barRow = document.createElement('div')
+            barRow.className = 'masteryRow'
+            const bar = document.createElement('div')
+            bar.className = 'bar researchBar'
+            const fill = document.createElement('div')
+            fill.className = 'barFill research'
+            fill.style.width = Math.min(100, this.save.research.progress / project.points * 100) + '%'
+            bar.append(fill)
+            const points = document.createElement('span')
+            points.textContent = this.save.research.progress + ' / ' + project.points + ' points'
+            barRow.append(bar, points)
+            progress.append(description, barRow)
+        }
+
+        const researchers = document.createElement('div')
+        researchers.className = 'sideColumn'
+        const researchersTitle = document.createElement('div')
+        researchersTitle.className = 'sheetTitle'
+        researchersTitle.textContent = 'Researchers · ' + this.save.researchers.length + ' · progress after each combat'
+        researchers.append(researchersTitle)
+        for (const character of this.save.roster) {
+            const researching = isResearching(this.save, character)
+            const button = document.createElement('button')
+            button.className = 'sideHero'
+            button.classList.toggle('selectedMission', researching)
+            const heroName = document.createElement('span')
+            heroName.className = 'missionText'
+            heroName.textContent = this.heroLabel(character) + (character.injured ? ' · Injured' : '')
+            const action = document.createElement('span')
+            action.className = researching ? 'equippedText' : 'heroDetails'
+            action.textContent = researching ? '+' + researchAmount(character) + ' / combat · Remove' : isHarvesting(this.save, character) ? 'At the fields · Assign' : 'Assign'
+            button.append(heroName, action)
+            button.addEventListener('click', () => {
+                assignResearch(this.save, character, !researching)
+                this.team.delete(character)
+                writeSave(this.save)
+                this.render()
+            })
+            researchers.append(button)
+        }
+        status.append(progress, researchers)
+
+        const projectsTitle = document.createElement('div')
+        projectsTitle.className = 'sheetTitle'
+        projectsTitle.textContent = 'Projects · Scholars, Alchemists and Sages research faster, injured heroes do half'
+        const projects = document.createElement('div')
+        projects.className = 'skillGrid'
         for (const [key, project] of Object.entries(researchProjects)) {
             const done = this.save.research.done.includes(key)
+            const card = document.createElement('div')
+            card.className = 'skillCard'
+            card.classList.toggle('equipped', key === current)
+            const title = document.createElement('span')
+            title.className = 'plaqueName'
+            title.textContent = project.name
+            const description = document.createElement('span')
+            description.className = 'heroDetails'
+            description.textContent = project.description
+            const cost = this.createCostChips(project.cost)
+            const pointsChip = document.createElement('span')
+            pointsChip.className = 'costChip'
+            pointsChip.textContent = project.points + ' points'
+            cost.prepend(pointsChip)
             const startButton = document.createElement('button')
-            startButton.textContent = done ? 'Done' : key === current ? 'In progress' : 'Start'
+            startButton.className = 'researchButton'
+            startButton.textContent = done ? 'Done' : key === current ? 'In progress' : current ? 'After the current research' : 'Start'
             startButton.disabled = !canStartResearch(this.save, key)
             startButton.addEventListener('click', () => this.updateTrainee(() => startResearch(this.save, key)))
-            list.append(this.createSkillRow(project.name, project.description + ' · ' + project.points + ' points · Cost: ' + this.formatCost(project.cost), [startButton]))
+            card.append(title, description, cost, startButton)
+            projects.append(card)
         }
-        return [title, status, list]
+
+        const column = document.createElement('div')
+        column.className = 'companyColumn'
+        column.append(this.renderStock(), status, projectsTitle, projects)
+        return [column]
     }
 
     private renderForge() {
