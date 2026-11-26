@@ -856,3 +856,90 @@ body.targeting canvas{
   font-size: 0.85em;
   color: var(--gold);
 }
+
+.altars{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 8px 0;
+}
+
+.altar{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 230px;
+  min-height: 90px;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 14px;
+  border-radius: 14px;
+  background-color: var(--panel-dark);
+  text-align: center;
+}
+
+.sacrificeAltar{
+  border: 2px solid #C0392B;
+}
+
+.receiverAltar{
+  border: 2px solid var(--gold);
+}
+
+.altarFlow{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+}
+
+.altarFlow .counterValue{
+  color: #B9A6F0;
+}
+
+.sacrificePick{
+  border: 2px solid #C0392B;
+}
+
+.sacrificeTag{
+  font-size: 0.85em;
+  color: #F0A08F;
+}
+
+.altarFooter{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: auto;
+}
+
+.combineButton:not(:disabled){
+  padding: 12px 36px;
+  border: none;
+  background-color: #7B5CC4;
+  color: #FFFFFF;
+  font-family: var(--title-font);
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.memorial{
+  width: 300px;
+  padding: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background-color: #232733;
+}
+
+.memorialStone{
+  display: flex;
+  flex-direction: column;
+  padding: 10px 14px;
+  border: 1px solid #5A6070;
+  border-radius: 10px;
+  background-color: #3A3F4C;
+}

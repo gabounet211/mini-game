@@ -85,7 +85,7 @@ export class Lobby {
         backButton.textContent = 'Back to village'
         backButton.addEventListener('click', () => this.close())
 
-        this.element.classList.toggle('warHall', this.building === "warHall" || this.building === "trainingGrounds")
+        this.element.classList.toggle('warHall', this.building === "warHall" || this.building === "trainingGrounds" || this.building === "shrine")
         if (this.building !== "warHall") {
             const content = document.createElement('div')
             content.className = 'lobbyContent'
@@ -119,7 +119,7 @@ export class Lobby {
     private renderBuilding() {
         switch (this.building) {
             case "trainingGrounds": return this.renderTraining()
-            case "shrine": return [...this.renderCombination(), ...this.renderMemorial()]
+            case "shrine": return this.renderShrine()
             case "storehouse": return this.renderInventory()
             case "fields": return this.renderBase()
             case "library": return [this.renderStock(), ...this.renderResearch()]
@@ -139,24 +139,6 @@ export class Lobby {
         summonButton.addEventListener('click', () => this.summon())
         summonRow.append(summonButton)
         return [summonRow]
-    }
-
-    private renderMemorial() {
-        if (!this.save.memorial.length)
-            return []
-
-        const memorialTitle = document.createElement('div')
-        memorialTitle.className = 'lobbyRow'
-        memorialTitle.textContent = 'Memorial'
-        const memorial = document.createElement('div')
-        memorial.className = 'heroList'
-        memorial.append(...this.save.memorial.map(fallen => {
-            const row = document.createElement('div')
-            row.className = 'heroDetails'
-            row.textContent = fallen.name + ' - Level ' + fallen.level + ' · fell in ' + fallen.levelTitle
-            return row
-        }))
-        return [memorialTitle, memorial]
     }
 
     private renderTraining() {
@@ -334,26 +316,69 @@ export class Lobby {
         return row
     }
 
-    private renderCombination() {
+    private renderShrine() {
+        const ritual = document.createElement('div')
+        ritual.className = 'companyColumn'
         const intro = document.createElement('div')
         intro.className = 'heroDetails'
         intro.textContent = 'Sacrifice a hero to give all its experience (+' + sacrificeExperience + ' bonus) to another hero. Its equipment returns to the inventory.'
 
-        const sacrificeRow = this.createHeroSelect('Sacrifice', this.sacrifice, this.receiver, character => this.sacrifice = character)
-        const receiverRow = this.createHeroSelect('Receive', this.receiver, this.sacrifice, character => this.receiver = character)
-
-        const preview = document.createElement('div')
         const sacrifice = this.sacrifice
         const receiver = this.receiver
+        const flow = document.createElement('div')
+        flow.className = 'altarFlow'
+        const amount = document.createElement('span')
+        amount.className = 'counterValue'
+        const result = document.createElement('span')
+        result.className = 'heroDetails'
         if (sacrifice && receiver) {
-            const amount = sacrificeValue(sacrifice)
-            const result = { ...receiver }
-            addExperience(result, amount)
-            preview.textContent = this.heroLabel(receiver) + ': +' + amount + ' XP' + (result.level > receiver.level ? ' (Level ' + receiver.level + ' → ' + result.level + ')' : '')
+            const value = sacrificeValue(sacrifice)
+            const after = { ...receiver }
+            addExperience(after, value)
+            amount.textContent = '+' + value + ' XP'
+            result.textContent = after.level > receiver.level ? 'Level ' + receiver.level + ' → ' + after.level : 'Level ' + receiver.level
+        } else {
+            amount.textContent = '→'
         }
+        flow.append(amount, result)
+        const altars = document.createElement('div')
+        altars.className = 'altars'
+        altars.append(this.createAltar('Sacrifice', sacrifice, 'sacrificeAltar'), flow, this.createAltar('Receives', receiver, 'receiverAltar'))
 
+        const pickTitle = document.createElement('div')
+        pickTitle.className = 'sheetTitle'
+        pickTitle.textContent = 'Pick the hero to sacrifice, then the one who receives'
+        const heroes = document.createElement('div')
+        heroes.className = 'rosterGrid'
+        heroes.append(...this.save.roster.map(character => {
+            const button = document.createElement('button')
+            button.className = 'sideHero'
+            button.classList.toggle('sacrificePick', character === sacrifice)
+            button.classList.toggle('selectedMission', character === receiver)
+            const name = document.createElement('span')
+            name.className = 'missionText'
+            name.textContent = this.heroLabel(character)
+            button.append(name)
+            if (character === sacrifice || character === receiver) {
+                const tag = document.createElement('span')
+                tag.className = character === sacrifice ? 'sacrificeTag' : 'equippedText'
+                tag.textContent = character === sacrifice ? 'Sacrifice' : 'Receives'
+                button.append(tag)
+            }
+            button.addEventListener('click', () => this.pickForCombination(character))
+            return button
+        }))
+
+        const footer = document.createElement('div')
+        footer.className = 'altarFooter'
+        if (this.confirmingTransfer) {
+            const warning = document.createElement('span')
+            warning.className = 'lobbyWarning'
+            warning.textContent = 'This cannot be undone. Click again to confirm.'
+            footer.append(warning)
+        }
         const combineButton = document.createElement('button')
-        combineButton.className = 'startButton'
+        combineButton.className = 'combineButton'
         combineButton.textContent = this.confirmingTransfer ? 'Confirm' : 'Combine'
         combineButton.disabled = !sacrifice || !receiver
         combineButton.addEventListener('click', () => {
@@ -371,28 +396,64 @@ export class Lobby {
             }
             this.render()
         })
-        return [intro, sacrificeRow, receiverRow, preview, combineButton]
+        footer.append(combineButton)
+        ritual.append(intro, altars, pickTitle, heroes, footer)
+
+        const memorial = document.createElement('div')
+        memorial.className = 'sideColumn memorial'
+        const memorialTitle = document.createElement('div')
+        memorialTitle.className = 'plaqueName'
+        memorialTitle.textContent = 'Memorial'
+        memorial.append(memorialTitle)
+        if (!this.save.memorial.length) {
+            const empty = document.createElement('div')
+            empty.className = 'heroDetails'
+            empty.textContent = 'No hero has fallen yet.'
+            memorial.append(empty)
+        }
+        memorial.append(...this.save.memorial.map(fallen => {
+            const stone = document.createElement('div')
+            stone.className = 'memorialStone'
+            const name = document.createElement('span')
+            name.className = 'plaqueName'
+            name.textContent = fallen.name
+            const details = document.createElement('span')
+            details.className = 'heroDetails'
+            details.textContent = 'Level ' + fallen.level + ' · fell in ' + fallen.levelTitle
+            stone.append(name, details)
+            return stone
+        }))
+
+        const body = document.createElement('div')
+        body.className = 'warHallBody'
+        body.append(ritual, memorial)
+        return [body]
     }
 
-    private createHeroSelect(label: string, current: Character | undefined, other: Character | undefined, onChange: (character: Character | undefined) => void) {
-        const row = document.createElement('label')
-        row.className = 'lobbyRow'
-        row.textContent = label
-        const select = document.createElement('select')
-        for (const character of [undefined, ...this.save.roster.filter(character => character !== other)]) {
-            const option = document.createElement('option')
-            option.value = character?.id ?? ''
-            option.textContent = character ? this.heroLabel(character) : '-'
-            option.selected = character === current
-            select.append(option)
-        }
-        select.addEventListener('change', () => {
-            onChange(this.save.roster.find(character => character.id === select.value))
-            this.confirmingTransfer = false
-            this.render()
-        })
-        row.append(select)
-        return row
+    private pickForCombination(character: Character) {
+        if (character === this.sacrifice)
+            this.sacrifice = undefined
+        else if (character === this.receiver)
+            this.receiver = undefined
+        else if (!this.sacrifice)
+            this.sacrifice = character
+        else
+            this.receiver = character
+        this.confirmingTransfer = false
+        this.render()
+    }
+
+    private createAltar(label: string, character: Character | undefined, className: string) {
+        const altar = document.createElement('div')
+        altar.className = 'altar ' + className
+        const title = document.createElement('span')
+        title.className = 'sheetTitle'
+        title.textContent = label
+        const name = document.createElement('span')
+        name.className = 'plaqueName'
+        name.textContent = character ? this.heroLabel(character) : 'Choose a hero'
+        altar.append(title, name)
+        return altar
     }
 
     private heroLabel(character: Character) {
