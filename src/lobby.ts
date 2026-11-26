@@ -6,6 +6,7 @@ import { addExperience, experienceToNextLevel, isDeadly, sacrificeExperience, sa
 import { equipmentBonuses, equippedStats, getItem, itemName, itemSlots, ItemSlot } from "./items"
 import { SaveData, writeSave } from "./save"
 import { describeAction } from "./action"
+import { allEnemiesDefeated, allHeroesDefeated, objectiveText } from "./endCondition"
 import { assignHarvest, harvestAmount, isHarvesting, Resource, resourceNames, resources } from "./base"
 import { assignResearch, canStartResearch, isResearching, researchAmount, researchProjects, startResearch, summonChances, teamBonus } from "./research"
 import { canAfford, Cost, craft, isRecipeUnlocked, dismantle, dismantleValue, recipes, upgrade, upgradeCost } from "./forge"
@@ -84,6 +85,7 @@ export class Lobby {
         backButton.textContent = 'Back to village'
         backButton.addEventListener('click', () => this.close())
 
+        this.element.classList.toggle('warHall', this.building === "warHall")
         if (this.building !== "warHall") {
             const content = document.createElement('div')
             content.className = 'lobbyContent'
@@ -92,47 +94,9 @@ export class Lobby {
             return
         }
 
-        const levelRow = document.createElement('label')
-        levelRow.className = 'lobbyRow'
-        levelRow.textContent = 'Level'
-        const levelSelect = document.createElement('select')
-        for (const key of levels.keys().slice(0, this.save.unlockedLevels)) {
-            const option = document.createElement('option')
-            option.value = key
-            option.textContent = levels.getLevel(key).title
-            option.selected = key === this.levelKey
-            levelSelect.append(option)
-        }
-        levelSelect.addEventListener('change', () => {
-            this.levelKey = levelSelect.value
-            for (const character of [...this.team])
-                if (!this.canBring(character))
-                    this.team.delete(character)
-            this.render()
-        })
-        levelRow.append(levelSelect)
-
-        const teamInfo = document.createElement('div')
-        teamInfo.textContent = 'Team: ' + this.team.size + '/' + this.teamLimit()
-
-        const recommendedLevel = levels.getLevel(this.levelKey).recommendedLevel
-        const recommendedInfo = document.createElement('div')
-        recommendedInfo.className = 'heroDetails'
-        recommendedInfo.textContent = recommendedLevel ? 'Recommended level: ' + recommendedLevel + ' (heroes more than 1 level above earn less XP)' : ''
-
-        const dangerInfo = document.createElement('div')
-        dangerInfo.className = isDeadly(this.levelKey) ? 'lobbyWarning' : 'heroDetails'
-        dangerInfo.textContent = isDeadly(this.levelKey)
-            ? 'Heroes who fall in this level die for good.'
-            : 'Heroes who fall here are only injured and miss the next combat.'
-
-        const content = document.createElement('div')
-        content.className = 'lobbyContent'
-        content.append(...this.renderHeroes())
-
         const startButton = document.createElement('button')
         startButton.className = 'startButton'
-        startButton.textContent = 'Start'
+        startButton.textContent = 'Depart'
         startButton.disabled = this.team.size === 0 || this.team.size > this.teamLimit()
         startButton.addEventListener('click', () => {
             this.element.remove()
@@ -143,7 +107,13 @@ export class Lobby {
             this.onStart(team, this.levelKey)
         })
 
-        this.element.replaceChildren(backButton, title, levelRow, recommendedInfo, dangerInfo, teamInfo, content, startButton)
+        const company = document.createElement('div')
+        company.className = 'companyColumn'
+        company.append(...this.renderCompany(), startButton)
+        const body = document.createElement('div')
+        body.className = 'warHallBody'
+        body.append(this.renderMissions(), company)
+        this.element.replaceChildren(backButton, title, body)
     }
 
     private renderBuilding() {
@@ -155,7 +125,7 @@ export class Lobby {
             case "library": return [this.renderStock(), ...this.renderResearch()]
             case "forge": return [this.renderStock(), ...this.renderForge()]
             case "summoning": return this.renderSummoning()
-            default: return this.renderHeroes()
+            default: return []
         }
     }
 
@@ -169,13 +139,6 @@ export class Lobby {
         summonButton.addEventListener('click', () => this.summon())
         summonRow.append(summonButton)
         return [summonRow]
-    }
-
-    private renderHeroes() {
-        const heroList = document.createElement('div')
-        heroList.className = 'heroList'
-        heroList.append(...this.save.roster.map(character => this.createHeroRow(character)))
-        return [heroList]
     }
 
     private renderMemorial() {
@@ -459,28 +422,137 @@ export class Lobby {
         return resources.filter(resource => cost[resource]).map(resource => cost[resource] + ' ' + resourceNames[resource]).join(', ')
     }
 
-    private createHeroRow(character: Character) {
-        const row = document.createElement('div')
-        row.className = 'heroRow'
-
-        const checkbox = document.createElement('input')
-        checkbox.type = 'checkbox'
-        checkbox.checked = this.team.has(character)
-        checkbox.disabled = !this.canBring(character) || (!checkbox.checked && this.team.size >= this.teamLimit())
-        checkbox.addEventListener('change', () => {
-            if (checkbox.checked)
-                this.team.add(character)
-            else
+    private selectLevel(key: string) {
+        this.levelKey = key
+        for (const character of [...this.team])
+            if (!this.canBring(character))
                 this.team.delete(character)
+        this.render()
+    }
+
+    private renderMissions() {
+        const column = document.createElement('div')
+        column.className = 'missionColumn'
+        const keys = levels.keys()
+        let chapter = ''
+        for (const [index, key] of keys.slice(0, this.save.unlockedLevels + 1).entries()) {
+            const level = levels.getLevel(key)
+            const [chapterName, missionName] = level.title.split(': ')
+            if (level.chapter !== chapter) {
+                chapter = level.chapter
+                const heading = document.createElement('div')
+                heading.className = 'sheetTitle'
+                heading.textContent = chapterName.split(' - ')[0]
+                column.append(heading)
+            }
+            const locked = index >= this.save.unlockedLevels
+            const mission = document.createElement('button')
+            mission.className = 'mission'
+            mission.dataset.level = key
+            mission.disabled = locked
+            mission.classList.toggle('selectedMission', key === this.levelKey)
+            const seal = document.createElement('span')
+            seal.className = 'missionSeal'
+            seal.textContent = chapterName.replace(/\D+/g, '-').replace(/^-|-$/g, '')
+            const name = document.createElement('span')
+            name.className = 'missionName'
+            name.textContent = locked ? 'Locked' : missionName ?? level.title
+            const info = document.createElement('span')
+            info.className = 'heroDetails'
+            info.textContent = locked ? 'Finish the previous mission' : 'Recommended Lv ' + (level.recommendedLevel ?? '-') + (isDeadly(key) ? ' · Deadly' : '')
+            const text = document.createElement('span')
+            text.className = 'missionText'
+            text.append(name, info)
+            mission.append(seal, text)
+            mission.addEventListener('click', () => this.selectLevel(key))
+            column.append(mission)
+        }
+
+        const level = levels.getLevel(this.levelKey)
+        const brief = document.createElement('div')
+        brief.className = 'missionBrief'
+        const briefTitle = document.createElement('div')
+        briefTitle.className = 'plaqueName'
+        briefTitle.textContent = level.title
+        const objective = document.createElement('div')
+        objective.textContent = 'Objective: ' + objectiveText(level.victory ?? allEnemiesDefeated, level.defeat ?? allHeroesDefeated)
+        const recommended = document.createElement('div')
+        recommended.className = 'heroDetails'
+        recommended.textContent = level.recommendedLevel ? 'Recommended level ' + level.recommendedLevel + ' · heroes more than 1 level above earn less XP' : ''
+        const danger = document.createElement('div')
+        danger.className = isDeadly(this.levelKey) ? 'lobbyWarning' : 'safeInfo'
+        danger.textContent = isDeadly(this.levelKey)
+            ? 'Deadly · heroes who fall in this level die for good.'
+            : 'Safe · fallen heroes are only injured and miss the next combat.'
+        brief.append(briefTitle, objective, recommended, danger)
+        column.append(brief)
+        return column
+    }
+
+    private renderCompany() {
+        const heading = document.createElement('div')
+        heading.className = 'plaqueName'
+        heading.textContent = 'Your company · ' + this.team.size + ' / ' + this.teamLimit()
+
+        const slots = document.createElement('div')
+        slots.className = 'teamSlots'
+        const members = this.save.roster.filter(character => this.team.has(character))
+        for (let index = 0; index < this.teamLimit(); index++) {
+            const character = members[index]
+            const slot = document.createElement('button')
+            slot.className = 'teamSlot' + (character ? ' filled' : '')
+            slot.disabled = !character
+            if (character) {
+                const attributes = deriveAttributes(equippedStats(character))
+                const name = document.createElement('span')
+                name.className = 'plaqueName'
+                name.textContent = this.heroLabel(character)
+                const details = document.createElement('span')
+                details.className = 'heroDetails'
+                details.textContent = 'HP ' + attributes.maxHealt + ' · AP ' + attributes.maxActionPoints + ' · Ms ' + attributes.moveRange
+                slot.title = 'Remove from the team'
+                slot.append(name, details)
+                slot.addEventListener('click', () => {
+                    this.team.delete(character)
+                    this.render()
+                })
+            } else {
+                slot.textContent = 'Empty'
+            }
+            slots.append(slot)
+        }
+
+        const rosterTitle = document.createElement('div')
+        rosterTitle.className = 'sheetTitle'
+        rosterTitle.textContent = 'Available heroes'
+        const roster = document.createElement('div')
+        roster.className = 'rosterGrid'
+        roster.append(...this.save.roster.map(character => this.createHeroCard(character)))
+        return [heading, slots, rosterTitle, roster]
+    }
+
+    private createHeroCard(character: Character) {
+        const card = document.createElement('div')
+        card.className = 'heroCard'
+        const inTeam = this.team.has(character)
+        card.classList.toggle('inTeam', inTeam)
+
+        const pick = document.createElement('button')
+        pick.className = 'heroPick'
+        pick.disabled = !inTeam && (!this.canBring(character) || this.team.size >= this.teamLimit())
+        pick.addEventListener('click', () => {
+            if (inTeam)
+                this.team.delete(character)
+            else
+                this.team.add(character)
             this.render()
         })
 
         const attributes = deriveAttributes(equippedStats(character))
-        const info = document.createElement('div')
-        info.className = 'heroInfo'
-        const name = document.createElement('div')
+        const name = document.createElement('span')
+        name.className = 'plaqueName'
         name.textContent = this.heroLabel(character)
-        const details = document.createElement('div')
+        const details = document.createElement('span')
         details.className = 'heroDetails'
         details.textContent = 'HP ' + attributes.maxHealt + ' · AP ' + attributes.maxActionPoints + ' · Ms ' + attributes.moveRange
             + (character.talent ? ' · Talent: ' + character.talent.charAt(0).toUpperCase() + character.talent.slice(1) : '')
@@ -490,11 +562,15 @@ export class Lobby {
             + (isHarvesting(this.save, character) ? ' · At the base: ' + resourceNames[this.save.harvest[character.id]] : '')
             + (isResearching(this.save, character) ? ' · At the base: Research' : '')
             + (this.facedChampion(character) ? ' · Already faced the champion' : '')
-        info.append(name, details)
-        info.addEventListener('click', () => this.showDetails(character))
+        pick.append(name, details)
 
-        row.append(checkbox, info)
-        return row
+        const detailsButton = document.createElement('button')
+        detailsButton.className = 'detailsButton'
+        detailsButton.textContent = 'Details'
+        detailsButton.addEventListener('click', () => this.showDetails(character))
+
+        card.append(pick, detailsButton)
+        return card
     }
 
     private showDetails(character: Character | undefined) {

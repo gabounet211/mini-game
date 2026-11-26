@@ -550,3 +550,170 @@ body.targeting canvas{
   border-radius: 50%;
   box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
 }
+
+#lobby.warHall{
+  width: min(1200px, calc(100vw - 32px));
+  height: calc(100vh - 32px);
+}
+
+.warHallBody{
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
+.missionColumn{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 340px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.mission{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.selectedMission{
+  border: 2px solid var(--gold);
+}
+
+.missionSeal{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: var(--line-soft);
+  font-family: var(--title-font);
+  font-weight: 700;
+  font-size: 0.85em;
+}
+
+.selectedMission .missionSeal{
+  background-color: var(--gold);
+  color: #2A2218;
+}
+
+.missionText{
+  display: flex;
+  flex-direction: column;
+}
+
+.missionName{
+  font-family: var(--title-font);
+  font-weight: 700;
+}
+
+.missionBrief{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background-color: var(--panel-dark);
+}
+
+.missionBrief .plaqueName{
+  color: var(--gold);
+}
+
+.safeInfo{
+  font-size: 0.85em;
+  color: #8FD3B0;
+}
+
+.companyColumn{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.teamSlots{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.teamSlot{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 90px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  color: var(--text-soft);
+}
+
+.teamSlot.filled{
+  border: 2px solid var(--gold);
+  color: var(--text);
+}
+
+.teamSlot:disabled{
+  opacity: 1;
+  cursor: default;
+}
+
+.rosterGrid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.heroCard{
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background-color: var(--panel-dark);
+}
+
+.heroCard.inTeam{
+  border-color: var(--gold-dark);
+  opacity: 0.6;
+}
+
+.heroPick{
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 2px;
+  border: none;
+  text-align: left;
+  background: none;
+}
+
+.detailsButton{
+  margin: 8px;
+  align-self: center;
+  font-size: 0.85em;
+}
+
+.companyColumn .startButton{
+  align-self: flex-end;
+  margin-top: auto;
+  padding: 12px 40px;
+  border: none;
+  background-color: var(--gold);
+  color: #2A2218;
+  font-family: var(--title-font);
+  font-weight: 700;
+  font-size: 1.2em;
+  letter-spacing: 2px;
+}
