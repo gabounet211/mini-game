@@ -717,3 +717,142 @@ body.targeting canvas{
   font-size: 1.2em;
   letter-spacing: 2px;
 }
+
+#lobby.warHall .lobbyContent{
+  flex: 1;
+  overflow: hidden;
+}
+
+.sideColumn{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 260px;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.sideHero{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.pointBadge{
+  min-width: 22px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background-color: #C0602A;
+  color: #FFFFFF;
+  font-size: 0.85em;
+  font-weight: 700;
+  text-align: center;
+}
+
+.heroBanner{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1px solid var(--gold-dark);
+  border-radius: 14px;
+  background-color: var(--panel-dark);
+}
+
+.heroBanner > .plaqueName{
+  flex: 1;
+  font-size: 1.2em;
+}
+
+.counter{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 14px;
+  border-radius: 10px;
+  background-color: var(--panel);
+}
+
+.counterValue{
+  font-size: 1.3em;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.skillGrid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.skillCard{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background-color: var(--panel-dark);
+}
+
+.skillCard.equipped{
+  border: 2px solid var(--gold);
+}
+
+.skillCard.learnable{
+  flex-direction: row;
+  align-items: center;
+  border: 1px dashed #C0602A;
+}
+
+.skillCard.learnable .missionText{
+  flex: 1;
+}
+
+.learnButton:not(:disabled){
+  border: none;
+  background-color: #C0602A;
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.rankPips{
+  display: flex;
+  gap: 6px;
+}
+
+.rankPip{
+  width: 10px;
+  height: 10px;
+  transform: rotate(45deg);
+  background-color: var(--line-soft);
+}
+
+.rankPip.filled{
+  background-color: var(--gold);
+}
+
+.masteryRow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85em;
+  color: var(--text-soft);
+}
+
+.masteryRow .bar{
+  flex: 1;
+}
+
+.barFill.mastery{
+  background-color: #F0A070;
+}
+
+.equippedText{
+  font-size: 0.85em;
+  color: var(--gold);
+}

@@ -85,7 +85,7 @@ export class Lobby {
         backButton.textContent = 'Back to village'
         backButton.addEventListener('click', () => this.close())
 
-        this.element.classList.toggle('warHall', this.building === "warHall")
+        this.element.classList.toggle('warHall', this.building === "warHall" || this.building === "trainingGrounds")
         if (this.building !== "warHall") {
             const content = document.createElement('div')
             content.className = 'lobbyContent'
@@ -162,44 +162,155 @@ export class Lobby {
     private renderTraining() {
         const trainee = this.trainee && this.save.roster.includes(this.trainee) ? this.trainee : this.save.roster[0]
         this.trainee = trainee
-        const pickRow = this.createHeroSelect('Hero', trainee, undefined, character => this.trainee = character)
-        if (!trainee)
-            return [pickRow]
 
-        const info = document.createElement('div')
-        info.textContent = 'Skill points: ' + trainee.skillPoints + ' · Equipped: ' + trainee.equippedSkills.length + '/' + skillSlots(trainee) + ' · Skills rank up by being used in combat'
+        const heroColumn = document.createElement('div')
+        heroColumn.className = 'sideColumn'
+        const heroTitle = document.createElement('div')
+        heroTitle.className = 'sheetTitle'
+        heroTitle.textContent = 'Heroes'
+        heroColumn.append(heroTitle, ...this.save.roster.map(character => {
+            const button = document.createElement('button')
+            button.className = 'sideHero'
+            button.classList.toggle('selectedMission', character === trainee)
+            const name = document.createElement('span')
+            name.className = 'missionText'
+            name.textContent = this.heroLabel(character)
+            button.append(name)
+            if (character.skillPoints) {
+                const badge = document.createElement('span')
+                badge.className = 'pointBadge'
+                badge.textContent = String(character.skillPoints)
+                button.append(badge)
+            }
+            button.addEventListener('click', () => {
+                this.trainee = character
+                this.render()
+            })
+            return button
+        }))
 
+        const body = document.createElement('div')
+        body.className = 'warHallBody'
+        if (!trainee) {
+            body.append(heroColumn)
+            return [body]
+        }
+
+        const detail = document.createElement('div')
+        detail.className = 'companyColumn'
+        const banner = document.createElement('div')
+        banner.className = 'heroBanner'
+        const bannerName = document.createElement('span')
+        bannerName.className = 'plaqueName'
+        bannerName.textContent = this.heroLabel(trainee)
+        banner.append(bannerName, this.createCounter(trainee.skillPoints, 'Skill points'), this.createCounter(trainee.equippedSkills.length + ' / ' + skillSlots(trainee), 'Equipped'))
+
+        const knownTitle = document.createElement('div')
+        knownTitle.className = 'sheetTitle'
+        knownTitle.textContent = 'Known skills · skills rank up by being used in combat'
         const known = document.createElement('div')
-        known.className = 'heroList'
+        known.className = 'skillGrid'
         for (const name of Object.keys(trainee.skills)) {
             const action = skillAction(trainee, name)
             if (!action)
                 continue
             const equipped = trainee.equippedSkills.includes(name)
+            const skill = trainee.skills[name]
+            const needed = masteryNeeded(skill)
+
+            const card = document.createElement('div')
+            card.className = 'skillCard'
+            card.classList.toggle('equipped', equipped)
+            const header = document.createElement('div')
+            header.className = 'lobbyRow'
+            const skillName = document.createElement('span')
+            skillName.className = 'plaqueName'
+            skillName.textContent = this.formatName(name)
+            const rank = document.createElement('span')
+            rank.className = 'rankPips'
+            rank.title = 'Rank ' + skill.rank + ' / ' + maxSkillRank
+            for (let index = 1; index <= maxSkillRank; index++) {
+                const pip = document.createElement('span')
+                pip.className = 'rankPip' + (index <= skill.rank ? ' filled' : '')
+                rank.append(pip)
+            }
+            header.append(skillName, rank)
+
+            const description = document.createElement('div')
+            description.className = 'heroDetails'
+            description.textContent = describeAction(action)
+
+            const mastery = document.createElement('div')
+            mastery.className = 'masteryRow'
+            const masteryBar = document.createElement('div')
+            masteryBar.className = 'bar'
+            const masteryFill = document.createElement('div')
+            masteryFill.className = 'barFill mastery'
+            masteryFill.style.width = needed === undefined ? '100%' : Math.min(100, (skill.mastery ?? 0) / needed * 100) + '%'
+            masteryBar.append(masteryFill)
+            const masteryText = document.createElement('span')
+            masteryText.textContent = needed === undefined ? 'Max rank' : 'Mastery ' + (skill.mastery ?? 0) + ' / ' + needed
+            mastery.append(masteryBar, masteryText)
+
+            const footer = document.createElement('div')
+            footer.className = 'lobbyRow'
+            const state = document.createElement('span')
+            state.className = equipped ? 'equippedText' : 'heroDetails'
+            state.textContent = equipped ? 'Equipped' : 'Not equipped'
             const equipButton = document.createElement('button')
             equipButton.textContent = equipped ? 'Unequip' : 'Equip'
             equipButton.disabled = equipped ? trainee.equippedSkills.length <= 1 : trainee.equippedSkills.length >= skillSlots(trainee)
             equipButton.addEventListener('click', () => this.updateTrainee(() => toggleEquipped(trainee, name)))
-            const skill = trainee.skills[name]
-            const needed = masteryNeeded(skill)
-            const progress = needed === undefined ? ' · max rank' : ' · mastery ' + (skill.mastery ?? 0) + '/' + needed
-            known.append(this.createSkillRow(this.formatName(name) + ' · rank ' + skill.rank + '/' + maxSkillRank + progress + (equipped ? ' · equipped' : ''), describeAction(action), [equipButton]))
+            footer.append(state, equipButton)
+
+            card.append(header, description, mastery, footer)
+            known.append(card)
         }
 
         const learnTitle = document.createElement('div')
-        learnTitle.textContent = 'Learn (' + learnCost + ' point each)'
+        learnTitle.className = 'sheetTitle'
+        learnTitle.textContent = 'Learn · ' + learnCost + ' point each'
         const learnable = document.createElement('div')
-        learnable.className = 'heroList'
+        learnable.className = 'skillGrid'
         for (const action of learnableSkills(trainee)) {
+            const card = document.createElement('div')
+            card.className = 'skillCard learnable'
+            const text = document.createElement('div')
+            text.className = 'missionText'
+            const skillName = document.createElement('span')
+            skillName.className = 'plaqueName'
+            skillName.textContent = this.formatName(action.name)
+            const description = document.createElement('span')
+            description.className = 'heroDetails'
+            description.textContent = describeAction(action)
+            text.append(skillName, description)
             const learnButton = document.createElement('button')
+            learnButton.className = 'learnButton'
             learnButton.textContent = 'Learn'
             learnButton.disabled = trainee.skillPoints < learnCost
             learnButton.addEventListener('click', () => this.updateTrainee(() => learnSkill(trainee, action.name)))
-            learnable.append(this.createSkillRow(this.formatName(action.name), describeAction(action), [learnButton]))
+            card.append(text, learnButton)
+            learnable.append(card)
         }
         if (!learnable.children.length)
             learnable.textContent = 'Every skill of this class is learned.'
-        return [pickRow, info, known, learnTitle, learnable]
+
+        detail.append(banner, knownTitle, known, learnTitle, learnable)
+        body.append(heroColumn, detail)
+        return [body]
+    }
+
+    private createCounter(value: number | string, label: string) {
+        const counter = document.createElement('span')
+        counter.className = 'counter'
+        const number = document.createElement('span')
+        number.className = 'counterValue'
+        number.textContent = String(value)
+        const text = document.createElement('span')
+        text.className = 'heroDetails'
+        text.textContent = label
+        counter.append(number, text)
+        return counter
     }
 
     private updateTrainee(change: () => unknown) {
