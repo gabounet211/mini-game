@@ -7,7 +7,7 @@ import { equipmentBonuses, equippedStats, getItem, itemName, itemSlots, ItemSlot
 import { SaveData, writeSave } from "./save"
 import { describeAction } from "./action"
 import { allEnemiesDefeated, allHeroesDefeated, objectiveText } from "./endCondition"
-import { assignHarvest, harvestAmount, isHarvesting, Resource, resourceNames, resources } from "./base"
+import { assignHarvest, harvestAmount, isHarvesting, Resource, resourceNames, resources, specialistResources } from "./base"
 import { assignResearch, canStartResearch, isResearching, researchAmount, researchProjects, startResearch, summonChances, teamBonus } from "./research"
 import { canAfford, Cost, craft, isRecipeUnlocked, dismantle, dismantleValue, recipes, upgrade, upgradeCost } from "./forge"
 import { equippedActions, learnableSkills, learnCost, learnSkill, masteryNeeded, maxSkillRank, skillAction, skillSlots, toggleEquipped } from "./skill"
@@ -19,6 +19,13 @@ const itemIcons: Record<ItemSlot | "classItem", [string, string]> = {
     armor: ["#3E5A7A", "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"],
     jewelry: ["#6E5A2A", "M12 8a6 6 0 1 0 0 12a6 6 0 1 0 0-12zM9 3h6l-3 5z"],
     classItem: ["#5A3F8A", "M12 2l7 7-7 13-7-13z"],
+}
+
+const campLooks: Record<Resource, [string, string]> = {
+    wood: ["Lumber Camp", "#7A5A34"],
+    food: ["Farm", "#8A7A2E"],
+    leather: ["Hunting Lodge", "#8A4E36"],
+    ore: ["Mine", "#4E5466"],
 }
 
 const itemFilters: [ItemSlot | "classItem" | "all", string][] = [["all", "All"], ["weapon", "Weapons"], ["armor", "Armor"], ["jewelry", "Jewelry"], ["classItem", "Class items"]]
@@ -96,7 +103,7 @@ export class Lobby {
         backButton.textContent = 'Back to village'
         backButton.addEventListener('click', () => this.close())
 
-        this.element.classList.toggle('warHall', this.building === "warHall" || this.building === "trainingGrounds" || this.building === "shrine" || this.building === "storehouse" || this.building === "forge" || this.building === "library")
+        this.element.classList.toggle('warHall', this.building === "warHall" || this.building === "trainingGrounds" || this.building === "shrine" || this.building === "storehouse" || this.building === "forge" || this.building === "library" || this.building === "fields")
         if (this.building !== "warHall") {
             const content = document.createElement('div')
             content.className = 'lobbyContent'
@@ -604,39 +611,94 @@ export class Lobby {
     }
 
     private renderBase() {
-        const stock = this.renderStock()
-        const intro = document.createElement('div')
-        intro.className = 'heroDetails'
-        intro.textContent = 'Heroes at the base work after each combat but cannot join the team. Villagers gather more of their own resource, Scholars, Alchemists and Sages research faster, injured heroes do half.'
-        const list = document.createElement('div')
-        list.className = 'heroList'
-        for (const character of this.save.roster) {
-            const row = document.createElement('label')
-            row.className = 'heroRow'
-            const info = document.createElement('div')
-            info.className = 'heroInfo'
-            info.textContent = this.heroLabel(character) + (character.injured ? ' · Injured' : '')
-            const select = document.createElement('select')
-            const research = isResearching(this.save, character)
-            for (const resource of [undefined, "research", ...resources] as (Resource | "research" | undefined)[]) {
-                const option = document.createElement('option')
-                option.value = resource ?? ''
-                option.textContent = resource === "research" ? 'Research (+' + researchAmount(character) + ')' : resource ? resourceNames[resource] + ' (+' + harvestAmount(character, resource) + ')' : 'Not working'
-                option.selected = research ? resource === "research" : this.save.harvest[character.id] === resource
-                select.append(option)
+        const camps = document.createElement('div')
+        camps.className = 'campGrid'
+        for (const resource of resources) {
+            const [campName, color] = campLooks[resource]
+            const workers = this.save.roster.filter(character => this.save.harvest[character.id] === resource)
+            const specialist = Object.entries(specialistResources).find(([, value]) => value === resource)?.[0]
+            const card = document.createElement('div')
+            card.className = 'skillCard campCard'
+            const banner = document.createElement('div')
+            banner.className = 'campBanner'
+            banner.style.backgroundColor = color
+            const name = document.createElement('span')
+            name.className = 'plaqueName'
+            name.textContent = campName
+            const info = document.createElement('span')
+            info.textContent = resourceNames[resource] + ' · specialist: ' + (specialist ? characterClasses[specialist]?.name ?? this.formatName(specialist) : 'none yet')
+            banner.append(name, info)
+            const stock = document.createElement('div')
+            stock.className = 'lobbyRow'
+            const amount = document.createElement('span')
+            amount.className = 'counterValue'
+            amount.textContent = String(this.save.resources[resource])
+            const gain = document.createElement('span')
+            gain.className = 'bonusValue'
+            gain.textContent = '+' + workers.reduce((total, character) => total + harvestAmount(character, resource), 0) + ' next combat'
+            stock.append(amount, gain)
+            card.append(banner, stock)
+            for (const character of workers) {
+                const worker = document.createElement('button')
+                worker.className = 'sideHero'
+                worker.title = 'Remove from the camp'
+                const workerName = document.createElement('span')
+                workerName.className = 'missionText'
+                workerName.textContent = this.heroLabel(character) + (character.injured ? ' · Injured' : '')
+                const workerGain = document.createElement('span')
+                workerGain.className = 'bonusValue'
+                workerGain.textContent = '+' + harvestAmount(character, resource)
+                worker.append(workerName, workerGain)
+                worker.addEventListener('click', () => this.assignWorker(character, undefined))
+                card.append(worker)
             }
-            select.addEventListener('change', () => {
-                assignResearch(this.save, character, select.value === "research")
-                assignHarvest(this.save, character, select.value && select.value !== "research" ? select.value as Resource : undefined)
-                if (select.value)
-                    this.team.delete(character)
-                writeSave(this.save)
-                this.render()
-            })
-            row.append(info, select)
-            list.append(row)
+            if (!workers.length) {
+                const empty = document.createElement('div')
+                empty.className = 'heroDetails'
+                empty.textContent = 'No worker'
+                card.append(empty)
+            }
+            camps.append(card)
         }
-        return [stock, intro, list]
+
+        const idleTitle = document.createElement('div')
+        idleTitle.className = 'sheetTitle'
+        idleTitle.textContent = 'Heroes not at the fields · heroes working at the base cannot join the team, injured heroes do half'
+        const idle = document.createElement('div')
+        idle.className = 'rosterGrid'
+        for (const character of this.save.roster.filter(character => !isHarvesting(this.save, character))) {
+            const card = document.createElement('div')
+            card.className = 'skillCard'
+            const name = document.createElement('span')
+            name.className = 'plaqueName'
+            name.textContent = this.heroLabel(character)
+            const state = document.createElement('span')
+            state.className = 'heroDetails'
+            state.textContent = isResearching(this.save, character) ? 'At the Library' : character.injured ? 'Injured' : 'Idle'
+            const buttons = document.createElement('div')
+            buttons.className = 'workButtons'
+            for (const resource of resources) {
+                const button = document.createElement('button')
+                button.textContent = resourceNames[resource] + ' +' + harvestAmount(character, resource)
+                button.addEventListener('click', () => this.assignWorker(character, resource))
+                buttons.append(button)
+            }
+            card.append(name, state, buttons)
+            idle.append(card)
+        }
+
+        const column = document.createElement('div')
+        column.className = 'companyColumn'
+        column.append(camps, idleTitle, idle)
+        return [column]
+    }
+
+    private assignWorker(character: Character, resource: Resource | undefined) {
+        assignHarvest(this.save, character, resource)
+        if (resource)
+            this.team.delete(character)
+        writeSave(this.save)
+        this.render()
     }
 
     private renderResearch() {

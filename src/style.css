@@ -1090,3 +1090,25 @@ body.targeting canvas{
   color: #FFFFFF;
   font-weight: 700;
 }
+
+.campGrid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.campCard{
+  gap: 10px;
+}
+
+.campBanner{
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.85em;
+}
+
+.campBanner .plaqueName{
+  font-size: 1.15em;
+}
