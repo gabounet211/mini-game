@@ -55,6 +55,8 @@ function startGame(team: Character[], levelKey: string) {
     keydown[ev.key] = false;
   })
   document.addEventListener("wheel", (ev) => {
+    if (!(ev.target instanceof HTMLCanvasElement))
+      return
     const delta = game.cameraControle.orbit
     delta.radius += ev.deltaY / 200;
     if (delta.radius < 2.5)
