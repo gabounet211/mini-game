@@ -14,6 +14,15 @@ import { equippedActions, learnableSkills, learnCost, learnSkill, masteryNeeded,
 
 export type Building = "warHall" | "trainingGrounds" | "shrine" | "storehouse" | "fields" | "library" | "forge" | "summoning"
 
+const itemIcons: Record<ItemSlot | "classItem", [string, string]> = {
+    weapon: ["#6B3A2E", "M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2"],
+    armor: ["#3E5A7A", "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"],
+    jewelry: ["#6E5A2A", "M12 8a6 6 0 1 0 0 12a6 6 0 1 0 0-12zM9 3h6l-3 5z"],
+    classItem: ["#5A3F8A", "M12 2l7 7-7 13-7-13z"],
+}
+
+const itemFilters: [ItemSlot | "classItem" | "all", string][] = [["all", "All"], ["weapon", "Weapons"], ["armor", "Armor"], ["jewelry", "Jewelry"], ["classItem", "Class items"]]
+
 export const buildingNames: Record<Building, string> = {
     warHall: "War Hall",
     trainingGrounds: "Training Grounds",
@@ -34,6 +43,8 @@ export class Lobby {
     private receiver: Character | undefined
     private confirmingTransfer = false
     private trainee: Character | undefined
+    private storedItem: string | undefined
+    private itemFilter: ItemSlot | "classItem" | "all" = "all"
     private building: Building = "warHall"
 
     constructor(private save: SaveData, private onStart: (team: Character[], levelKey: string) => void, private onBack: () => void) {
@@ -85,7 +96,7 @@ export class Lobby {
         backButton.textContent = 'Back to village'
         backButton.addEventListener('click', () => this.close())
 
-        this.element.classList.toggle('warHall', this.building === "warHall" || this.building === "trainingGrounds" || this.building === "shrine")
+        this.element.classList.toggle('warHall', this.building === "warHall" || this.building === "trainingGrounds" || this.building === "shrine" || this.building === "storehouse")
         if (this.building !== "warHall") {
             const content = document.createElement('div')
             content.className = 'lobbyContent'
@@ -465,26 +476,125 @@ export class Lobby {
         const counts = new Map<string, number>()
         for (const key of this.save.inventory)
             counts.set(key, (counts.get(key) ?? 0) + 1)
-        const list = document.createElement('div')
-        list.className = 'heroList'
-        if (!counts.size)
-            list.textContent = 'No unused items.'
-        for (const [key, count] of counts) {
-            const row = document.createElement('div')
-            row.className = 'heroRow'
-            const info = document.createElement('div')
-            info.className = 'heroInfo'
-            const name = document.createElement('div')
-            name.textContent = itemName(key) + (count > 1 ? ' ×' + count : '')
-            const details = document.createElement('div')
-            details.className = 'heroDetails'
-            const item = getItem(key)
-            details.textContent = item ? this.formatName(item.slot) + ' · ' + this.formatBonuses(key) : 'Class change item'
-            info.append(name, details)
-            row.append(info)
-            list.append(row)
+        const kindOf = (key: string) => getItem(key)?.slot ?? "classItem"
+        if (this.storedItem && !counts.has(this.storedItem))
+            this.storedItem = undefined
+
+        const filters = document.createElement('div')
+        filters.className = 'lobbyTabs'
+        for (const [key, label] of itemFilters) {
+            const button = document.createElement('button')
+            button.textContent = label
+            button.classList.toggle('activeTab', key === this.itemFilter)
+            button.addEventListener('click', () => {
+                this.itemFilter = key
+                this.render()
+            })
+            filters.append(button)
         }
-        return [list]
+
+        const grid = document.createElement('div')
+        grid.className = 'itemGrid'
+        for (const [key, count] of counts) {
+            if (this.itemFilter !== "all" && kindOf(key) !== this.itemFilter)
+                continue
+            const tile = document.createElement('button')
+            tile.className = 'itemTile'
+            tile.classList.toggle('selectedMission', key === this.storedItem)
+            const name = document.createElement('span')
+            name.className = 'plaqueName'
+            name.textContent = itemName(key)
+            const bonus = document.createElement('span')
+            bonus.className = 'heroDetails'
+            bonus.textContent = getItem(key) ? this.formatBonuses(key) : 'Class change item'
+            tile.append(this.createItemIcon(kindOf(key)), name, bonus)
+            if (count > 1) {
+                const countTag = document.createElement('span')
+                countTag.className = 'itemCount'
+                countTag.textContent = '×' + count
+                tile.append(countTag)
+            }
+            tile.addEventListener('click', () => {
+                this.storedItem = key
+                this.render()
+            })
+            grid.append(tile)
+        }
+        if (!grid.children.length)
+            grid.textContent = counts.size ? 'No item of this kind.' : 'No unused items.'
+
+        const items = document.createElement('div')
+        items.className = 'companyColumn'
+        items.append(this.renderStock(), filters, grid)
+
+        const body = document.createElement('div')
+        body.className = 'warHallBody'
+        body.append(items)
+        const key = this.storedItem
+        if (key) {
+            const panel = document.createElement('div')
+            panel.className = 'sideColumn itemPanel'
+            const header = document.createElement('div')
+            header.className = 'itemHeader'
+            const title = document.createElement('div')
+            title.className = 'missionText'
+            const name = document.createElement('span')
+            name.className = 'plaqueName'
+            name.textContent = itemName(key)
+            const info = document.createElement('span')
+            info.className = 'heroDetails'
+            const item = getItem(key)
+            info.textContent = (item ? this.formatName(item.slot) : 'Class change item') + ' · ×' + counts.get(key) + ' in storage'
+            title.append(name, info)
+            header.append(this.createItemIcon(kindOf(key)), title)
+            panel.append(header)
+            if (item) {
+                for (const [stat, value] of Object.entries(item.bonuses)) {
+                    const row = document.createElement('div')
+                    row.className = 'sheetRow bonusRow'
+                    const statName = document.createElement('span')
+                    statName.textContent = this.formatName(stat)
+                    const statValue = document.createElement('span')
+                    statValue.className = 'bonusValue'
+                    statValue.textContent = '+' + value
+                    row.append(statName, statValue)
+                    panel.append(row)
+                }
+                const equipTitle = document.createElement('div')
+                equipTitle.className = 'sheetTitle'
+                equipTitle.textContent = 'Equip on'
+                panel.append(equipTitle, ...this.save.roster.map(character => {
+                    const button = document.createElement('button')
+                    button.className = 'sideHero'
+                    const heroName = document.createElement('span')
+                    heroName.className = 'missionText'
+                    heroName.textContent = this.heroLabel(character)
+                    const current = document.createElement('span')
+                    current.className = 'heroDetails'
+                    const equipped = character.equipment[item.slot]
+                    current.textContent = equipped ? itemName(equipped) : 'Empty'
+                    button.append(heroName, current)
+                    button.addEventListener('click', () => this.equip(character, item.slot, key))
+                    return button
+                }))
+            } else {
+                const note = document.createElement('div')
+                note.className = 'heroDetails'
+                note.textContent = 'Used to change the class of a legendary hero.'
+                panel.append(note)
+            }
+            body.append(panel)
+        }
+        return [body]
+    }
+
+    private createItemIcon(kind: ItemSlot | "classItem") {
+        const [color, path] = itemIcons[kind]
+        const icon = document.createElement('span')
+        icon.className = 'itemIcon'
+        icon.style.backgroundColor = color
+        icon.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F1E9D6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + path + '"/></svg>'
+        return icon
     }
 
     private renderStock() {
@@ -871,7 +981,8 @@ export class Lobby {
         character.equipment[slot] = item
         writeSave(this.save)
         this.render()
-        this.showDetails(character)
+        if (this.details.style.display === 'flex')
+            this.showDetails(character)
     }
 
     private createSection(title: string, rows: [string, string | number][]) {

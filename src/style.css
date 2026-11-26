@@ -943,3 +943,64 @@ body.targeting canvas{
   border-radius: 10px;
   background-color: #3A3F4C;
 }
+
+.itemGrid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.itemTile{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 12px;
+  text-align: center;
+}
+
+.itemIcon{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  border-radius: 12px;
+}
+
+.itemCount{
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.itemPanel{
+  width: 320px;
+  padding: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--gold-dark);
+  border-radius: 14px;
+  background-color: var(--panel-dark);
+}
+
+.itemHeader{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bonusRow{
+  padding: 8px 12px;
+  border-radius: 8px;
+  background-color: var(--panel);
+}
+
+.bonusValue{
+  font-weight: 700;
+  color: #8FD3B0;
+}
