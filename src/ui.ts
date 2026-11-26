@@ -18,10 +18,11 @@ export class Ui {
     private settingMenu = document.createElement('div')
     private volumeSliders = new Map<VolumeKind, HTMLInputElement>()
     private partyCards = document.createElement('div')
-    private cards = new Map<Piece, { element: HTMLDivElement, health: HTMLDivElement }>()
+    private cards = new Map<Piece, { element: HTMLDivElement, health: HTMLDivElement, bar: HTMLDivElement }>()
     private sheet = document.createElement('div')
     private sheetName = document.createElement('div')
     private sheetHealth = document.createElement('div')
+    private sheetHealthBar = this.createBar()
     private sheetPoints = document.createElement('div')
     private sheetDetails = document.createElement('div')
     private inspected: Piece | undefined
@@ -38,7 +39,7 @@ export class Ui {
 
         this.sheet.id = 'characterSheet'
         this.sheetDetails.className = 'sheetDetails'
-        this.sheet.append(this.sheetName, this.sheetHealth, this.sheetPoints, this.sheetDetails)
+        this.sheet.append(this.sheetName, this.sheetHealth, this.sheetHealthBar.element, this.sheetPoints, this.sheetDetails)
         document.body.append(this.sheet)
 
         this.settingButton.id = 'setting'
@@ -112,15 +113,15 @@ export class Ui {
         this.sheetName.textContent = piece.name + ' (' + piece.character.rarity + ')'
         this.sheetDetails.replaceChildren(
             this.createSection('Attributes', [...(piece.effects.length ? [['Effects', piece.effects.map(describeEffect).join(', ')] as [string, string]] : []), ['Level', piece.character.level], ['Talent', piece.character.talent ? this.formatName(piece.character.talent) : '-'], ['Ms', piece.movePoints + ' / ' + piece.moveRange]]),
-            this.createSection('Stats', Object.entries(piece.stats).map(([name, value]) => [this.formatName(name), value])),
+            this.createSection('Stats', Object.entries(piece.stats).map(([name, value]) => [this.formatName(name), value]), 'sheetGrid'),
             this.createSection('Equipment', [['Weapon', (piece.character.equipment.weapon ? itemName(piece.character.equipment.weapon) : '-')], ['Armor', (piece.character.equipment.armor ? itemName(piece.character.equipment.armor) : '-')], ['Jewelry', (piece.character.equipment.jewelry ? itemName(piece.character.equipment.jewelry) : '-')]]),
-            this.createSection('Actions', [...(piece.inspiresAllies ? [['Inspire allies', '+1 damage'] as [string, string]] : []), ...piece.actions.map(action => [this.formatName(action.name), describeAction(action)] as [string, string])]),
+            this.createSection('Actions', [...(piece.inspiresAllies ? [['Inspire allies', '+1 damage'] as [string, string]] : []), ...piece.actions.map(action => [this.formatName(action.name), describeAction(action)] as [string, string])], 'sheetActions'),
         )
     }
 
-    private createSection(title: string, rows: [string, string | number][]) {
+    private createSection(title: string, rows: [string, string | number][], layout?: string) {
         const section = document.createElement('div')
-        section.className = 'sheetSection'
+        section.className = 'sheetSection' + (layout ? ' ' + layout : '')
         const heading = document.createElement('div')
         heading.className = 'sheetTitle'
         heading.textContent = title
@@ -147,6 +148,7 @@ export class Ui {
             return
         }
         this.setText(this.sheetHealth, 'HP: ' + piece.healt + '/' + piece.maxHealt)
+        this.setBar(this.sheetHealthBar.fill, piece.healt, piece.maxHealt)
         this.setText(this.sheetPoints, this.pointsText(piece))
     }
 
@@ -174,6 +176,7 @@ export class Ui {
         for (const [piece, card] of this.cards) {
             card.element.classList.toggle('selected', piece === this.game.selector.selected)
             this.setText(card.health, 'HP: ' + piece.healt + '/' + piece.maxHealt)
+            this.setBar(card.bar, piece.healt, piece.maxHealt)
         }
     }
 
@@ -184,9 +187,25 @@ export class Ui {
         const name = document.createElement('div')
         name.textContent = piece.name
         const health = document.createElement('div')
-        element.append(name, health)
+        const bar = this.createBar()
+        element.append(name, bar.element, health)
         this.partyCards.append(element)
-        return { element, health }
+        return { element, health, bar: bar.fill }
+    }
+
+    private createBar() {
+        const element = document.createElement('div')
+        element.className = 'bar'
+        const fill = document.createElement('div')
+        fill.className = 'barFill'
+        element.append(fill)
+        return { element, fill }
+    }
+
+    private setBar(fill: HTMLElement, value: number, max: number) {
+        const width = Math.max(0, Math.min(100, value / max * 100)) + '%'
+        if (fill.style.width !== width)
+            fill.style.width = width
     }
 
     private buildSettingMenu() {
@@ -272,18 +291,28 @@ export class Ui {
         if (!piece)
             return
 
-        const health = document.createElement('span')
+        const status = document.createElement('div')
+        status.className = 'actionStatus'
+        const health = document.createElement('div')
         health.textContent = 'HP: ' + piece.healt + '/' + piece.maxHealt
-        const points = document.createElement('span')
+        const bar = this.createBar()
+        this.setBar(bar.fill, piece.healt, piece.maxHealt)
+        const points = document.createElement('div')
         points.textContent = this.pointsText(piece)
-        this.actionButtons.append(health, points)
+        status.append(health, bar.element, points)
+        this.actionButtons.append(status)
 
         for (let index = 0; index < actions.length; index++) {
             const element = actions[index];
 
             const attackBouton = document.createElement('button');
             const cooldown = piece.cooldowns.get(element)
-            attackBouton.textContent = this.formatName(element.name) + ' (' + element.cost + (element.concentration ? ', ' + element.concentration + 'C' : '') + ')' + (cooldown ? ' · ' + cooldown + 't' : '');
+            const actionName = document.createElement('span')
+            actionName.textContent = this.formatName(element.name)
+            const actionCost = document.createElement('span')
+            actionCost.className = 'actionCost'
+            actionCost.textContent = element.cost + ' AP' + (element.concentration ? ' · ' + element.concentration + ' C' : '') + (cooldown ? ' · ' + cooldown + 't' : '')
+            attackBouton.append(actionName, actionCost)
             attackBouton.title = describeAction(element)
             attackBouton.disabled = !canUse(piece, element)
             this.actionButtons.append(attackBouton);
